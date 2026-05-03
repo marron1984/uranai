@@ -72,3 +72,50 @@ export function personalityNumber(name: string): number {
     .reduce((a, c) => a + letterValue(c), 0);
   return reduceNumber(sum);
 }
+
+// 表現数（Expression Number）= 全文字の合計を1桁にリダクト
+export function expressionNumber(name: string): number {
+  const sum = name
+    .toUpperCase()
+    .split("")
+    .filter((c) => /[A-Z]/.test(c))
+    .reduce((a, c) => a + letterValue(c), 0);
+  return reduceNumber(sum);
+}
+
+// 誕生日数（Birthday Number）= 生まれた日のみをリダクト
+export function birthdayNumber(birth: string): number {
+  const day = Number(birth.split("-")[2] ?? 0);
+  return reduceNumber(day);
+}
+
+// パーソナルイヤー（Personal Year Number）= 誕生月日 + 対象年 をリダクト
+// 1〜9 の周期で「今年のテーマ」を示す。
+export function personalYear(birth: string, year: number): number {
+  const [, m, d] = birth.split("-").map(Number);
+  const base =
+    String(m ?? 0)
+      .split("")
+      .reduce((a, c) => a + Number(c), 0) +
+    String(d ?? 0)
+      .split("")
+      .reduce((a, c) => a + Number(c), 0) +
+    String(year)
+      .split("")
+      .reduce((a, c) => a + Number(c), 0);
+  return reduceNumber(base, false); // パーソナルイヤーはマスター扱いしない
+}
+
+export const PERSONAL_YEAR_TEXT: Record<number, { title: string; text: string }> = {
+  1: { title: "種まきの年", text: "新たなスタートの周期。挑戦・自立・新規プロジェクトに最適。" },
+  2: { title: "育成と協力の年", text: "焦らず関係を育てる時期。直感とパートナーシップが鍵。" },
+  3: { title: "表現と社交の年", text: "創造性・楽しみ・コミュニケーションを広げる時。" },
+  4: { title: "基盤づくりの年", text: "地道に積み上げる時期。健康・仕事の基礎を整える。" },
+  5: { title: "変化と自由の年", text: "旅・転機・新しい体験。柔軟さが運を呼ぶ。" },
+  6: { title: "愛と責任の年", text: "家族・パートナー・コミュニティに向き合う時期。" },
+  7: { title: "内省と探求の年", text: "学び直し・スピリチュアル・一人時間が育つ年。" },
+  8: { title: "達成と豊かさの年", text: "実力が形になる収穫期。仕事・財運の節目。" },
+  9: { title: "完了と手放しの年", text: "周期の終わり。古いものを手放し次の1へ備える。" },
+};
+
+

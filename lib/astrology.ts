@@ -161,6 +161,30 @@ export const ZODIAC: Zodiac[] = [
   },
 ];
 
+// 各星座のラッキー要素 + 相性 + 月のテーマ（簡易）
+export type Lucky = {
+  color: string;
+  number: number;
+  item: string;
+  compatible: string[]; // 相性の良い星座キー
+  monthlyTheme: string;
+};
+
+export const LUCKY: Record<string, Lucky> = {
+  aries: { color: "赤", number: 9, item: "シルバーのアクセサリー", compatible: ["leo", "sagittarius", "gemini"], monthlyTheme: "新規プロジェクトと挑戦の月。先手必勝で動こう。" },
+  taurus: { color: "エメラルドグリーン", number: 6, item: "良質なレザー", compatible: ["virgo", "capricorn", "cancer"], monthlyTheme: "豊かさを味わう月。趣味と五感を磨く。" },
+  gemini: { color: "イエロー", number: 5, item: "本・万年筆", compatible: ["libra", "aquarius", "aries"], monthlyTheme: "情報と人脈の月。学びと交流を増やす。" },
+  cancer: { color: "シルバー", number: 2, item: "観葉植物", compatible: ["scorpio", "pisces", "taurus"], monthlyTheme: "家と心の月。安らぎを整え直す。" },
+  leo: { color: "ゴールド", number: 1, item: "クリスタル", compatible: ["aries", "sagittarius", "libra"], monthlyTheme: "舞台と表現の月。中心で輝こう。" },
+  virgo: { color: "ネイビー", number: 7, item: "ノート・手帳", compatible: ["taurus", "capricorn", "scorpio"], monthlyTheme: "改善と健康の月。ルーティンを整える。" },
+  libra: { color: "ペールピンク", number: 6, item: "香水", compatible: ["gemini", "aquarius", "leo"], monthlyTheme: "対人と美の月。バランス感覚で勝負。" },
+  scorpio: { color: "ボルドー", number: 8, item: "黒革の小物", compatible: ["cancer", "pisces", "virgo"], monthlyTheme: "深掘りと変容の月。一点突破で動く。" },
+  sagittarius: { color: "ターコイズ", number: 3, item: "旅道具", compatible: ["aries", "leo", "aquarius"], monthlyTheme: "視野を広げる月。学びと旅へ。" },
+  capricorn: { color: "ダークブラウン", number: 8, item: "万年カレンダー", compatible: ["taurus", "virgo", "pisces"], monthlyTheme: "実績の月。長期計画を一段進める。" },
+  aquarius: { color: "コバルトブルー", number: 4, item: "テクノロジー製品", compatible: ["gemini", "libra", "sagittarius"], monthlyTheme: "革新と仲間の月。新しい仕組みを試す。" },
+  pisces: { color: "ラベンダー", number: 7, item: "アロマ・音楽", compatible: ["cancer", "scorpio", "capricorn"], monthlyTheme: "感性と癒しの月。インスピレーションを大切に。" },
+};
+
 // 太陽が各宮に入る日付（簡易版・年により1日前後ずれる）
 const RANGES: { key: string; from: [number, number]; to: [number, number] }[] = [
   { key: "capricorn", from: [12, 22], to: [1, 19] },

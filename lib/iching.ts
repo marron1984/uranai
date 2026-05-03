@@ -157,6 +157,31 @@ export function trigramName(yaos: Yao[], pos: "lower" | "upper"): string {
   return TRIGRAMS[trigramIndex(slice)];
 }
 
+// 変爻のポジション別メッセージ（爻位の一般則）
+const LINE_POS_TEXT: Record<number, string> = {
+  1: "初爻：物事の始まり。基礎を固め、軽率な動きを避ける段階。",
+  2: "二爻：内側の中。柔順に・誠実に動くと通る位置。",
+  3: "三爻：内卦の上。岐路。慎重さを欠くと危険。",
+  4: "四爻：外卦の入口。表に立ち始める時。動機を確かめる。",
+  5: "五爻：尊位（リーダーの位）。徳を持って治めれば大成する。",
+  6: "上爻：物事の極み。引き際を読み、次に備える時。",
+};
+
+// 変爻位置（下から数えて 1-6）の解釈
+export function changingLineMeanings(yaos: Yao[]): { pos: number; isYang: boolean; text: string }[] {
+  const out: { pos: number; isYang: boolean; text: string }[] = [];
+  yaos.forEach((y, i) => {
+    if (y.isChanging) {
+      out.push({
+        pos: i + 1,
+        isYang: y.isYang,
+        text: LINE_POS_TEXT[i + 1],
+      });
+    }
+  });
+  return out;
+}
+
 export function yaoSymbol(y: Yao): string {
   if (y.value === 6) return "⚋ ×"; // 老陰（変）
   if (y.value === 9) return "⚊ ○"; // 老陽（変）

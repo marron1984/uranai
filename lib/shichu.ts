@@ -159,6 +159,139 @@ export function calcFourPillars(
   };
 }
 
+// 五行（基本元素）
+const STEM_FIVE: Record<string, "木" | "火" | "土" | "金" | "水"> = {
+  甲: "木", 乙: "木", 丙: "火", 丁: "火", 戊: "土",
+  己: "土", 庚: "金", 辛: "金", 壬: "水", 癸: "水",
+};
+const BRANCH_FIVE: Record<string, "木" | "火" | "土" | "金" | "水"> = {
+  寅: "木", 卯: "木", 巳: "火", 午: "火", 辰: "土",
+  戌: "土", 丑: "土", 未: "土", 申: "金", 酉: "金", 子: "水", 亥: "水",
+};
+const STEM_YANG: Record<string, boolean> = {
+  甲: true, 乙: false, 丙: true, 丁: false, 戊: true,
+  己: false, 庚: true, 辛: false, 壬: true, 癸: false,
+};
+
+const FIVE_GENERATES: Record<string, string> = { 木: "火", 火: "土", 土: "金", 金: "水", 水: "木" };
+const FIVE_CONTROLS: Record<string, string> = { 木: "土", 土: "水", 水: "火", 火: "金", 金: "木" };
+
+// 通変星: 日干 vs 他の干 の関係
+export type TongbianStar =
+  | "比肩" | "劫財" | "食神" | "傷官" | "偏財"
+  | "正財" | "偏官" | "正官" | "偏印" | "印綬";
+
+export function tongbianStar(dayStem: string, otherStem: string): TongbianStar {
+  const dE = STEM_FIVE[dayStem];
+  const oE = STEM_FIVE[otherStem];
+  const dY = STEM_YANG[dayStem];
+  const oY = STEM_YANG[otherStem];
+  if (dE === oE) return dY === oY ? "比肩" : "劫財";
+  if (FIVE_GENERATES[dE] === oE) return dY === oY ? "食神" : "傷官";
+  if (FIVE_CONTROLS[dE] === oE) return dY === oY ? "偏財" : "正財";
+  if (FIVE_CONTROLS[oE] === dE) return dY === oY ? "偏官" : "正官";
+  if (FIVE_GENERATES[oE] === dE) return dY === oY ? "偏印" : "印綬";
+  return "比肩";
+}
+
+export const TONGBIAN_TEXT: Record<TongbianStar, string> = {
+  比肩: "独立心と自我。自分の道を貫く力。",
+  劫財: "競争と協力。仲間との切磋琢磨で伸びる。",
+  食神: "創造と楽しみ。表現力・芸術・グルメ。",
+  傷官: "鋭い才能。批評眼と独自性、ただし衝突に注意。",
+  偏財: "流通する財。社交と機転で得る豊かさ。",
+  正財: "安定した財。コツコツ蓄える堅実さ。",
+  偏官: "胆力と決断。リーダー型・武の星。",
+  正官: "規律と名誉。組織で評価される真面目さ。",
+  偏印: "独自の知性。アイデアと直感、副業向き。",
+  印綬: "学問と保護。教養と人徳で守られる。",
+};
+
+// 十二運: 日干に対する各支のライフステージ
+const STAGES = [
+  "長生", "沐浴", "冠帯", "建禄", "帝旺", "衰",
+  "病", "死", "墓", "絶", "胎", "養",
+] as const;
+
+// 各日干 → 長生の支のindex (子=0..亥=11) と 進行方向
+// 陽干: 順行 / 陰干: 逆行
+const LONG_LIFE: Record<string, { idx: number; forward: boolean }> = {
+  甲: { idx: 11, forward: true },  // 亥
+  丙: { idx: 2, forward: true },    // 寅
+  戊: { idx: 2, forward: true },    // 寅
+  庚: { idx: 5, forward: true },    // 巳
+  壬: { idx: 8, forward: true },    // 申
+  乙: { idx: 6, forward: false },   // 午
+  丁: { idx: 9, forward: false },   // 酉
+  己: { idx: 9, forward: false },   // 酉
+  辛: { idx: 0, forward: false },   // 子
+  癸: { idx: 3, forward: false },   // 卯
+};
+
+const BRANCH_INDEX: Record<string, number> = {
+  子: 0, 丑: 1, 寅: 2, 卯: 3, 辰: 4, 巳: 5,
+  午: 6, 未: 7, 申: 8, 酉: 9, 戌: 10, 亥: 11,
+};
+
+export type TwelveStage = (typeof STAGES)[number];
+
+export function twelveStage(dayStem: string, branch: string): TwelveStage {
+  const start = LONG_LIFE[dayStem];
+  const bIdx = BRANCH_INDEX[branch];
+  const offset = start.forward
+    ? (bIdx - start.idx + 12) % 12
+    : (start.idx - bIdx + 12) % 12;
+  return STAGES[offset];
+}
+
+export const TWELVE_TEXT: Record<TwelveStage, string> = {
+  長生: "誕生・育成。新しい段階の始まり。", 沐浴: "産湯。揺らぎと探索の時。",
+  冠帯: "成人。実力をまといはじめる時。", 建禄: "自立。自分の場を築く充実期。",
+  帝旺: "頂点。最大の力を発揮する時。", 衰: "勢いが緩み始める転換点。",
+  病: "立ち止まり、内省する時。", 死: "終焉と再構築への準備。",
+  墓: "蓄積と内なる充実。地味だが深い時。", 絶: "切り替わり。古い枠が外れる時。",
+  胎: "新たな構想が宿る時。", 養: "じっくり育てる時。",
+};
+
+// 五行バランス（4柱の天干＋地支から数える）
+export type FiveCount = Record<"木" | "火" | "土" | "金" | "水", number>;
+
+export function fiveElementBalance(p: FourPillars): FiveCount {
+  const c: FiveCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  const pillars = [p.year, p.month, p.day, p.hour].filter(
+    (x): x is Pillar => x !== null
+  );
+  for (const pl of pillars) {
+    c[STEM_FIVE[pl.stem]]++;
+    c[BRANCH_FIVE[pl.branch]]++;
+  }
+  return c;
+}
+
+// 命式に対する補助情報
+export type ShichuExtras = {
+  tongbian: { year: TongbianStar; month: TongbianStar; hour: TongbianStar | null };
+  twelve: { year: TwelveStage; month: TwelveStage; day: TwelveStage; hour: TwelveStage | null };
+  five: FiveCount;
+};
+
+export function calcShichuExtras(p: FourPillars): ShichuExtras {
+  return {
+    tongbian: {
+      year: tongbianStar(p.day.stem, p.year.stem),
+      month: tongbianStar(p.day.stem, p.month.stem),
+      hour: p.hour ? tongbianStar(p.day.stem, p.hour.stem) : null,
+    },
+    twelve: {
+      year: twelveStage(p.day.stem, p.year.branch),
+      month: twelveStage(p.day.stem, p.month.branch),
+      day: twelveStage(p.day.stem, p.day.branch),
+      hour: p.hour ? twelveStage(p.day.stem, p.hour.branch) : null,
+    },
+    five: fiveElementBalance(p),
+  };
+}
+
 export const DAY_MASTER_TEXT: Record<string, string> = {
   陽木: "甲（こうぼく）。大樹のような大らかさと、まっすぐ伸びる成長力。",
   陰木: "乙（いつぼく）。草花のしなやかさと、繊細な美意識。",

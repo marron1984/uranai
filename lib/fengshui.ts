@@ -74,6 +74,64 @@ export function dirRatings(kua: number): { dir: Dir; rating: DirRating; kind: "�
   return DIRS.map((d) => ({ dir: d, rating: map[d], kind: RATING_KIND[map[d]] }));
 }
 
+// 流年（年運）方位: 西暦から「九星」を割り出し、その年に避けるべき方位を返す。
+// 簡易ルール:
+//   九星 = ((11 - (西暦 mod 9)) % 9) || 9   (1=一白水星 ... 9=九紫火星)
+//   五黄殺 (中央に来た五黄が動いた逆方位) と 暗剣殺 を年盤からの近似で算出
+// MVPでは「歳破」「五黄」「暗剣」の3方位だけ示す。
+
+const SAIHA_DIR: Record<number, string> = {
+  // 西暦の地支（年支）の対冲方位
+  // 子(0)→午(南), 丑(1)→未(西南), 寅(2)→申(西), 卯(3)→酉(西), 辰(4)→戌(西北),
+  // 巳(5)→亥(西北), 午(6)→子(北), 未(7)→丑(東北), 申(8)→寅(東北), 酉(9)→卯(東),
+  // 戌(10)→辰(東南), 亥(11)→巳(東南)
+  0: "南", 1: "西南", 2: "西", 3: "西", 4: "西北", 5: "西北",
+  6: "北", 7: "東北", 8: "東北", 9: "東", 10: "東南", 11: "東南",
+};
+
+// 各九星が中央にいる年の年盤に基づく、五黄／暗剣の所在方位
+// 簡易版テーブル: 中央=「九星番号」のとき → [五黄方位, 暗剣方位]
+const ANNUAL_TABLE: Record<number, { gokou: string; anken: string }> = {
+  1: { gokou: "南東",  anken: "北西" }, // 五黄が南東、その対冲が北西
+  2: { gokou: "東",    anken: "西" },
+  3: { gokou: "中央",  anken: "—"   }, // 五黄が中央=被害無し
+  4: { gokou: "北西",  anken: "南東" },
+  5: { gokou: "西",    anken: "東" },
+  6: { gokou: "北東",  anken: "南西" },
+  7: { gokou: "南",    anken: "北" },
+  8: { gokou: "北",    anken: "南" },
+  9: { gokou: "南西",  anken: "北東" },
+};
+
+export type AnnualDirection = {
+  year: number;
+  star: number;
+  starName: string;
+  saiha: string;     // 歳破（避けるべき）
+  gokou: string;     // 五黄殺
+  anken: string;     // 暗剣殺
+};
+
+const STAR_NAMES = [
+  "", "一白水星", "二黒土星", "三碧木星", "四緑木星", "五黄土星",
+  "六白金星", "七赤金星", "八白土星", "九紫火星",
+];
+
+export function annualDirection(year: number): AnnualDirection {
+  let star = (11 - (year % 9)) % 9;
+  if (star === 0) star = 9;
+  const branchIdx = (year - 4 + 12 * 1000) % 12;
+  const t = ANNUAL_TABLE[star];
+  return {
+    year,
+    star,
+    starName: STAR_NAMES[star],
+    saiha: SAIHA_DIR[branchIdx],
+    gokou: t.gokou,
+    anken: t.anken,
+  };
+}
+
 export const RATING_TEXT: Record<DirRating, string> = {
   生気: "大吉。発展と活力。仕事・恋愛・新しい挑戦に。",
   天医: "吉。健康と回復。寝室や休息の場所に。",
