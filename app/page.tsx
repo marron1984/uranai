@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  loadProfile,
-  saveProfile,
-  clearProfile,
-  DEFAULT_PROFILE,
-  type Profile,
-} from "@/lib/profile";
+import { OWNER } from "@/lib/owner";
 import {
   getSunSign,
   getDailyFortune,
@@ -81,15 +75,14 @@ type AllResults = {
   };
 };
 
-function compute(profile: Profile): AllResults {
-  const d = new Date(profile.birth);
+function compute(): AllResults {
+  const d = new Date(OWNER.birth);
   const y = d.getFullYear();
   const m = d.getMonth() + 1;
   const day = d.getDate();
-  const h = profile.hour;
   const zodiac = getSunSign(m, day);
   const yaos = castHexagram();
-  const sp = calcFourPillars(y, m, day, h);
+  const sp = calcFourPillars(y, m, day, OWNER.hour);
   const thisYear = new Date().getFullYear();
 
   return {
@@ -97,13 +90,13 @@ function compute(profile: Profile): AllResults {
     daily: getDailyFortune(zodiac.key, new Date()),
     tarot: drawCards(3),
     numerology: {
-      life: lifePathNumber(profile.birth),
-      soul: profile.nameRoman ? soulNumber(profile.nameRoman) : 0,
-      persona: profile.nameRoman ? personalityNumber(profile.nameRoman) : 0,
-      expression: profile.nameRoman ? expressionNumber(profile.nameRoman) : 0,
-      birthday: birthdayNumber(profile.birth),
-      personal: personalYear(profile.birth, thisYear),
-      hasName: !!profile.nameRoman,
+      life: lifePathNumber(OWNER.birth),
+      soul: OWNER.nameRoman ? soulNumber(OWNER.nameRoman) : 0,
+      persona: OWNER.nameRoman ? personalityNumber(OWNER.nameRoman) : 0,
+      expression: OWNER.nameRoman ? expressionNumber(OWNER.nameRoman) : 0,
+      birthday: birthdayNumber(OWNER.birth),
+      personal: personalYear(OWNER.birth, thisYear),
+      hasName: !!OWNER.nameRoman,
     },
     iching: {
       yaos,
@@ -114,265 +107,69 @@ function compute(profile: Profile): AllResults {
     shichu: sp,
     shichuExtras: calcShichuExtras(sp),
     fengshui: {
-      kua: calcKua(y, m, day, profile.gender),
-      ratings: dirRatings(calcKua(y, m, day, profile.gender)),
+      kua: calcKua(y, m, day, OWNER.gender),
+      ratings: dirRatings(calcKua(y, m, day, OWNER.gender)),
       annual: annualDirection(thisYear),
     },
   };
 }
 
 export default function Home() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [editing, setEditing] = useState(false);
   const [results, setResults] = useState<AllResults | null>(null);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (p) {
-      setProfile(p);
-      setResults(compute(p));
-    } else {
-      setEditing(true);
-    }
-    setHydrated(true);
+    setResults(compute());
   }, []);
 
-  const onSave = (p: Profile) => {
-    saveProfile(p);
-    setProfile(p);
-    setResults(compute(p));
-    setEditing(false);
-  };
-
-  const onReshuffle = () => {
-    if (!profile) return;
-    setResults(compute(profile));
-  };
-
-  const onReset = () => {
-    if (!confirm("プロフィールを削除して最初からやり直しますか？")) return;
-    clearProfile();
-    setProfile(null);
-    setResults(null);
-    setEditing(true);
-  };
-
-  if (!hydrated) {
-    return <div className="text-sm text-ink-400">読み込み中…</div>;
-  }
-
-  return (
-    <div>
-      {(editing || !profile) && (
-        <ProfileForm
-          initial={profile ?? DEFAULT_PROFILE}
-          onSave={onSave}
-          onCancel={profile ? () => setEditing(false) : undefined}
-        />
-      )}
-
-      {profile && results && !editing && (
-        <>
-          <Greeting
-            profile={profile}
-            onEdit={() => setEditing(true)}
-            onReshuffle={onReshuffle}
-            onReset={onReset}
-          />
-          <div className="mt-10 space-y-10">
-            <AstrologySection result={results} />
-            <NumerologySection result={results} />
-            <ShichuSection result={results} />
-            <FengShuiSection result={results} />
-            <TarotSection result={results} />
-            <IChingSection result={results} />
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ========== Profile Form ==========
-
-function ProfileForm({
-  initial,
-  onSave,
-  onCancel,
-}: {
-  initial: Profile;
-  onSave: (p: Profile) => void;
-  onCancel?: () => void;
-}) {
-  const [p, setP] = useState<Profile>(initial);
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!p.birth) return;
-    onSave(p);
-  };
-
-  return (
-    <section className="py-6">
-      <h1 className="font-serif text-3xl">
-        {onCancel ? "プロフィール編集" : "ようこそ。最初に設定しましょう"}
-      </h1>
-      <p className="mt-2 text-sm text-ink-500">
-        この情報はあなたのブラウザにのみ保存され、外部には送信されません。
-      </p>
-
-      <form
-        onSubmit={submit}
-        className="mt-6 rounded-2xl border border-ink-100 p-6 bg-ink-50/40 grid grid-cols-1 sm:grid-cols-2 gap-4"
-      >
-        <label className="block">
-          <span className="text-xs text-ink-500">呼び名</span>
-          <input
-            type="text"
-            value={p.displayName}
-            onChange={(e) => setP({ ...p, displayName: e.target.value })}
-            placeholder="Yoshida"
-            className="block mt-1 w-full rounded-md border border-ink-200 px-3 py-2 bg-white focus:outline-none focus:border-ink-900"
-          />
-        </label>
-        <label className="block">
-          <span className="text-xs text-ink-500">生年月日（必須）</span>
-          <input
-            type="date"
-            value={p.birth}
-            onChange={(e) => setP({ ...p, birth: e.target.value })}
-            required
-            className="block mt-1 w-full rounded-md border border-ink-200 px-3 py-2 bg-white focus:outline-none focus:border-ink-900"
-          />
-        </label>
-        <fieldset>
-          <legend className="text-xs text-ink-500 mb-1">性別</legend>
-          <div className="flex gap-4 mt-2">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                checked={p.gender === "male"}
-                onChange={() => setP({ ...p, gender: "male" })}
-              />
-              <span className="text-sm">男性</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                checked={p.gender === "female"}
-                onChange={() => setP({ ...p, gender: "female" })}
-              />
-              <span className="text-sm">女性</span>
-            </label>
-          </div>
-        </fieldset>
-        <label className="block">
-          <span className="text-xs text-ink-500">生まれた時刻 0-23（任意）</span>
-          <input
-            type="number"
-            min={0}
-            max={23}
-            value={p.hour ?? ""}
-            onChange={(e) =>
-              setP({ ...p, hour: e.target.value === "" ? null : Number(e.target.value) })
-            }
-            placeholder="例: 14"
-            className="block mt-1 w-full rounded-md border border-ink-200 px-3 py-2 bg-white focus:outline-none focus:border-ink-900"
-          />
-        </label>
-        <label className="block sm:col-span-2">
-          <span className="text-xs text-ink-500">氏名 ローマ字（任意）</span>
-          <input
-            type="text"
-            value={p.nameRoman}
-            onChange={(e) => setP({ ...p, nameRoman: e.target.value })}
-            placeholder="例: TARO YOSHIDA"
-            className="block mt-1 w-full rounded-md border border-ink-200 px-3 py-2 bg-white focus:outline-none focus:border-ink-900"
-          />
-        </label>
-        <div className="sm:col-span-2 flex items-center gap-3 mt-2">
-          <button
-            type="submit"
-            className="rounded-md bg-ink-900 text-white px-6 py-2.5 hover:bg-ink-700"
-          >
-            {onCancel ? "保存" : "保存して占いを開く"}
-          </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="text-sm text-ink-500 hover:text-ink-900"
-            >
-              キャンセル
-            </button>
-          )}
-        </div>
-      </form>
-    </section>
-  );
-}
-
-// ========== Greeting ==========
-
-function Greeting({
-  profile,
-  onEdit,
-  onReshuffle,
-  onReset,
-}: {
-  profile: Profile;
-  onEdit: () => void;
-  onReshuffle: () => void;
-  onReset: () => void;
-}) {
   const today = useMemo(() => {
     const d = new Date();
     return `${d.getFullYear()}年 ${d.getMonth() + 1}月 ${d.getDate()}日（${
       ["日", "月", "火", "水", "木", "金", "土"][d.getDay()]
     }）`;
   }, []);
-  const hour = new Date().getHours();
-  const greeting =
-    hour < 5 ? "夜更かしですね" :
-    hour < 11 ? "おはようございます" :
-    hour < 18 ? "こんにちは" :
-    "こんばんは";
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h < 5) return "夜更かしですね";
+    if (h < 11) return "おはようございます";
+    if (h < 18) return "こんにちは";
+    return "こんばんは";
+  }, []);
+
+  if (!results) {
+    return <div className="text-sm text-ink-400">読み込み中…</div>;
+  }
 
   return (
-    <section className="py-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-ink-100">
-      <div>
-        <div className="text-xs uppercase tracking-widest text-ink-400">
-          {today}
+    <div>
+      <section className="py-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-ink-100">
+        <div>
+          <div className="text-xs uppercase tracking-widest text-ink-400">
+            {today}
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl mt-1">
+            {greeting}、{OWNER.displayName}さん。
+          </h1>
+          <p className="text-sm text-ink-500 mt-1">
+            本日の総合的な占断をまとめました。
+          </p>
         </div>
-        <h1 className="font-serif text-3xl sm:text-4xl mt-1">
-          {greeting}、{profile.displayName}さん。
-        </h1>
-        <p className="text-sm text-ink-500 mt-1">
-          本日の総合的な占断を以下にまとめました。
-        </p>
-      </div>
-      <div className="flex gap-2 text-sm">
         <button
-          onClick={onReshuffle}
-          className="rounded-md border border-ink-200 px-3 py-1.5 hover:border-ink-900"
+          onClick={() => setResults(compute())}
+          className="rounded-md border border-ink-200 px-3 py-1.5 text-sm hover:border-ink-900 self-start sm:self-end"
         >
           再シャッフル
         </button>
-        <button
-          onClick={onEdit}
-          className="rounded-md border border-ink-200 px-3 py-1.5 hover:border-ink-900"
-        >
-          プロフィール編集
-        </button>
-        <button
-          onClick={onReset}
-          className="rounded-md border border-ink-200 px-3 py-1.5 text-ink-400 hover:text-ink-900"
-        >
-          リセット
-        </button>
+      </section>
+
+      <div className="mt-10 space-y-10">
+        <AstrologySection result={results} />
+        <NumerologySection result={results} />
+        <ShichuSection result={results} />
+        <FengShuiSection result={results} />
+        <TarotSection result={results} />
+        <IChingSection result={results} />
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -495,11 +292,6 @@ function NumerologySection({ result }: { result: AllResults }) {
           {n.hasName && <SmallNum label="ソウル数" value={n.soul} />}
           {n.hasName && <SmallNum label="人格数" value={n.persona} />}
         </div>
-        {!n.hasName && (
-          <p className="text-xs text-ink-400">
-            ※ プロフィールに氏名（ローマ字）を入れると、表現数・ソウル数・人格数も計算されます。
-          </p>
-        )}
       </div>
     </section>
   );
@@ -525,42 +317,18 @@ function ShichuSection({ result }: { result: AllResults }) {
       <SectionHeader en="Shichu Suimei" ja="四柱推命" />
       <div className="mt-4 rounded-xl border border-ink-100 p-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <PillarCell
-            label="時柱"
-            pillar={s.hour}
-            tongbian={x.tongbian.hour}
-            twelve={x.twelve.hour}
-          />
-          <PillarCell
-            label="日柱"
-            pillar={s.day}
-            twelve={x.twelve.day}
-            highlight
-          />
-          <PillarCell
-            label="月柱"
-            pillar={s.month}
-            tongbian={x.tongbian.month}
-            twelve={x.twelve.month}
-          />
-          <PillarCell
-            label="年柱"
-            pillar={s.year}
-            tongbian={x.tongbian.year}
-            twelve={x.twelve.year}
-          />
+          <PillarCell label="時柱" pillar={s.hour} tongbian={x.tongbian.hour} twelve={x.twelve.hour} />
+          <PillarCell label="日柱" pillar={s.day} twelve={x.twelve.day} highlight />
+          <PillarCell label="月柱" pillar={s.month} tongbian={x.tongbian.month} twelve={x.twelve.month} />
+          <PillarCell label="年柱" pillar={s.year} tongbian={x.tongbian.year} twelve={x.twelve.year} />
         </div>
 
         <div className="border-t border-ink-100 mt-6 pt-6">
-          <div className="text-xs uppercase tracking-widest text-ink-400">
-            日主（あなた本人）
-          </div>
+          <div className="text-xs uppercase tracking-widest text-ink-400">日主（あなた本人）</div>
           <div className="font-serif text-xl mt-1">
             {s.dayMaster.stem} ・ {s.dayMaster.element}
           </div>
-          <p className="text-sm text-ink-700 mt-2">
-            {DAY_MASTER_TEXT[s.dayMaster.element]}
-          </p>
+          <p className="text-sm text-ink-700 mt-2">{DAY_MASTER_TEXT[s.dayMaster.element]}</p>
         </div>
 
         <div className="border-t border-ink-100 mt-6 pt-6">
@@ -577,9 +345,7 @@ function ShichuSection({ result }: { result: AllResults }) {
         </div>
 
         <div className="border-t border-ink-100 mt-6 pt-6">
-          <div className="text-xs uppercase tracking-widest text-ink-400 mb-2">
-            十二運（人生段階）
-          </div>
+          <div className="text-xs uppercase tracking-widest text-ink-400 mb-2">十二運（人生段階）</div>
           <ul className="space-y-1 text-sm">
             <li>日柱: <span className="font-medium">{x.twelve.day}</span> — <span className="text-ink-600">{TWELVE_TEXT[x.twelve.day]}</span></li>
             <li>月柱: <span className="font-medium">{x.twelve.month}</span> — <span className="text-ink-600">{TWELVE_TEXT[x.twelve.month]}</span></li>
@@ -591,9 +357,7 @@ function ShichuSection({ result }: { result: AllResults }) {
         </div>
 
         <div className="border-t border-ink-100 mt-6 pt-6">
-          <div className="text-xs uppercase tracking-widest text-ink-400 mb-3">
-            五行バランス
-          </div>
+          <div className="text-xs uppercase tracking-widest text-ink-400 mb-3">五行バランス</div>
           <div className="space-y-1.5">
             {(["木", "火", "土", "金", "水"] as const).map((e) => {
               const v = x.five[e];
@@ -602,10 +366,7 @@ function ShichuSection({ result }: { result: AllResults }) {
                 <div key={e} className="flex items-center gap-3 text-sm">
                   <div className="w-6 text-ink-500">{e}</div>
                   <div className="flex-1 h-2 bg-ink-100 rounded">
-                    <div
-                      className="h-2 bg-ink-900 rounded"
-                      style={{ width: `${pct}%` }}
-                    />
+                    <div className="h-2 bg-ink-900 rounded" style={{ width: `${pct}%` }} />
                   </div>
                   <div className="w-8 tabular-nums text-right">{v}</div>
                 </div>
@@ -636,16 +397,12 @@ function PillarCell({
       <div className="text-xs uppercase tracking-widest text-ink-400">{label}</div>
       {pillar ? (
         <>
-          {tongbian && (
-            <div className="text-xs text-ink-500 mt-1">{tongbian}</div>
-          )}
+          {tongbian && <div className="text-xs text-ink-500 mt-1">{tongbian}</div>}
           <div className="font-serif text-3xl mt-1">{pillar.stem}</div>
           <div className="text-xs text-ink-500">{pillar.stemElement}</div>
           <div className="font-serif text-3xl mt-2">{pillar.branch}</div>
           <div className="text-xs text-ink-500">{pillar.branchElement}</div>
-          {twelve && (
-            <div className="text-xs text-ink-500 mt-2">{twelve}</div>
-          )}
+          {twelve && <div className="text-xs text-ink-500 mt-2">{twelve}</div>}
         </>
       ) : (
         <div className="text-sm text-ink-400 mt-3">—</div>
@@ -831,9 +588,7 @@ function IChingSection({ result }: { result: AllResults }) {
           <ul className="space-y-2 text-sm">
             {iching.lines.map((l, i) => (
               <li key={i} className="flex gap-3">
-                <span className="font-medium w-12">
-                  第{l.pos}爻
-                </span>
+                <span className="font-medium w-12">第{l.pos}爻</span>
                 <span className="text-ink-700">{l.text}</span>
               </li>
             ))}
