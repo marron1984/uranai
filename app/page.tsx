@@ -161,6 +161,8 @@ import {
   newThread,
   buildSystemPrompt,
   streamOracle,
+  fileToImage,
+  imageToDataUrl,
   CATEGORY_LABELS,
   MODEL_LABELS,
   type OracleCategory,
@@ -168,6 +170,7 @@ import {
   type CompatPerson,
   type ChatThread,
   type ChatMessage,
+  type ChatImage,
 } from "@/lib/oracle";
 
 // ==========================================================================
@@ -2703,12 +2706,14 @@ function OracleTab() {
   const [partnerGender, setPartnerGender] = useState<"male" | "female">("male");
 
   const [input, setInput] = useState("");
+  const [pendingImages, setPendingImages] = useState<ChatImage[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setApiKey(loadApiKey());
@@ -2761,8 +2766,32 @@ function OracleTab() {
     setActiveId(t.id);
   };
 
+  const onPickImages = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const next: ChatImage[] = [...pendingImages];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > 5 * 1024 * 1024) {
+        setError(`${file.name} は5MB超のため除外しました`);
+        continue;
+      }
+      try {
+        const img = await fileToImage(file);
+        next.push(img);
+      } catch {
+        setError(`${file.name} の読み込みに失敗しました`);
+      }
+    }
+    setPendingImages(next);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removePendingImage = (idx: number) => {
+    setPendingImages((arr) => arr.filter((_, i) => i !== idx));
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() || !active || streaming) return;
+    if ((!input.trim() && pendingImages.length === 0) || !active || streaming) return;
     if (!apiKey) {
       setError("APIキーを設定してください");
       return;
@@ -2771,6 +2800,7 @@ function OracleTab() {
     const userMsg: ChatMessage = {
       role: "user",
       content: input.trim(),
+      images: pendingImages.length > 0 ? pendingImages : undefined,
       timestamp: new Date().toISOString(),
     };
     const updated: ChatThread = {
@@ -2782,6 +2812,7 @@ function OracleTab() {
     setThreads(newThreads);
     saveThreads(newThreads);
     setInput("");
+    setPendingImages([]);
     setStreaming(true);
     setStreamText("");
     setError(null);
@@ -3065,6 +3096,27 @@ function OracleTab() {
           </div>
 
           <div className="border-t border-ink-200 p-4 bg-sand-50">
+            {/* 添付画像のプレビュー */}
+            {pendingImages.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {pendingImages.map((img, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={imageToDataUrl(img)}
+                      alt=""
+                      className="h-20 w-20 rounded-md border border-ink-300 object-cover"
+                    />
+                    <button
+                      onClick={() => removePendingImage(idx)}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-shu-500 text-white text-xs hover:bg-shu-600 shadow"
+                      title="削除"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -3073,12 +3125,37 @@ function OracleTab() {
                   sendMessage();
                 }
               }}
-              placeholder="質問を入力（⌘/Ctrl + Enter で送信）"
+              placeholder={
+                pendingImages.length > 0
+                  ? "画像について質問する（⌘/Ctrl + Enter で送信）"
+                  : "質問を入力（⌘/Ctrl + Enter で送信）"
+              }
               rows={3}
               disabled={streaming}
               className="w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
             />
-            <div className="mt-2 flex items-center justify-end gap-2">
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => onPickImages(e.target.files)}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={streaming}
+                  className="rounded-md border border-ink-300 px-3 py-2 text-sm hover:border-gold-500 disabled:opacity-30 flex items-center gap-1"
+                  title="画像を添付（最大5MB/枚）"
+                >
+                  📎 <span className="hidden sm:inline">画像添付</span>
+                </button>
+                <span className="text-[10px] text-ink-400">
+                  対応: JPG/PNG/WEBP/GIF・最大5MB/枚
+                </span>
+              </div>
               {streaming ? (
                 <button
                   onClick={stopStream}
@@ -3089,7 +3166,7 @@ function OracleTab() {
               ) : (
                 <button
                   onClick={sendMessage}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() && pendingImages.length === 0}
                   className="rounded-md bg-kachi-fade text-sand-50 font-display text-sm px-6 py-2 hover:bg-kachi-700 border border-gold-500 disabled:opacity-30"
                 >
                   送信
@@ -3120,6 +3197,27 @@ function MessageBubble({
             : "bg-paper border border-gold-300 text-ink-800"
         }`}
       >
+        {/* 添付画像 */}
+        {message.images && message.images.length > 0 && (
+          <div className={`flex flex-wrap gap-2 ${message.content ? "mb-3" : ""}`}>
+            {message.images.map((img, i) => (
+              <img
+                key={i}
+                src={imageToDataUrl(img)}
+                alt=""
+                className="max-h-48 rounded-md border border-gold-500/30 cursor-pointer hover:opacity-90"
+                onClick={() => {
+                  const w = window.open();
+                  if (w) {
+                    w.document.write(
+                      `<img src="${imageToDataUrl(img)}" style="max-width:100%;height:auto;">`
+                    );
+                  }
+                }}
+              />
+            ))}
+          </div>
+        )}
         {message.content}
         {streaming && <span className="inline-block w-2 h-4 bg-gold-500 align-middle animate-pulse ml-1"></span>}
       </div>

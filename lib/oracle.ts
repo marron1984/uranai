@@ -94,11 +94,40 @@ export type CompatPerson = {
   gender: "male" | "female";
 };
 
+export type ChatImage = {
+  mediaType: string; // image/jpeg, image/png, image/webp, image/gif
+  data: string; // base64 (no data: prefix)
+};
+
 export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
+  images?: ChatImage[];
   timestamp: string;
 };
+
+// File → base64 image
+export async function fileToImage(file: File): Promise<ChatImage> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const commaIdx = result.indexOf(",");
+      const header = result.slice(0, commaIdx);
+      const data = result.slice(commaIdx + 1);
+      const match = header.match(/data:([^;]+);base64/);
+      const mediaType = match ? match[1] : "image/jpeg";
+      resolve({ mediaType, data });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// チャット表示用の data URL に戻す
+export function imageToDataUrl(img: ChatImage): string {
+  return `data:${img.mediaType};base64,${img.data}`;
+}
 
 export type ChatThread = {
   id: string;
@@ -374,7 +403,22 @@ export async function streamOracle({
       model,
       max_tokens: 4096,
       system: systemPrompt,
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      messages: messages.map((m) => {
+        // Assistant or no image → text only
+        if (m.role === "assistant" || !m.images || m.images.length === 0) {
+          return { role: m.role, content: m.content };
+        }
+        // User with images → multimodal content array
+        const content: Array<
+          | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+          | { type: "text"; text: string }
+        > = m.images.map((img) => ({
+          type: "image" as const,
+          source: { type: "base64" as const, media_type: img.mediaType, data: img.data },
+        }));
+        if (m.content) content.push({ type: "text", text: m.content });
+        return { role: "user", content };
+      }),
       stream: true,
     }),
     signal,
