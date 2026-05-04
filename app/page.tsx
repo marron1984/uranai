@@ -85,6 +85,14 @@ import {
   FINAL_MESSAGE,
   type SynthesisCard,
 } from "@/lib/synthesis";
+import { fetchOsakaWeather, type WeatherData } from "@/lib/weather";
+import {
+  recommendPerfumes,
+  classifyWeather,
+  getSeason,
+  getTimeTag,
+  type PerfumeMatch,
+} from "@/lib/perfume";
 
 // ==========================================================================
 // データ計算
@@ -161,11 +169,19 @@ function basisData() {
 export default function Home() {
   const [tab, setTab] = useState<"today" | "basis">("today");
   const [today, setToday] = useState<TodayResults | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weatherErr, setWeatherErr] = useState(false);
   const basis = useMemo(basisData, []);
 
   useEffect(() => {
     setToday(todayCompute(basis.sun.key));
   }, [basis.sun.key]);
+
+  useEffect(() => {
+    fetchOsakaWeather()
+      .then(setWeather)
+      .catch(() => setWeatherErr(true));
+  }, []);
 
   const now = new Date();
   const todayLabel = `${now.getFullYear()}年 ${now.getMonth() + 1}月 ${now.getDate()}日（${
@@ -214,6 +230,8 @@ export default function Home() {
             personalMonth={pMonth}
             personalYear={basis.numero.personal}
             annual={basis.annual}
+            weather={weather}
+            weatherErr={weatherErr}
             onReshuffle={() => setToday(todayCompute(basis.sun.key))}
           />
         ) : (
@@ -321,6 +339,8 @@ function TodayTab({
   personalMonth: pMonth,
   personalYear,
   annual,
+  weather,
+  weatherErr,
   onReshuffle,
 }: {
   sun: Zodiac;
@@ -329,6 +349,8 @@ function TodayTab({
   personalMonth: number;
   personalYear: number;
   annual: ReturnType<typeof annualDirection>;
+  weather: WeatherData | null;
+  weatherErr: boolean;
   onReshuffle: () => void;
 }) {
   const lucky = LUCKY[sun.key];
@@ -342,8 +364,24 @@ function TodayTab({
   const sb = todayShadowBlessing(pDay);
   const timing = currentHourTiming();
 
+  // 香水推薦
+  const now = new Date();
+  const weatherTags = weather
+    ? classifyWeather(weather.weatherCode, weather.tempC)
+    : [];
+  const perfumeRecs: PerfumeMatch[] = recommendPerfumes(
+    pDay,
+    weatherTags,
+    getTimeTag(now.getHours()),
+    getSeason(now.getMonth() + 1),
+    2
+  );
+
   return (
     <div className="space-y-12">
+      {/* ━━ 0. 大阪の天気 ━━ */}
+      <WeatherCard weather={weather} weatherErr={weatherErr} />
+
       {/* ━━ 1. パーソナルデイ（最重要） ━━ */}
       <NumberedSection num="壱" label="Today's Energy" title="今日のエネルギー" >
         <div className="rounded-2xl bg-gold-fade border-2 border-gold-400 p-8 shadow-sm">
@@ -378,6 +416,9 @@ function TodayTab({
           </div>
         </div>
       </NumberedSection>
+
+      {/* ━━ 1.5 香水推薦 ━━ */}
+      <PerfumeRecommendSection perfumes={perfumeRecs} />
 
       {/* ━━ 2. 影と祝福 ━━ */}
       <NumberedSection num="弐" label="Shadow & Blessing" title="今日の影と祝福">
@@ -1528,6 +1569,177 @@ function HexBlock({
         </div>
       )}
     </div>
+  );
+}
+
+// ==========================================================================
+// 大阪の天気カード
+// ==========================================================================
+
+function WeatherCard({
+  weather,
+  weatherErr,
+}: {
+  weather: WeatherData | null;
+  weatherErr: boolean;
+}) {
+  if (weatherErr) {
+    return (
+      <article className="rounded-2xl bg-sand-50 border border-ink-200 p-5 text-sm text-ink-500">
+        天気の取得に失敗しました（オフライン or APIブロック中）。
+      </article>
+    );
+  }
+  if (!weather) {
+    return (
+      <article className="rounded-2xl bg-sand-50 border border-ink-200 p-5 text-sm text-ink-400">
+        大阪の天気を取得中…
+      </article>
+    );
+  }
+  return (
+    <article className="rounded-2xl bg-paper border border-gold-300 p-6 sm:p-7">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">
+            Osaka Weather ／ 大阪の天気
+          </div>
+          <div className="flex items-baseline gap-3 mt-2">
+            <span className="text-5xl">{weather.icon}</span>
+            <div>
+              <div className="font-display text-4xl tabular-nums text-ink-900">
+                {Math.round(weather.tempC)}
+                <span className="text-2xl text-ink-500">℃</span>
+              </div>
+              <div className="text-xs text-ink-600 mt-0.5">{weather.desc}</div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-1.5 text-xs text-ink-600 text-right">
+          <div>
+            体感 <span className="font-display text-base text-ink-800">{Math.round(weather.feelsLikeC)}℃</span>
+          </div>
+          <div>
+            湿度 <span className="font-display text-base text-ink-800">{weather.humidity}%</span>
+          </div>
+          <div>
+            風速 <span className="font-display text-base text-ink-800">{Math.round(weather.windKmh)}km/h</span>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+// ==========================================================================
+// 香水レコメンド
+// ==========================================================================
+
+function PerfumeRecommendSection({ perfumes }: { perfumes: PerfumeMatch[] }) {
+  if (perfumes.length === 0) return null;
+  const top = perfumes[0];
+  const sub = perfumes[1];
+  return (
+    <NumberedSection num="壱・五" label="Fragrance Pairing" title="今日の運勢を加速させる香り">
+      <div className="space-y-4">
+        {/* TOP RECOMMENDATION */}
+        <article className="rounded-2xl bg-kachi-fade text-sand-50 p-6 sm:p-8 relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-72 h-72 rounded-full bg-gold-500/15 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-baseline justify-between gap-4">
+              <div>
+                <div className="text-[10px] tracking-[0.4em] uppercase text-gold-300">
+                  Top Pick ／ 本命の一本
+                </div>
+                <div className="text-[10px] tracking-widest uppercase text-sand-300 mt-3">
+                  {top.perfume.brand}
+                </div>
+                <h3 className="font-display text-3xl sm:text-4xl mt-1 text-sand-50 leading-tight">
+                  {top.perfume.name}
+                </h3>
+                <div className="text-xs text-gold-200 mt-1">{top.perfume.family}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-[10px] tracking-[0.3em] text-gold-300 uppercase">Match</div>
+                <div className="font-display text-3xl text-gold-300">{top.score}</div>
+                <div className="text-[10px] text-sand-300">score</div>
+              </div>
+            </div>
+
+            <p className="mt-5 text-sm sm:text-[15px] leading-loose text-sand-100">
+              {top.perfume.description}
+            </p>
+
+            <div className="mt-5">
+              <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300 mb-2">Notes</div>
+              <div className="flex flex-wrap gap-1.5">
+                {top.perfume.notes.map((n) => (
+                  <span
+                    key={n}
+                    className="text-xs px-2.5 py-1 rounded-full border border-gold-500/40 text-gold-200"
+                  >
+                    {n}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {top.reasons.length > 0 && (
+              <div className="mt-5 border-t border-gold-500/30 pt-4">
+                <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300 mb-2">
+                  なぜ今日この一本か
+                </div>
+                <ul className="space-y-1">
+                  {top.reasons.map((r, i) => (
+                    <li key={i} className="text-xs text-sand-200 flex gap-2">
+                      <span className="text-gold-400">◆</span>
+                      <span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </article>
+
+        {/* ALTERNATIVE */}
+        {sub && (
+          <article className="rounded-2xl bg-paper border border-gold-300 p-5 sm:p-6">
+            <div className="flex items-baseline justify-between gap-4">
+              <div className="flex-1">
+                <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">
+                  Alternative ／ もう一本の候補
+                </div>
+                <div className="text-[10px] tracking-widest uppercase text-ink-500 mt-2">
+                  {sub.perfume.brand}
+                </div>
+                <h4 className="font-display text-2xl mt-0.5 text-ink-900">
+                  {sub.perfume.name}
+                </h4>
+                <div className="text-xs text-ink-500">{sub.perfume.family}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-[10px] tracking-[0.3em] text-gold-700 uppercase">Match</div>
+                <div className="font-display text-2xl text-gold-700">{sub.score}</div>
+              </div>
+            </div>
+            <p className="mt-3 text-sm text-ink-700 leading-relaxed">
+              {sub.perfume.description}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1">
+              {sub.perfume.notes.map((n) => (
+                <span
+                  key={n}
+                  className="text-[10px] px-2 py-0.5 rounded-full border border-gold-300 text-gold-800 bg-white"
+                >
+                  {n}
+                </span>
+              ))}
+            </div>
+          </article>
+        )}
+      </div>
+    </NumberedSection>
   );
 }
 
