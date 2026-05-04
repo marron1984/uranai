@@ -256,8 +256,8 @@ ${daiun.map((d) => `- ${d.startAge}-${d.endAge}歳: ${d.ganzhi}・${d.stemTongbi
 - 8方位の吉凶: ${ratings.map((r) => `${r.dir}(${r.rating})`).join(" / ")}
 
 ## 家族
-- 妻: ${OWNER.family.spouse.birth} 生・${spouseAge()}歳・射手座・酉年・一白水星・ライフパス4 / 年齢差 ${spouseAgeDiff()}歳
-- 子: ${OWNER.family.child.birth} 生・${childAge()}歳・${childGradeJP()}・蠍座・卯年・四緑木星・ライフパス9
+- 妻: ${OWNER.family.spouse.birth} 生・${spouseAge()}歳・射手座・酉年・四緑木星・ライフパス4 / 年齢差 ${spouseAgeDiff()}歳 / 吉田から見て金剋木
+- 子: ${OWNER.family.child.birth} 生・${childAge()}歳・${childGradeJP()}・蠍座・卯年・七赤金星・ライフパス9 / 吉田と同じ七赤金で比和
 - 義母: 認知症進行中、デイ・ショート利用
 
 ## 当日のコズミック（${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}）

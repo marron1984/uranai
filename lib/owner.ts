@@ -69,7 +69,7 @@ export const OWNER = {
       gender: "female" as const,
       sunSign: "sagittarius",
       eto: "酉",
-      kyusei: 1,
+      kyusei: 4,   // 四緑木星 (1+9+6+9=25 → 7 → 11-7=4)
       lifePath: 4,
     },
     child: {
@@ -78,7 +78,7 @@ export const OWNER = {
       gender: null,
       sunSign: "scorpio",
       eto: "卯",
-      kyusei: 4,
+      kyusei: 7,   // 七赤金星 (2+0+1+1=4 → 11-4=7)
       lifePath: 9,
     },
   },
