@@ -339,3 +339,75 @@ export const DAY_MASTER_TEXT: Record<string, string> = {
   陽水: "壬（じんすい・みずのえ）— 大河・海の象意。流れ続ける大水のような包容力とスケール。物事を大きく捉え、知恵と機転で道を作る日干。社交的で世渡り上手、海外や移動と縁が深い。短所は移り気と落ち着きのなさ、深く一つに留まる経験が運命を深める。",
   陰水: "癸（きすい・みずのと）— 雨・霧・露の象意。柔らかく繊細、しかし全てを潤す細やかな知性。直感力・霊感・芸術センスに優れ、見えないものを言語化する才能。短所は気分の波と弱気、コップに溜める時間（自己ケア）を持つことで本領を発揮する。",
 };
+
+// ============================================================
+// 大運（10年周期のライフサイクル）
+// ============================================================
+
+const ALL_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"] as const;
+const ALL_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"] as const;
+
+export type DaiunPeriod = {
+  index: number;
+  startAge: number;
+  endAge: number;
+  ganzhi: string;
+  stem: string;
+  branch: string;
+  stemTongbian: TongbianStar;
+  stemElement: string;
+  branchElement: string;
+  isCurrent: boolean;
+  theme: string;
+};
+
+const DAIUN_THEMES: Record<TongbianStar, string> = {
+  比肩: "独立心と競争のフェーズ。自分軸が確立され、仲間と切磋琢磨する10年。",
+  劫財: "出費と試練のフェーズ。仲間・兄弟・友人との関わりが運命を動かす波乱期。",
+  食神: "創造と楽しみのフェーズ。表現力と才能が花開き、衣食住も豊かになる黄金期。",
+  傷官: "才能と批評のフェーズ。鋭さで頭角を現すが衝突も多い、内省と挑戦の10年。",
+  偏財: "流動する財のフェーズ。ビジネス・社交・副業で大きく稼ぐチャンス期。",
+  正財: "堅実な財のフェーズ。コツコツ蓄積し、家庭と仕事の安定を築く充実期。",
+  偏官: "胆力と挑戦のフェーズ。改革者・経営者として頂点を目指す試練と栄光の10年。",
+  正官: "規律と名誉のフェーズ。社会的地位・公的評価が頂点に達する充実期。",
+  偏印: "独自の知性のフェーズ。副業・専門性・霊性が深まる、内向きで静かな実りの期。",
+  印綬: "学問と人徳のフェーズ。教養・名誉・年長者の庇護が満ちる、人格完成の10年。",
+};
+
+// 月柱の干支から大運を生成
+// forward: 男+陽干 or 女+陰干 → true（順行）/ それ以外 → false（逆行）
+export function generateDaiun(
+  monthGZ: string,
+  startingAge: number,
+  forward: boolean,
+  count: number,
+  currentAge: number,
+  dayStem: string
+): DaiunPeriod[] {
+  const startStemIdx = ALL_STEMS.indexOf(monthGZ[0] as (typeof ALL_STEMS)[number]);
+  const startBranchIdx = ALL_BRANCHES.indexOf(monthGZ[1] as (typeof ALL_BRANCHES)[number]);
+  const dir = forward ? 1 : -1;
+  const periods: DaiunPeriod[] = [];
+  for (let i = 1; i <= count; i++) {
+    const stem = ALL_STEMS[((startStemIdx + dir * i) % 10 + 10) % 10];
+    const branch = ALL_BRANCHES[((startBranchIdx + dir * i) % 12 + 12) % 12];
+    const ganzhi = stem + branch;
+    const periodStart = startingAge + (i - 1) * 10;
+    const periodEnd = periodStart + 9;
+    const tb = tongbianStar(dayStem, stem);
+    periods.push({
+      index: i,
+      startAge: periodStart,
+      endAge: periodEnd,
+      ganzhi,
+      stem,
+      branch,
+      stemTongbian: tb,
+      stemElement: STEM_ELEMENT[stem],
+      branchElement: BRANCH_ELEMENT[branch],
+      isCurrent: currentAge >= periodStart && currentAge <= periodEnd,
+      theme: DAIUN_THEMES[tb],
+    });
+  }
+  return periods;
+}

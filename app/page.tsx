@@ -92,8 +92,25 @@ import {
   FENGSHUI_HOME,
   SPIRITUAL_THEME,
   FINAL_MESSAGE,
+  COMMUNICATION_STYLE,
+  DECISION_STYLE,
+  LEADERSHIP_STYLE,
+  CONFLICT_PATTERN,
+  MONEY_PSYCHOLOGY,
+  PARENTING_STYLE_DEEP,
+  MIDLIFE_TRANSITION,
+  BODY_CONSTITUTION,
+  MENTAL_PATTERNS,
+  SPIRITUAL_PRACTICE,
+  PARENT_RELATIONSHIPS,
+  LEGACY_QUESTION,
   type SynthesisCard,
 } from "@/lib/synthesis";
+import { generateDaiun, type DaiunPeriod } from "@/lib/shichu";
+import {
+  calcBusinessCompat,
+  type BusinessCompatResult,
+} from "@/lib/businessCompat";
 import { fetchOsakaWeather, type WeatherData } from "@/lib/weather";
 import {
   recommendPerfumes,
@@ -168,7 +185,11 @@ function basisData() {
     OWNER.family.child.sunSign,
     OWNER.family.child.kyusei as StarNumber
   );
-  return { sun, fp, fpExtras, kakusu, bc, numero, ratings, annual, spouseCompat, childCompat };
+  // 大運（10年周期）— 1984/05/02 = 戊申, 男+陽干甲 → 順行, 立運1歳
+  const currentAge = new Date().getFullYear() - 1984;
+  const daiun = generateDaiun("戊辰", 1, true, 8, currentAge, "戊");
+
+  return { sun, fp, fpExtras, kakusu, bc, numero, ratings, annual, spouseCompat, childCompat, daiun, currentAge };
 }
 
 // ==========================================================================
@@ -731,25 +752,57 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
         <FengShuiFullSection ratings={basis.ratings} />
       </NumberedSection>
 
+      {/* ━━ 大運（10年周期） ━━ */}
+      <NumberedSection num="玖" label="Daiun / Decade Luck" title="大運表 — 10年周期のライフサイクル">
+        <DaiunTable periods={basis.daiun} currentAge={basis.currentAge} />
+      </NumberedSection>
+
       {/* ━━ 統合占断シリーズ ━━ */}
-      <SectionDivider title="統合占断" />
+      <SectionDivider title="統合占断・性格と行動" />
 
-      <SynthesisBlock num="玖" card={CAREER_DEEP} />
-      <SynthesisBlock num="拾" card={RELATIONSHIP_SPOUSE} />
-      <SynthesisBlock num="拾壱" card={RELATIONSHIP_CHILD} />
-      <SynthesisBlock num="拾弐" card={FAMILY_CARE} />
-      <SynthesisBlock num="拾参" card={WEALTH_CORE} />
-      <SynthesisBlock num="拾肆" card={HEALTH_CORE} />
-      <SynthesisBlock num="拾伍" card={LIFE_ARC} />
-      <SynthesisBlock num="拾陸" card={FENGSHUI_HOME} />
-      <SynthesisBlock num="拾漆" card={SPIRITUAL_THEME} />
+      <SynthesisBlock num="拾" card={CAREER_DEEP} />
+      <SynthesisBlock num="拾壱" card={COMMUNICATION_STYLE} />
+      <SynthesisBlock num="拾弐" card={DECISION_STYLE} />
+      <SynthesisBlock num="拾参" card={LEADERSHIP_STYLE} />
+      <SynthesisBlock num="拾肆" card={CONFLICT_PATTERN} />
 
-      {/* ━━ 家族との相性（既存） ━━ */}
-      <NumberedSection num="拾捌" label="Family Compatibility" title="家族との相性スコア">
+      <SectionDivider title="統合占断・関係と家族" />
+
+      <SynthesisBlock num="拾伍" card={RELATIONSHIP_SPOUSE} />
+      <SynthesisBlock num="拾陸" card={RELATIONSHIP_CHILD} />
+      <SynthesisBlock num="拾漆" card={PARENTING_STYLE_DEEP} />
+      <SynthesisBlock num="拾捌" card={FAMILY_CARE} />
+      <SynthesisBlock num="拾玖" card={PARENT_RELATIONSHIPS} />
+
+      {/* ━━ 家族との相性スコア ━━ */}
+      <NumberedSection num="弐拾" label="Family Compatibility" title="家族との相性スコア">
         <CompatSection
           spouseCompat={basis.spouseCompat}
           childCompat={basis.childCompat}
         />
+      </NumberedSection>
+
+      <SectionDivider title="統合占断・財・健康・心" />
+
+      <SynthesisBlock num="弐拾壱" card={WEALTH_CORE} />
+      <SynthesisBlock num="弐拾弐" card={MONEY_PSYCHOLOGY} />
+      <SynthesisBlock num="弐拾参" card={HEALTH_CORE} />
+      <SynthesisBlock num="弐拾肆" card={BODY_CONSTITUTION} />
+      <SynthesisBlock num="弐拾伍" card={MENTAL_PATTERNS} />
+
+      <SectionDivider title="統合占断・人生と魂" />
+
+      <SynthesisBlock num="弐拾陸" card={LIFE_ARC} />
+      <SynthesisBlock num="弐拾漆" card={MIDLIFE_TRANSITION} />
+      <SynthesisBlock num="弐拾捌" card={FENGSHUI_HOME} />
+      <SynthesisBlock num="弐拾玖" card={SPIRITUAL_THEME} />
+      <SynthesisBlock num="参拾" card={SPIRITUAL_PRACTICE} />
+      <SynthesisBlock num="参拾壱" card={LEGACY_QUESTION} />
+
+      {/* ━━ ビジネス相性チェッカー ━━ */}
+      <SectionDivider title="ビジネス相性チェック" />
+      <NumberedSection num="参拾弐" label="Business Compatibility" title="任意の人物とのビジネス相性">
+        <BusinessCompatChecker />
       </NumberedSection>
 
       {/* ━━ 最終メッセージ ━━ */}
@@ -1774,6 +1827,296 @@ function PerfumeRecommendSection({ perfumes }: { perfumes: PerfumeMatch[] }) {
         )}
       </div>
     </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// 大運表
+// ==========================================================================
+
+function DaiunTable({
+  periods,
+  currentAge,
+}: {
+  periods: DaiunPeriod[];
+  currentAge: number;
+}) {
+  return (
+    <div className="rounded-2xl border border-ink-200 bg-white p-6 sm:p-8">
+      <div className="text-sm text-ink-600 mb-5">
+        現在 <span className="font-display text-2xl text-gold-700">{currentAge}</span> 歳。
+        立運1歳から始まる10年周期の流れ。
+      </div>
+      <div className="space-y-3">
+        {periods.map((p) => (
+          <DaiunRow key={p.index} period={p} />
+        ))}
+      </div>
+      <p className="mt-5 text-xs text-ink-500 leading-relaxed">
+        ※ 大運は四柱推命の核心理論。月柱を起点に10年ごとに干支が進み、各期の通変星が
+        その10年の主要テーマを決めます。「現在」マークの期に最も注目してください。
+      </p>
+    </div>
+  );
+}
+
+function DaiunRow({ period }: { period: DaiunPeriod }) {
+  const cls = period.isCurrent
+    ? "bg-gold-fade border-2 border-gold-500 shadow"
+    : "bg-sand-50 border border-ink-200";
+  return (
+    <article className={`rounded-xl p-4 sm:p-5 ${cls}`}>
+      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+        <div className="flex items-baseline gap-3">
+          <div className="font-display text-2xl text-ink-900">
+            {period.startAge}-{period.endAge}歳
+          </div>
+          <div className="font-display text-3xl text-gold-700">
+            {period.ganzhi}
+          </div>
+          {period.isCurrent && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-gold-500 text-white font-medium">
+              現在
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-ink-500">
+          <span>{period.stemElement}・{period.branchElement}</span>
+          <span className="font-display text-base text-kachi-700">{period.stemTongbian}</span>
+        </div>
+      </div>
+      <p className="mt-2 text-sm text-ink-700 leading-relaxed">{period.theme}</p>
+    </article>
+  );
+}
+
+// ==========================================================================
+// ビジネス相性チェッカー
+// ==========================================================================
+
+function BusinessCompatChecker() {
+  const [name, setName] = useState("");
+  const [birth, setBirth] = useState("");
+  const [gender, setGender] = useState<"male" | "female">("male");
+  const [result, setResult] = useState<BusinessCompatResult | null>(null);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!birth) return;
+    setResult(calcBusinessCompat({ name: name || undefined, birth, gender }));
+  };
+
+  return (
+    <div className="rounded-2xl border border-ink-200 bg-white p-6 sm:p-8">
+      <p className="text-sm text-ink-600 mb-4">
+        相手の生年月日と性別を入力すると、吉田俊輔さんとの<strong>ビジネス相性</strong>を
+        <strong>多軸スコア・役割分担・詳細分析</strong>で表示します。
+      </p>
+
+      <form onSubmit={onSubmit} className="rounded-xl bg-sand-50 border border-ink-200 p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="block">
+          <span className="text-[10px] tracking-[0.3em] uppercase text-ink-500">氏名（任意）</span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="例: 田中太郎"
+            className="block mt-1 w-full rounded-md border border-ink-300 px-3 py-2 bg-white focus:outline-none focus:border-gold-500"
+          />
+        </label>
+        <label className="block">
+          <span className="text-[10px] tracking-[0.3em] uppercase text-ink-500">生年月日 *</span>
+          <input
+            type="date"
+            value={birth}
+            onChange={(e) => setBirth(e.target.value)}
+            required
+            className="block mt-1 w-full rounded-md border border-ink-300 px-3 py-2 bg-white focus:outline-none focus:border-gold-500"
+          />
+        </label>
+        <fieldset className="sm:col-span-2">
+          <legend className="text-[10px] tracking-[0.3em] uppercase text-ink-500 mb-2">性別 *</legend>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input type="radio" checked={gender === "male"} onChange={() => setGender("male")} />
+              <span className="text-sm">男性</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="radio" checked={gender === "female"} onChange={() => setGender("female")} />
+              <span className="text-sm">女性</span>
+            </label>
+          </div>
+        </fieldset>
+        <button
+          type="submit"
+          className="sm:col-span-2 mt-2 rounded-md bg-kachi-fade text-sand-50 font-display text-lg py-3 hover:bg-kachi-700 border border-gold-500"
+        >
+          ビジネス相性を診断
+        </button>
+      </form>
+
+      {result && <BusinessCompatResult result={result} />}
+    </div>
+  );
+}
+
+function BusinessCompatResult({ result }: { result: BusinessCompatResult }) {
+  return (
+    <div className="mt-8 space-y-6">
+      {/* ヘッダー：相手のプロファイル */}
+      <article className="rounded-2xl bg-kachi-fade text-sand-50 p-6 sm:p-8 relative overflow-hidden">
+        <div className="absolute -top-12 -right-12 w-72 h-72 rounded-full bg-gold-500/15 blur-3xl" />
+        <div className="relative">
+          <div className="text-[10px] tracking-[0.4em] uppercase text-gold-300">
+            Subject ／ 診断対象
+          </div>
+          <div className="font-display text-2xl sm:text-3xl mt-2 text-sand-50">
+            {result.partner.name}
+            <span className="text-sm text-sand-300 ml-3">
+              {result.partner.birth}・{result.partner.gender === "male" ? "男性" : "女性"}・{result.partner.age}歳
+            </span>
+          </div>
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <ResultBadge label="太陽星座" value={result.data.sunSign.name} />
+            <ResultBadge label="九星" value={result.data.starName} />
+            <ResultBadge label="日干" value={`${result.data.dayMaster}（${result.data.dayMasterElement}）`} />
+            <ResultBadge label="ライフパス" value={String(result.data.lifePath)} />
+            <ResultBadge label="干支" value={`${result.data.yearBranch}年`} />
+          </div>
+        </div>
+      </article>
+
+      {/* スコア6軸 */}
+      <article className="rounded-2xl border-2 border-gold-400 bg-gold-fade p-6 sm:p-8">
+        <div className="text-[10px] tracking-[0.4em] uppercase text-gold-700 mb-3">
+          Scores ／ 6軸スコア
+        </div>
+        <div className="flex items-center gap-4 mb-6">
+          <div className="font-display text-7xl text-gold-700 tabular-nums leading-none">
+            {result.scores.overall}
+          </div>
+          <div>
+            <div className="text-sm text-ink-600">総合相性</div>
+            <Stars value={result.scores.overall} large />
+            <div className="font-display text-base mt-1">{result.recommendation}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <ScoreCell label="決断" value={result.scores.decision} />
+          <ScoreCell label="実行" value={result.scores.execution} />
+          <ScoreCell label="対話" value={result.scores.communication} />
+          <ScoreCell label="金銭" value={result.scores.finance} />
+          <ScoreCell label="長期" value={result.scores.longTerm} />
+          <ScoreCell label="縁" value={result.scores.chemistry} />
+        </div>
+      </article>
+
+      {/* 役割分担 */}
+      <article className="rounded-2xl border border-ink-200 bg-white p-6">
+        <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+          Role Distribution ／ 役割分担の最適配置
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-lg bg-kachi-fade text-sand-50 p-5">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300">あなた（吉田俊輔）</div>
+            <div className="font-display text-lg mt-2">{result.roles.you}</div>
+          </div>
+          <div className="rounded-lg bg-paper border border-gold-300 p-5">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">{result.partner.name}</div>
+            <div className="font-display text-lg mt-2">{result.roles.partner}</div>
+            <p className="text-xs text-ink-600 mt-2">{result.partnerComplement}</p>
+          </div>
+        </div>
+      </article>
+
+      {/* 強み と リスク */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {result.strengths.length > 0 && (
+          <article className="rounded-2xl border border-gold-300 bg-gold-50/40 p-5">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+              Strengths ／ 強み
+            </div>
+            <ul className="space-y-2">
+              {result.strengths.map((s, i) => (
+                <li key={i} className="text-sm text-ink-800 flex gap-2">
+                  <span className="text-gold-600">◎</span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        )}
+        {result.risks.length > 0 && (
+          <article className="rounded-2xl border border-shu-300 bg-shu-50 p-5">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-shu-700 mb-3">
+              Risks ／ 注意点
+            </div>
+            <ul className="space-y-2">
+              {result.risks.map((s, i) => (
+                <li key={i} className="text-sm text-ink-800 flex gap-2">
+                  <span className="text-shu-500">⚠</span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        )}
+      </div>
+
+      {/* 詳細分析 */}
+      <article className="rounded-2xl bg-paper border border-gold-300 p-6 sm:p-8">
+        <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+          Detailed Analysis ／ 詳細分析
+        </div>
+        <div className="text-sm sm:text-[15px] text-ink-800 leading-loose whitespace-pre-line">
+          {result.detailedAnalysis}
+        </div>
+      </article>
+
+      {/* 関係指標の詳細 */}
+      <article className="rounded-2xl border border-ink-200 bg-white p-6">
+        <div className="text-[10px] tracking-[0.3em] uppercase text-ink-500 mb-3">
+          Relationship Indicators ／ 関係指標
+        </div>
+        <div className="space-y-3 text-sm">
+          <div className="border-l-2 border-gold-400 pl-3">
+            <div className="text-xs text-ink-500">星座（牡牛座×{result.data.sunSign.name}）</div>
+            <p className="text-ink-700 mt-1">{result.zodiacCompat.text}</p>
+          </div>
+          <div className="border-l-2 border-kachi-500 pl-3">
+            <div className="text-xs text-ink-500">九星五行（七赤金×{result.data.starName}）</div>
+            <p className="text-ink-700 mt-1">{result.starCompat.relation} — {result.starCompat.text}</p>
+          </div>
+          <div className="border-l-2 border-shu-400 pl-3">
+            <div className="text-xs text-ink-500">通変星（戊→{result.data.dayMaster}）</div>
+            <p className="text-ink-700 mt-1"><span className="font-display text-base">{result.tongbian}</span> の関係</p>
+          </div>
+          <div className="border-l-2 border-gold-300 pl-3">
+            <div className="text-xs text-ink-500">年支の縁（子年×{result.data.yearBranch}年）</div>
+            <p className="text-ink-700 mt-1"><span className="font-display text-base">{result.branchInter.type}</span> — {result.branchInter.text}</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  );
+}
+
+function ResultBadge({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-gold-500/30 bg-kachi-700/40 backdrop-blur px-3 py-2.5">
+      <div className="text-[9px] tracking-[0.3em] uppercase text-gold-300/80">{label}</div>
+      <div className="mt-1 font-display text-base text-sand-50">{value}</div>
+    </div>
+  );
+}
+
+function ScoreCell({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-white border border-gold-300 p-3 text-center">
+      <div className="text-[10px] tracking-[0.3em] uppercase text-ink-500">{label}</div>
+      <div className="font-display text-3xl text-gold-700 mt-1 tabular-nums">{value}</div>
+      <div className="text-[10px] text-ink-400">/ 5</div>
+    </div>
   );
 }
 
