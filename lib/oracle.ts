@@ -3,7 +3,7 @@
 // BYOK (Bring Your Own Key) 方式: API キーは localStorage に保存
 
 import { OWNER, ownerAge, spouseAge, childAge, childGradeJP, spouseAgeDiff, calcAge } from "@/lib/owner";
-import { getSunSign, ZODIAC, type Zodiac } from "@/lib/astrology";
+import { getSunSign } from "@/lib/astrology";
 import {
   fourPillarsFromGanzhi,
   calcShichuExtras,

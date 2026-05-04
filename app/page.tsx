@@ -95,7 +95,7 @@ import {
   FAMILY_CARE,
   WEALTH_CORE,
   HEALTH_CORE,
-  LIFE_ARC,
+  lifeArc,
   FENGSHUI_HOME,
   SPIRITUAL_THEME,
   FINAL_MESSAGE,
@@ -1111,7 +1111,7 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
 
       <SectionDivider title="統合占断・人生と魂" />
 
-      <SynthesisBlock num="弐拾陸" card={LIFE_ARC} />
+      <SynthesisBlock num="弐拾陸" card={lifeArc(basis.currentAge)} />
       <SynthesisBlock num="弐拾漆" card={midlifeTransition(basis.currentAge)} />
       <SynthesisBlock num="弐拾捌" card={FENGSHUI_HOME} />
       <SynthesisBlock num="弐拾玖" card={SPIRITUAL_THEME} />
