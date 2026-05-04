@@ -120,6 +120,29 @@ import {
   getTimeTag,
   type PerfumeMatch,
 } from "@/lib/perfume";
+import {
+  accurateSunSign,
+  accurateMoonSign,
+  moonPhase,
+  currentSolarTerm,
+  sunLongitude,
+  moonLongitude,
+  SOLAR_TERM_TEXT,
+  MOON_PHASE_TEXT,
+} from "@/lib/astronomy";
+import {
+  type JournalEntry,
+  type Hit,
+  loadAll as loadJournal,
+  saveEntry as saveJournalEntry,
+  getEntry as getJournalEntry,
+  dateKey,
+  getRecentEntries,
+  aggregateByPersonalDay,
+  hitRatesByForecast,
+  currentStreak,
+  entryCount,
+} from "@/lib/journal";
 
 // ==========================================================================
 // データ計算
@@ -670,12 +693,18 @@ function TodayTab({
         </article>
       )}
 
+      {/* ━━ 0.3 天文（コズミック）パネル ━━ */}
+      <CosmicPanel date={selectedDate} />
+
       {/* ━━ 0.5 本日の統合シンセシス（最重要） ━━ */}
       <TodaySynthesisHero
         synthesis={synthesis}
         dayPillar={todayDP}
         tongbian={todayTB}
       />
+
+      {/* ━━ 0.6 ジャーナル（日々の記録） ━━ */}
+      <JournalSection date={selectedDate} personalDayNum={pDay} />
 
       {/* ━━ 0.7 12時辰盤 ━━ */}
       <TwelveHoursChart chart={hourlyChart} luckyHours={luckyHours} />
@@ -960,6 +989,9 @@ function TodayTab({
 function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
   return (
     <div className="space-y-12">
+      {/* ━━ パターン分析（蓄積データから） ━━ */}
+      <PatternsSection />
+
       {/* ━━ 統合占断 ヒーロー ━━ */}
       <SynthesisHero />
 
@@ -2605,6 +2637,372 @@ function FamilyAdviceSection({
         </article>
       </div>
     </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// コズミックパネル（天文・節気・月相）
+// ==========================================================================
+
+function CosmicPanel({ date }: { date: Date }) {
+  const sunSign = useMemo(() => accurateSunSign(date), [date]);
+  const moonSign = useMemo(() => accurateMoonSign(date), [date]);
+  const phase = useMemo(() => moonPhase(date), [date]);
+  const term = useMemo(() => currentSolarTerm(date), [date]);
+
+  return (
+    <section className="rounded-2xl bg-kachi-fade text-sand-50 p-6 sm:p-8 relative overflow-hidden">
+      <div className="absolute -top-12 -left-12 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
+      <div className="absolute -bottom-12 -right-12 w-72 h-72 rounded-full bg-shu-500/10 blur-3xl" />
+      <div className="relative">
+        <div className="text-[10px] tracking-[0.4em] uppercase text-gold-300">
+          Cosmic ／ 当日の天文
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+          <CosmicCell
+            label="太陽"
+            big={`${sunSign.name}`}
+            sub={`${sunSign.degree.toFixed(1)}°`}
+          />
+          <CosmicCell
+            label="月"
+            big={`${moonSign.name}`}
+            sub={`${moonSign.degree.toFixed(1)}°`}
+          />
+          <CosmicCell
+            label="月相"
+            big={`${phase.emoji} ${phase.name}`}
+            sub={`${phase.age.toFixed(1)}日齢 / ${(phase.illumination * 100).toFixed(0)}%`}
+          />
+          <CosmicCell
+            label="節気"
+            big={term.term}
+            sub={`${term.daysSinceStart}日目 → ${term.nextTerm}まで${term.daysUntilNext}日`}
+          />
+        </div>
+
+        {/* 月相と節気の解説 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+          <div className="rounded-lg bg-kachi-700/40 backdrop-blur border border-gold-500/30 p-4">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300">月相のテーマ</div>
+            <p className="text-sm text-sand-100 mt-2 leading-relaxed">
+              {MOON_PHASE_TEXT[phase.name]}
+            </p>
+          </div>
+          <div className="rounded-lg bg-kachi-700/40 backdrop-blur border border-gold-500/30 p-4">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300">節気「{term.term}」のテーマ</div>
+            <p className="text-sm text-sand-100 mt-2 leading-relaxed">
+              {SOLAR_TERM_TEXT[term.term]}
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-5 text-[11px] text-sand-300/80 text-center">
+          Meeus天文計算による太陽黄経 {sunLongitude(date).toFixed(2)}° / 月黄経 {moonLongitude(date).toFixed(2)}°
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function CosmicCell({ label, big, sub }: { label: string; big: string; sub: string }) {
+  return (
+    <div className="rounded-lg border border-gold-500/30 bg-kachi-700/40 backdrop-blur px-3 py-2.5">
+      <div className="text-[9px] tracking-[0.3em] uppercase text-gold-300/80">{label}</div>
+      <div className="mt-1 font-display text-base sm:text-lg text-sand-50">{big}</div>
+      <div className="text-[10px] text-sand-300 tabular-nums">{sub}</div>
+    </div>
+  );
+}
+
+// ==========================================================================
+// ジャーナル（日々の記録蓄積）
+// ==========================================================================
+
+function JournalSection({
+  date,
+  personalDayNum,
+}: {
+  date: Date;
+  personalDayNum: number;
+}) {
+  const key = dateKey(date);
+  const [entry, setEntry] = useState<JournalEntry>({ date: key });
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  // 入力欄の状態をセッション内ロード
+  useEffect(() => {
+    const existing = getJournalEntry(key);
+    setEntry(existing ? { ...existing } : { date: key });
+    setStreak(currentStreak(getRecentEntries(60)));
+    setTotal(entryCount());
+  }, [key]);
+
+  const update = (patch: Partial<JournalEntry>) => {
+    setEntry((prev) => {
+      const next = { ...prev, date: key, ...patch };
+      saveJournalEntry(next);
+      setSavedAt(new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" }));
+      setStreak(currentStreak(getRecentEntries(60)));
+      setTotal(entryCount());
+      return next;
+    });
+  };
+
+  const setHit = (
+    type: keyof NonNullable<JournalEntry["forecastHits"]>,
+    value: Hit
+  ) => {
+    const fh = { ...(entry.forecastHits || {}) };
+    fh[type] = fh[type] === value ? null : value;
+    update({ forecastHits: fh });
+  };
+
+  const moodLabels = ["", "とても低い", "低い", "普通", "良い", "最高"];
+  const energyLabels = ["", "枯渇", "低い", "普通", "高い", "全開"];
+
+  return (
+    <NumberedSection
+      num="零・六"
+      label="Journal"
+      title="今日の記録（蓄積データ）"
+      action={
+        <div className="text-xs text-ink-500 text-right">
+          <div>📊 累計 {total} 日</div>
+          <div>🔥 連続 {streak} 日</div>
+        </div>
+      }
+    >
+      <div className="rounded-2xl bg-paper border border-gold-300 p-6 space-y-5">
+        <p className="text-xs text-ink-600 leading-relaxed">
+          記録を続けるほど、あなた個人のパターンが見えてきます。基礎タブの「パターン分析」で集計結果を見られます。
+        </p>
+
+        {/* ムード */}
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">気分（Mood）</div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map((v) => (
+              <button
+                key={v}
+                onClick={() => update({ mood: v })}
+                className={`flex-1 rounded-lg border py-3 transition-all ${
+                  entry.mood === v
+                    ? "bg-gold-fade border-gold-500 border-2 shadow"
+                    : "bg-white border-ink-200 hover:border-gold-400"
+                }`}
+              >
+                <div className="font-display text-2xl">{["😞", "🙁", "😐", "🙂", "😄"][v - 1]}</div>
+                <div className="text-[10px] text-ink-500 mt-1">{v}</div>
+              </button>
+            ))}
+          </div>
+          {entry.mood && (
+            <p className="text-xs text-ink-500 mt-2">→ {moodLabels[entry.mood]}</p>
+          )}
+        </div>
+
+        {/* エネルギー */}
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">エネルギー</div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map((v) => (
+              <button
+                key={v}
+                onClick={() => update({ energy: v })}
+                className={`flex-1 rounded-lg border py-3 transition-all ${
+                  entry.energy === v
+                    ? "bg-gold-fade border-gold-500 border-2 shadow"
+                    : "bg-white border-ink-200 hover:border-gold-400"
+                }`}
+              >
+                <div className="font-display text-lg">{"⚡".repeat(v)}</div>
+                <div className="text-[10px] text-ink-500 mt-1">{v}</div>
+              </button>
+            ))}
+          </div>
+          {entry.energy && (
+            <p className="text-xs text-ink-500 mt-2">→ {energyLabels[entry.energy]}</p>
+          )}
+        </div>
+
+        {/* 占断的中フラグ */}
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">
+            占断は当たった？（後で振り返って評価）
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(["tarot", "iching", "daily", "synthesis"] as const).map((t) => {
+              const label = t === "tarot" ? "タロット" : t === "iching" ? "易経" : t === "daily" ? "本日運勢" : "シンセシス";
+              const cur = entry.forecastHits?.[t];
+              return (
+                <div key={t} className="rounded-lg border border-ink-200 bg-white p-3">
+                  <div className="text-[10px] text-ink-500 mb-2">{label}</div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setHit(t, "hit")}
+                      className={`flex-1 rounded text-xs py-1 ${cur === "hit" ? "bg-gold-500 text-white" : "border border-ink-200 hover:bg-gold-50"}`}
+                    >
+                      ◎
+                    </button>
+                    <button
+                      onClick={() => setHit(t, "miss")}
+                      className={`flex-1 rounded text-xs py-1 ${cur === "miss" ? "bg-shu-500 text-white" : "border border-ink-200 hover:bg-shu-50"}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 使用香水 */}
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">使用した香水</div>
+          <select
+            value={entry.perfumeUsed || ""}
+            onChange={(e) => update({ perfumeUsed: e.target.value || undefined })}
+            className="w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
+          >
+            <option value="">— 選択 —</option>
+            {OWNER.perfumes.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.brand}・{p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* イベント・メモ */}
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">今日のメモ</div>
+          <textarea
+            value={entry.notes || ""}
+            onChange={(e) => update({ notes: e.target.value })}
+            placeholder="出来事・気づき・誰と会ったか・何を感じたか…"
+            rows={3}
+            className="w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
+          />
+        </div>
+
+        {savedAt && (
+          <p className="text-[10px] text-ink-400 text-right">自動保存 ✓ {savedAt}</p>
+        )}
+      </div>
+    </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// パターン分析（蓄積データの集計表示）
+// ==========================================================================
+
+function PatternsSection() {
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setEntries(Object.values(loadJournal()));
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) return null;
+
+  if (entries.length === 0) {
+    return (
+      <NumberedSection num="〇" label="Patterns" title="あなたのパターン分析">
+        <article className="rounded-2xl bg-paper border border-gold-300 p-6 text-center">
+          <div className="text-4xl mb-3">📊</div>
+          <p className="text-sm text-ink-700">
+            まだ記録がありません。
+            <br />
+            今日タブの「ジャーナル」で気分・エネルギー・占断の的中を記録すると、
+            <br />
+            ここに<strong>あなた個人の傾向</strong>が見えてきます。
+          </p>
+        </article>
+      </NumberedSection>
+    );
+  }
+
+  const byPDay = aggregateByPersonalDay(entries, OWNER.birth, personalDay);
+  const hits = hitRatesByForecast(entries);
+  const streak = currentStreak(entries);
+
+  return (
+    <NumberedSection num="〇" label="Patterns" title="あなたのパターン分析（蓄積データから）">
+      <div className="rounded-2xl bg-paper border border-gold-300 p-6 sm:p-8 space-y-6">
+        <div className="flex flex-wrap gap-3 items-baseline">
+          <div className="font-display text-4xl text-gold-700">{entries.length}</div>
+          <div className="text-sm text-ink-700">日分の記録 / 連続 <span className="font-display text-xl text-gold-700">{streak}</span> 日</div>
+        </div>
+
+        {/* パーソナルデイ別の平均ムード */}
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+            パーソナルデイ別の気分傾向
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((pd) => {
+              const stat = byPDay[pd];
+              if (stat.count === 0) {
+                return (
+                  <div key={pd} className="flex items-center gap-3 text-sm">
+                    <div className="w-6 font-display text-lg text-ink-400">{pd}</div>
+                    <div className="flex-1 text-xs text-ink-300">未記録</div>
+                  </div>
+                );
+              }
+              const moodPct = (stat.avgMood / 5) * 100;
+              return (
+                <div key={pd} className="flex items-center gap-3 text-sm">
+                  <div className="w-6 font-display text-lg text-gold-700">{pd}</div>
+                  <div className="flex-1 h-3 bg-ink-100 rounded">
+                    <div className="h-3 bg-gold-500 rounded" style={{ width: `${moodPct}%` }} />
+                  </div>
+                  <div className="w-12 text-right tabular-nums text-xs">{stat.avgMood.toFixed(1)}</div>
+                  <div className="w-12 text-right text-[10px] text-ink-500">{stat.count}日</div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-ink-400 mt-2">
+            ※ 平均気分 5/5 が最も高い。記録が増えるほど、自分にとって最良/最弱のパーソナルデイがわかる。
+          </p>
+        </div>
+
+        {/* 占断別の的中率 */}
+        <div className="border-t border-gold-300 pt-5">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+            占断タイプ別の的中率
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <HitCell label="タロット" rate={hits.tarot.rate} total={hits.tarot.total} />
+            <HitCell label="易経" rate={hits.iching.rate} total={hits.iching.total} />
+            <HitCell label="本日運勢" rate={hits.daily.rate} total={hits.daily.total} />
+            <HitCell label="シンセシス" rate={hits.synthesis.rate} total={hits.synthesis.total} />
+          </div>
+          <p className="text-[10px] text-ink-400 mt-2">
+            ※ 蓄積が増えるほど、あなたにとって最も精度が高い占術が浮かび上がる（個人キャリブレーション）。
+          </p>
+        </div>
+      </div>
+    </NumberedSection>
+  );
+}
+
+function HitCell({ label, rate, total }: { label: string; rate: number; total: number }) {
+  const pct = (rate * 100).toFixed(0);
+  return (
+    <div className="rounded-lg bg-white border border-ink-200 p-4 text-center">
+      <div className="text-[10px] tracking-[0.3em] uppercase text-ink-500">{label}</div>
+      <div className="font-display text-3xl text-gold-700 mt-1 tabular-nums">{total > 0 ? pct : "—"}</div>
+      <div className="text-[10px] text-ink-400">{total > 0 ? `% / ${total}件` : "未記録"}</div>
+    </div>
   );
 }
 
