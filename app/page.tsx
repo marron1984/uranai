@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { OWNER, ownerAge } from "@/lib/owner";
+import {
+  OWNER,
+  ownerAge,
+  spouseAge,
+  childAge,
+  childGradeJP,
+  spouseAgeDiff,
+  childDisplayName,
+} from "@/lib/owner";
 import {
   getSunSign,
   getDailyFortune,
@@ -84,8 +92,6 @@ import {
   HERO_SYNTHESIS,
   PERSONALITY_CORE,
   CAREER_DEEP,
-  RELATIONSHIP_SPOUSE,
-  RELATIONSHIP_CHILD,
   FAMILY_CARE,
   WEALTH_CORE,
   HEALTH_CORE,
@@ -98,13 +104,15 @@ import {
   LEADERSHIP_STYLE,
   CONFLICT_PATTERN,
   MONEY_PSYCHOLOGY,
-  PARENTING_STYLE_DEEP,
+  parentingStyleDeep,
   midlifeTransition,
   BODY_CONSTITUTION,
   MENTAL_PATTERNS,
   SPIRITUAL_PRACTICE,
   PARENT_RELATIONSHIPS,
   legacyQuestion,
+  relationshipSpouse,
+  relationshipChild,
   type SynthesisCard,
 } from "@/lib/synthesis";
 import { generateDaiun, type DaiunPeriod } from "@/lib/shichu";
@@ -1049,9 +1057,18 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
 
       <SectionDivider title="統合占断・関係と家族" />
 
-      <SynthesisBlock num="拾伍" card={RELATIONSHIP_SPOUSE} />
-      <SynthesisBlock num="拾陸" card={RELATIONSHIP_CHILD} />
-      <SynthesisBlock num="拾漆" card={PARENTING_STYLE_DEEP} />
+      <SynthesisBlock
+        num="拾伍"
+        card={relationshipSpouse(spouseAge(), spouseAgeDiff())}
+      />
+      <SynthesisBlock
+        num="拾陸"
+        card={relationshipChild(childAge(), childGradeJP())}
+      />
+      <SynthesisBlock
+        num="拾漆"
+        card={parentingStyleDeep(childAge(), childGradeJP())}
+      />
       <SynthesisBlock num="拾捌" card={FAMILY_CARE} />
       <SynthesisBlock num="拾玖" card={PARENT_RELATIONSHIPS} />
 
@@ -1594,8 +1611,14 @@ function CompatSection({
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <CompatCard title={`妻（${OWNER.family.spouse.birth}生）`} c={spouseCompat} />
-      <CompatCard title={`${OWNER.family.child.relation}（${OWNER.family.child.birth}生）`} c={childCompat} />
+      <CompatCard
+        title={`妻（${spouseAge()}歳・${OWNER.family.spouse.birth}生）`}
+        c={spouseCompat}
+      />
+      <CompatCard
+        title={`${childDisplayName()}（${childAge()}歳・${OWNER.family.child.birth}生）`}
+        c={childCompat}
+      />
     </div>
   );
 }

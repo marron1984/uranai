@@ -265,3 +265,48 @@ export function calcAge(birth: string, reference: Date = new Date()): number {
   return age;
 }
 
+// 配偶者の満年齢
+export function spouseAge(reference: Date = new Date()): number {
+  return calcAge(OWNER.family.spouse.birth, reference);
+}
+
+// 子の満年齢
+export function childAge(reference: Date = new Date()): number {
+  return calcAge(OWNER.family.child.birth, reference);
+}
+
+// 配偶者との年齢差（オーナーから見て：正なら配偶者が年上）
+export function spouseAgeDiff(reference: Date = new Date()): number {
+  return spouseAge(reference) - ownerAge(reference);
+}
+
+// 日本の学年を算出
+// 4/2-12/31生まれ: 入学年 = 生年 + 7（4月入学）
+// 1/1-4/1生まれ:    入学年 = 生年 + 6（早生まれ）
+// その後、年度（4/1始まり）ごとに進級
+export function childGradeJP(reference: Date = new Date()): string {
+  const [y, m, d] = OWNER.family.child.birth.split("-").map(Number);
+  const lateInYear = m > 4 || (m === 4 && d >= 2);
+  const entryYear = lateInYear ? y + 7 : y + 6;
+
+  // 当該年度（4月1日始まり）
+  let academicYear = reference.getFullYear();
+  if (reference.getMonth() + 1 < 4 || (reference.getMonth() + 1 === 4 && reference.getDate() < 1)) {
+    academicYear--;
+  }
+  const grade = academicYear - entryYear + 1;
+
+  if (grade < 1) return "未就学";
+  if (grade <= 6) return `小学${grade}年`;
+  if (grade <= 9) return `中学${grade - 6}年`;
+  if (grade <= 12) return `高校${grade - 9}年`;
+  if (grade <= 16) return `大学${grade - 12}年`;
+  return "社会人";
+}
+
+// 子の表示用関係名（学年を含む動的）
+export function childDisplayName(reference: Date = new Date()): string {
+  const grade = childGradeJP(reference);
+  return `子（${grade}）`;
+}
+
