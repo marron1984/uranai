@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   OWNER,
   ownerAge,
@@ -151,6 +151,24 @@ import {
   currentStreak,
   entryCount,
 } from "@/lib/journal";
+import {
+  loadApiKey,
+  saveApiKey,
+  loadModel,
+  saveModel,
+  loadThreads,
+  saveThreads,
+  newThread,
+  buildSystemPrompt,
+  streamOracle,
+  CATEGORY_LABELS,
+  MODEL_LABELS,
+  type OracleCategory,
+  type OracleModel,
+  type CompatPerson,
+  type ChatThread,
+  type ChatMessage,
+} from "@/lib/oracle";
 
 // ==========================================================================
 // データ計算
@@ -262,7 +280,7 @@ function dayDiff(a: Date, b: Date): number {
 }
 
 export default function Home() {
-  const [tab, setTab] = useState<"today" | "basis">("today");
+  const [tab, setTab] = useState<"today" | "basis" | "oracle">("today");
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
   const [reshuffleSeed, setReshuffleSeed] = useState(0);
   const [today, setToday] = useState<TodayResults | null>(null);
@@ -355,9 +373,10 @@ export default function Home() {
       />
 
       {/* ===== Tab ===== */}
-      <nav className="mt-10 flex gap-1 border-b border-ink-200">
+      <nav className="mt-10 flex gap-1 border-b border-ink-200 overflow-x-auto">
         <TabButton active={tab === "today"} onClick={() => setTab("today")} label="今日の占い" sub="Daily Reading" />
         <TabButton active={tab === "basis"} onClick={() => setTab("basis")} label="基礎の占い" sub="Natal & Synthesis" />
+        <TabButton active={tab === "oracle"} onClick={() => setTab("oracle")} label="Oracle" sub="AI 個人相談" />
       </nav>
 
       <div className="mt-10">
@@ -389,8 +408,10 @@ export default function Home() {
               />
             </div>
           </>
-        ) : (
+        ) : tab === "basis" ? (
           <BasisTab basis={basis} />
+        ) : (
+          <OracleTab />
         )}
       </div>
     </div>
@@ -2660,6 +2681,449 @@ function FamilyAdviceSection({
         </article>
       </div>
     </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// Oracle タブ（Claude API 個人相談）
+// ==========================================================================
+
+function OracleTab() {
+  const [apiKey, setApiKey] = useState("");
+  const [keyInput, setKeyInput] = useState("");
+  const [model, setModel] = useState<OracleModel>("claude-opus-4-7");
+  const [hydrated, setHydrated] = useState(false);
+
+  const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const [category, setCategory] = useState<OracleCategory>("free");
+  const [partnerName, setPartnerName] = useState("");
+  const [partnerBirth, setPartnerBirth] = useState("");
+  const [partnerGender, setPartnerGender] = useState<"male" | "female">("male");
+
+  const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const [streamText, setStreamText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setApiKey(loadApiKey());
+    setModel(loadModel());
+    setThreads(loadThreads());
+    setHydrated(true);
+  }, []);
+
+  const active = threads.find((t) => t.id === activeId) || null;
+
+  const isCompat = category.startsWith("compat-");
+
+  // Auto-scroll on new content
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [active?.messages.length, streamText]);
+
+  const onSaveKey = () => {
+    saveApiKey(keyInput.trim());
+    setApiKey(keyInput.trim());
+    setKeyInput("");
+  };
+
+  const onClearKey = () => {
+    if (!confirm("APIキーを削除しますか？")) return;
+    saveApiKey("");
+    setApiKey("");
+  };
+
+  const onChangeModel = (m: OracleModel) => {
+    setModel(m);
+    saveModel(m);
+  };
+
+  const startNew = () => {
+    let partner: CompatPerson | undefined;
+    if (isCompat) {
+      if (!partnerBirth) {
+        alert("相性鑑定の対象には生年月日が必須です");
+        return;
+      }
+      partner = { name: partnerName, birth: partnerBirth, gender: partnerGender };
+    }
+    const t = newThread(category, partner);
+    const next = [t, ...threads];
+    setThreads(next);
+    saveThreads(next);
+    setActiveId(t.id);
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || !active || streaming) return;
+    if (!apiKey) {
+      setError("APIキーを設定してください");
+      return;
+    }
+
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: input.trim(),
+      timestamp: new Date().toISOString(),
+    };
+    const updated: ChatThread = {
+      ...active,
+      messages: [...active.messages, userMsg],
+      updatedAt: new Date().toISOString(),
+    };
+    const newThreads = threads.map((t) => (t.id === active.id ? updated : t));
+    setThreads(newThreads);
+    saveThreads(newThreads);
+    setInput("");
+    setStreaming(true);
+    setStreamText("");
+    setError(null);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const sysPrompt = buildSystemPrompt(active.category, active.partner);
+      let acc = "";
+      const full = await streamOracle({
+        apiKey,
+        model,
+        systemPrompt: sysPrompt,
+        messages: updated.messages,
+        signal: controller.signal,
+        onChunk: (t) => {
+          acc += t;
+          setStreamText(acc);
+        },
+      });
+
+      const assistantMsg: ChatMessage = {
+        role: "assistant",
+        content: full,
+        timestamp: new Date().toISOString(),
+      };
+      const final: ChatThread = {
+        ...updated,
+        messages: [...updated.messages, assistantMsg],
+        updatedAt: new Date().toISOString(),
+      };
+      const finalThreads = newThreads.map((t) => (t.id === active.id ? final : t));
+      setThreads(finalThreads);
+      saveThreads(finalThreads);
+      setStreamText("");
+    } catch (e: unknown) {
+      const err = e as Error;
+      if (err.name !== "AbortError") {
+        setError(err.message || "通信エラー");
+      }
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  };
+
+  const stopStream = () => {
+    abortRef.current?.abort();
+  };
+
+  const deleteThread = (id: string) => {
+    if (!confirm("このスレッドを削除しますか？")) return;
+    const next = threads.filter((t) => t.id !== id);
+    setThreads(next);
+    saveThreads(next);
+    if (activeId === id) setActiveId(null);
+  };
+
+  if (!hydrated) {
+    return <div className="text-sm text-ink-400 py-12 text-center">読み込み中…</div>;
+  }
+
+  // ===== API KEY 未設定 =====
+  if (!apiKey) {
+    return (
+      <section className="rounded-2xl bg-kachi-fade text-sand-50 p-8 sm:p-12">
+        <div className="text-[10px] tracking-[0.4em] uppercase text-gold-300">
+          Oracle Setup ／ 初回設定
+        </div>
+        <h2 className="font-display text-3xl sm:text-4xl mt-3">Claude API キーを登録</h2>
+        <p className="mt-4 text-sand-200 text-sm leading-relaxed">
+          あなたの命式・大運・五格すべてをコンテキストに、Claude が深い個人相談を行います。
+          APIキーは <strong>このブラウザの localStorage</strong> にのみ保存され、外部送信されません。
+        </p>
+        <p className="mt-3 text-sand-300 text-xs">
+          API キーは{" "}
+          <a
+            href="https://console.anthropic.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-gold-300"
+          >
+            console.anthropic.com
+          </a>{" "}
+          で取得可能（sk-ant-... で始まる文字列）。
+        </p>
+        <div className="mt-6 space-y-3">
+          <input
+            type="password"
+            value={keyInput}
+            onChange={(e) => setKeyInput(e.target.value)}
+            placeholder="sk-ant-api03-..."
+            className="w-full rounded-md bg-kachi-700/40 border border-gold-500/30 px-4 py-3 text-sand-50 placeholder:text-sand-400 focus:outline-none focus:border-gold-500"
+          />
+          <button
+            onClick={onSaveKey}
+            disabled={!keyInput.trim()}
+            className="w-full rounded-md bg-gold-500 text-kachi-900 font-display text-lg py-3 hover:bg-gold-400 disabled:opacity-30"
+          >
+            保存して開始
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  // ===== メインUI =====
+  return (
+    <div className="space-y-6">
+      {/* ヘッダ: モデル選択 / キー管理 */}
+      <section className="rounded-xl bg-paper border border-gold-300 p-4 flex flex-wrap items-center gap-3">
+        <div className="flex-1 min-w-[200px]">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">Model</div>
+          <select
+            value={model}
+            onChange={(e) => onChangeModel(e.target.value as OracleModel)}
+            className="mt-1 w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
+          >
+            {Object.entries(MODEL_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          onClick={onClearKey}
+          className="text-xs text-ink-400 hover:text-shu-700 underline self-end"
+        >
+          API キー削除
+        </button>
+      </section>
+
+      {/* スレッド一覧 + 新規作成 */}
+      <section className="rounded-2xl bg-paper border border-gold-300 p-5 sm:p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+          <div>
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">
+              New Thread ／ 新しい相談
+            </div>
+            <h3 className="font-display text-xl mt-1">カテゴリを選んで開始</h3>
+          </div>
+        </div>
+
+        {/* カテゴリ選択 */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {(Object.entries(CATEGORY_LABELS) as [OracleCategory, typeof CATEGORY_LABELS[OracleCategory]][]).map(([k, v]) => (
+            <button
+              key={k}
+              onClick={() => setCategory(k)}
+              className={`rounded-lg border p-3 text-left transition-all ${
+                category === k
+                  ? "bg-gold-fade border-2 border-gold-500 shadow"
+                  : "bg-white border-ink-200 hover:border-gold-400"
+              }`}
+            >
+              <div className="text-2xl">{v.emoji}</div>
+              <div className="font-display text-sm mt-1">{v.label}</div>
+              <div className="text-[10px] text-ink-500">{v.sub}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* 相性カテゴリの場合: 相手情報フォーム */}
+        {isCompat && (
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-sand-50 rounded-lg border border-ink-200">
+            <label className="block">
+              <span className="text-[10px] tracking-[0.3em] uppercase text-ink-500">名前（任意）</span>
+              <input
+                type="text"
+                value={partnerName}
+                onChange={(e) => setPartnerName(e.target.value)}
+                placeholder="例: 田中太郎"
+                className="mt-1 w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[10px] tracking-[0.3em] uppercase text-ink-500">生年月日 *</span>
+              <input
+                type="date"
+                value={partnerBirth}
+                onChange={(e) => setPartnerBirth(e.target.value)}
+                className="mt-1 w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
+              />
+            </label>
+            <fieldset>
+              <legend className="text-[10px] tracking-[0.3em] uppercase text-ink-500 mb-2">性別 *</legend>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 text-sm">
+                  <input type="radio" checked={partnerGender === "male"} onChange={() => setPartnerGender("male")} />
+                  男性
+                </label>
+                <label className="flex items-center gap-1 text-sm">
+                  <input type="radio" checked={partnerGender === "female"} onChange={() => setPartnerGender("female")} />
+                  女性
+                </label>
+              </div>
+            </fieldset>
+          </div>
+        )}
+
+        <button
+          onClick={startNew}
+          className="mt-5 rounded-md bg-kachi-fade text-sand-50 font-display text-base px-6 py-2.5 hover:bg-kachi-700 border border-gold-500"
+        >
+          新規スレッド開始
+        </button>
+      </section>
+
+      {/* スレッドリスト */}
+      {threads.length > 0 && (
+        <section className="rounded-2xl bg-white border border-ink-200 p-5">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+            Threads ／ 履歴 ({threads.length})
+          </div>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {threads.map((t) => (
+              <div
+                key={t.id}
+                className={`flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors ${
+                  activeId === t.id ? "bg-gold-fade border border-gold-400" : "hover:bg-sand-50 border border-transparent"
+                }`}
+                onClick={() => setActiveId(t.id)}
+              >
+                <div className="text-lg">{CATEGORY_LABELS[t.category].emoji}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm truncate">{t.title}</div>
+                  <div className="text-[10px] text-ink-400">
+                    {t.messages.length}件 / {new Date(t.updatedAt).toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteThread(t.id);
+                  }}
+                  className="text-xs text-ink-400 hover:text-shu-700 px-2"
+                >
+                  削除
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* チャットエリア */}
+      {active && (
+        <section className="rounded-2xl bg-white border border-ink-200 overflow-hidden">
+          <div className="px-5 py-3 bg-paper border-b border-gold-300 flex items-baseline gap-3">
+            <div className="text-2xl">{CATEGORY_LABELS[active.category].emoji}</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-display text-base">{active.title}</div>
+              {active.partner && (
+                <div className="text-[10px] text-ink-500">
+                  対象: {active.partner.name || "—"} / {active.partner.birth} / {active.partner.gender === "male" ? "男性" : "女性"}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div ref={scrollRef} className="px-5 py-4 max-h-[60vh] overflow-y-auto space-y-4">
+            {active.messages.map((m, i) => (
+              <MessageBubble key={i} message={m} />
+            ))}
+            {streaming && streamText && (
+              <MessageBubble
+                message={{ role: "assistant", content: streamText, timestamp: "" }}
+                streaming
+              />
+            )}
+            {streaming && !streamText && (
+              <div className="text-sm text-ink-400">⏳ 占い中…</div>
+            )}
+            {error && (
+              <div className="rounded-md bg-shu-50 border border-shu-300 text-shu-700 text-sm p-3">
+                エラー: {error}
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-ink-200 p-4 bg-sand-50">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  sendMessage();
+                }
+              }}
+              placeholder="質問を入力（⌘/Ctrl + Enter で送信）"
+              rows={3}
+              disabled={streaming}
+              className="w-full rounded-md border border-ink-300 px-3 py-2 bg-white text-sm focus:outline-none focus:border-gold-500"
+            />
+            <div className="mt-2 flex items-center justify-end gap-2">
+              {streaming ? (
+                <button
+                  onClick={stopStream}
+                  className="rounded-md bg-shu-500 text-white text-sm px-4 py-2 hover:bg-shu-600"
+                >
+                  停止
+                </button>
+              ) : (
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim()}
+                  className="rounded-md bg-kachi-fade text-sand-50 font-display text-sm px-6 py-2 hover:bg-kachi-700 border border-gold-500 disabled:opacity-30"
+                >
+                  送信
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function MessageBubble({
+  message,
+  streaming,
+}: {
+  message: ChatMessage;
+  streaming?: boolean;
+}) {
+  const isUser = message.role === "user";
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`max-w-[88%] rounded-lg px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+          isUser
+            ? "bg-kachi-fade text-sand-50"
+            : "bg-paper border border-gold-300 text-ink-800"
+        }`}
+      >
+        {message.content}
+        {streaming && <span className="inline-block w-2 h-4 bg-gold-500 align-middle animate-pulse ml-1"></span>}
+      </div>
+    </div>
   );
 }
 
