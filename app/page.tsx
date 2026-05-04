@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { OWNER } from "@/lib/owner";
+import { OWNER, ownerAge } from "@/lib/owner";
 import {
   getSunSign,
   getDailyFortune,
@@ -99,12 +99,12 @@ import {
   CONFLICT_PATTERN,
   MONEY_PSYCHOLOGY,
   PARENTING_STYLE_DEEP,
-  MIDLIFE_TRANSITION,
+  midlifeTransition,
   BODY_CONSTITUTION,
   MENTAL_PATTERNS,
   SPIRITUAL_PRACTICE,
   PARENT_RELATIONSHIPS,
-  LEGACY_QUESTION,
+  legacyQuestion,
   type SynthesisCard,
 } from "@/lib/synthesis";
 import { generateDaiun, type DaiunPeriod } from "@/lib/shichu";
@@ -221,7 +221,7 @@ function basisData() {
     OWNER.family.child.kyusei as StarNumber
   );
   // 大運（10年周期）— 1984/05/02 = 戊申, 男+陽干甲 → 順行, 立運1歳
-  const currentAge = new Date().getFullYear() - 1984;
+  const currentAge = ownerAge();
   const daiun = generateDaiun("戊辰", 1, true, 8, currentAge, "戊");
 
   return { sun, fp, fpExtras, kakusu, bc, numero, ratings, annual, spouseCompat, childCompat, daiun, currentAge };
@@ -1074,11 +1074,11 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       <SectionDivider title="統合占断・人生と魂" />
 
       <SynthesisBlock num="弐拾陸" card={LIFE_ARC} />
-      <SynthesisBlock num="弐拾漆" card={MIDLIFE_TRANSITION} />
+      <SynthesisBlock num="弐拾漆" card={midlifeTransition(basis.currentAge)} />
       <SynthesisBlock num="弐拾捌" card={FENGSHUI_HOME} />
       <SynthesisBlock num="弐拾玖" card={SPIRITUAL_THEME} />
       <SynthesisBlock num="参拾" card={SPIRITUAL_PRACTICE} />
-      <SynthesisBlock num="参拾壱" card={LEGACY_QUESTION} />
+      <SynthesisBlock num="参拾壱" card={legacyQuestion(basis.currentAge)} />
 
       {/* ━━ ビジネス相性チェッカー ━━ */}
       <SectionDivider title="ビジネス相性チェック" />

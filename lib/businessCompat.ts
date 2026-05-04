@@ -2,7 +2,7 @@
 // 任意の人物（生年月日・性別・氏名）を入力 → 吉田俊輔さんとの
 // ビジネス相性を多軸で算出する。
 
-import { OWNER } from "@/lib/owner";
+import { OWNER, ownerAge, calcAge } from "@/lib/owner";
 import { getSunSign, ZODIAC, type Zodiac } from "@/lib/astrology";
 import {
   honmeiStar,
@@ -155,14 +155,7 @@ export type BusinessCompatResult = {
   detailedAnalysis: string;
 };
 
-function calculateAge(birth: string): number {
-  const [y, m, d] = birth.split("-").map(Number);
-  const today = new Date();
-  let age = today.getFullYear() - y;
-  const mDiff = today.getMonth() + 1 - m;
-  if (mDiff < 0 || (mDiff === 0 && today.getDate() < d)) age--;
-  return age;
-}
+// （年齢計算は lib/owner.ts の calcAge / ownerAge に統合）
 
 export function calcBusinessCompat(input: BusinessCompatInput): BusinessCompatResult {
   const [, m, d] = input.birth.split("-").map(Number);
@@ -175,7 +168,7 @@ export function calcBusinessCompat(input: BusinessCompatInput): BusinessCompatRe
   const dayStem = partnerDayStem(input.birth);
   const yearBranch = partnerYearBranch(input.birth);
   const lifePath = lifePathNumber(input.birth);
-  const age = calculateAge(input.birth);
+  const age = calcAge(input.birth);
 
   const stemElementMap: Record<string, string> = {
     甲: "木", 乙: "木", 丙: "火", 丁: "火", 戊: "土",
@@ -287,9 +280,16 @@ function generateDetailedAnalysis(
   bi: ReturnType<typeof branchInteraction>,
   age: number
 ): string {
-  const ageDiff = age - 41;
+  // 吉田さんの実年齢を当日基準で動的計算
+  const yoshidaAgeNow = ownerAge();
+  const ageDiff = age - yoshidaAgeNow;
+  // age (相手) > yoshidaAge → 相手は『年上』 / age < yoshidaAge → 『年下』
   const ageDiffText =
-    ageDiff > 0 ? `あなたより${ageDiff}歳年下` : ageDiff < 0 ? `あなたより${-ageDiff}歳年上` : "ほぼ同年代";
+    ageDiff > 0
+      ? `あなたより${ageDiff}歳年上`
+      : ageDiff < 0
+      ? `あなたより${-ageDiff}歳年下`
+      : "ほぼ同年代";
 
   return [
     `${name}さん（${sun.name}・${STAR_NAME[star]}・日干${dayStem}・ライフパス${lifePath}・${yearBranch}年生まれ・${ageDiffText}）との相性を、ビジネス視点で多軸分析しました。`,

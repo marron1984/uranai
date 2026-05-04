@@ -246,3 +246,22 @@ export const OWNER = {
     { id: "ysl-babycat", brand: "Yves Saint Laurent", name: "ベビキャット", family: "オリエンタル・レザー", notes: ["タバコ", "レザー", "ハニー", "アンバー"], mood: ["官能", "毛皮", "夜"], season: ["autumn", "winter"], time: ["evening", "night"], weather: ["cold", "cloudy"], energyDays: [8, 9], description: "深紅の毛皮のような官能。最重要の夜・記憶に残したい場面に。" },
   ],
 } as const;
+
+// オーナーの満年齢（誕生日が当年に到達済みかを正確に判定）
+export function ownerAge(reference: Date = new Date()): number {
+  const [y, m, d] = OWNER.birth.split("-").map(Number);
+  let age = reference.getFullYear() - y;
+  const mDiff = reference.getMonth() + 1 - m;
+  if (mDiff < 0 || (mDiff === 0 && reference.getDate() < d)) age--;
+  return age;
+}
+
+// 任意の生年月日の満年齢を算出
+export function calcAge(birth: string, reference: Date = new Date()): number {
+  const [y, m, d] = birth.split("-").map(Number);
+  let age = reference.getFullYear() - y;
+  const mDiff = reference.getMonth() + 1 - m;
+  if (mDiff < 0 || (mDiff === 0 && reference.getDate() < d)) age--;
+  return age;
+}
+
