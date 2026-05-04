@@ -125,13 +125,15 @@ function monthStemIndex(yearStem: string, monthBranchIdx: number): number {
   return (start + offset) % 10;
 }
 
-// 日柱: 1900-01-01 = 庚戌(stem=6, branch=10). 通日からの差で算出
+// 日柱: 1900-01-01 = 丙戌(stem=2, branch=10) を基準に通日差で算出
+// （1984-05-02 = 戊申 を真として逆算した値。shichu/page.tsx での
+//  任意日付入力時にも正確な日柱が出るよう修正済み）
 function dayPillar(year: number, month: number, day: number): Pillar {
   const base = Date.UTC(1900, 0, 1);
   const target = Date.UTC(year, month - 1, day);
   const days = Math.floor((target - base) / (1000 * 60 * 60 * 24));
-  const stemIdx = (6 + days) % 10;
-  const branchIdx = (10 + days) % 12;
+  const stemIdx = ((2 + days) % 10 + 10) % 10;
+  const branchIdx = ((10 + days) % 12 + 12) % 12;
   return pillar(stemIdx, branchIdx);
 }
 
