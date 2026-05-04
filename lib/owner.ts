@@ -1,14 +1,14 @@
-// 個人クローズドサイトの利用者データ（吉田俊輔）
+// 個人クローズドサイトの利用者データ（吉田駿成・呼び名 しゅんすけ）
 // すべての占断結果はこの定数から生成される。
 
 export const OWNER = {
   // ===== 識別情報 =====
-  displayName: "吉田俊輔",
+  displayName: "しゅんすけ",
   nameSei: "吉田",
-  nameMei: "俊輔",
+  nameMei: "駿成",
   nameSeiKakusu: [6, 5] as const,    // 吉(6) 田(5)
-  nameMeiKakusu: [9, 14] as const,   // 俊(9) 輔(14)
-  nameRoman: "YOSHIDA SHUNSUKE",
+  nameMeiKakusu: [17, 7] as const,   // 駿(17) 成(7)
+  nameRoman: "YOSHIDA SHUNSUKE",     // 読みは「しゅんすけ」継続
   birth: "1984-05-02",
   hour: 13,                          // 13:00 出生
   gender: "male" as "male" | "female",

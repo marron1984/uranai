@@ -2213,7 +2213,7 @@ function BusinessCompatChecker() {
   return (
     <div className="rounded-2xl border border-ink-200 bg-white p-6 sm:p-8">
       <p className="text-sm text-ink-600 mb-4">
-        相手の生年月日と性別を入力すると、吉田俊輔さんとの<strong>ビジネス相性</strong>を
+        相手の生年月日と性別を入力すると、しゅんすけさんとの<strong>ビジネス相性</strong>を
         <strong>多軸スコア・役割分担・詳細分析</strong>で表示します。
       </p>
 
@@ -2322,7 +2322,7 @@ function BusinessCompatResult({ result }: { result: BusinessCompatResult }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-lg bg-kachi-fade text-sand-50 p-5">
-            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300">あなた（吉田俊輔）</div>
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-300">あなた（しゅんすけ）</div>
             <div className="font-display text-lg mt-2">{result.roles.you}</div>
           </div>
           <div className="rounded-lg bg-paper border border-gold-300 p-5">
