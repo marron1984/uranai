@@ -10,17 +10,46 @@
 const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"] as const;
 const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"] as const;
 
-const STEM_ELEMENT: Record<string, string> = {
+export const STEM_ELEMENT: Record<string, string> = {
   甲: "陽木", 乙: "陰木", 丙: "陽火", 丁: "陰火",
   戊: "陽土", 己: "陰土", 庚: "陽金", 辛: "陰金",
   壬: "陽水", 癸: "陰水",
 };
 
-const BRANCH_ELEMENT: Record<string, string> = {
+export const BRANCH_ELEMENT: Record<string, string> = {
   子: "陽水", 丑: "陰土", 寅: "陽木", 卯: "陰木",
   辰: "陽土", 巳: "陰火", 午: "陽火", 未: "陰土",
   申: "陽金", 酉: "陰金", 戌: "陽土", 亥: "陰水",
 };
+
+// 既知の干支文字列（例 "戊申"）から Pillar / FourPillars を構築
+export function pillarFromGanzhi(gz: string): Pillar {
+  const stem = gz[0];
+  const branch = gz[1];
+  return {
+    stem,
+    branch,
+    ganzhi: gz,
+    stemElement: STEM_ELEMENT[stem],
+    branchElement: BRANCH_ELEMENT[branch],
+  };
+}
+
+export function fourPillarsFromGanzhi(
+  yearGZ: string,
+  monthGZ: string,
+  dayGZ: string,
+  hourGZ: string | null
+): FourPillars {
+  const day = pillarFromGanzhi(dayGZ);
+  return {
+    year: pillarFromGanzhi(yearGZ),
+    month: pillarFromGanzhi(monthGZ),
+    day,
+    hour: hourGZ ? pillarFromGanzhi(hourGZ) : null,
+    dayMaster: { stem: day.stem, element: STEM_ELEMENT[day.stem] },
+  };
+}
 
 export type Pillar = {
   stem: string;
