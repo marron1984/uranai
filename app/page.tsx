@@ -69,6 +69,15 @@ import {
   DAY_CAUTIONS,
   DAY_FOODS,
   todayShadowBlessing,
+  todayDayPillar,
+  todayTongbianForOwner,
+  todayHourlyChart,
+  todayLuckyHours,
+  todayPersonalHexagram,
+  todaySynthesis,
+  todayFamilyAdvice,
+  type HourSlot,
+  type TodaySynthesis,
 } from "@/lib/today";
 import {
   HERO_SYNTHESIS,
@@ -364,6 +373,15 @@ function TodayTab({
   const sb = todayShadowBlessing(pDay);
   const timing = currentHourTiming();
 
+  // 新しい高精度データ
+  const todayDP = todayDayPillar();
+  const todayTB = todayTongbianForOwner();
+  const hourlyChart = todayHourlyChart();
+  const luckyHours = todayLuckyHours();
+  const personalHex = todayPersonalHexagram();
+  const synthesis = todaySynthesis(pDay);
+  const familyAdvice = todayFamilyAdvice(pDay);
+
   // 香水推薦
   const now = new Date();
   const weatherTags = weather
@@ -381,6 +399,22 @@ function TodayTab({
     <div className="space-y-12">
       {/* ━━ 0. 大阪の天気 ━━ */}
       <WeatherCard weather={weather} weatherErr={weatherErr} />
+
+      {/* ━━ 0.5 本日の統合シンセシス（最重要） ━━ */}
+      <TodaySynthesisHero
+        synthesis={synthesis}
+        dayPillar={todayDP}
+        tongbian={todayTB}
+      />
+
+      {/* ━━ 0.7 12時辰盤 ━━ */}
+      <TwelveHoursChart chart={hourlyChart} luckyHours={luckyHours} />
+
+      {/* ━━ 0.8 本日のパーソナル易卦 ━━ */}
+      <PersonalHexSection hex={personalHex} />
+
+      {/* ━━ 0.9 家族への助言 ━━ */}
+      <FamilyAdviceSection advice={familyAdvice} />
 
       {/* ━━ 1. パーソナルデイ（最重要） ━━ */}
       <NumberedSection num="壱" label="Today's Energy" title="今日のエネルギー" >
@@ -1738,6 +1772,245 @@ function PerfumeRecommendSection({ perfumes }: { perfumes: PerfumeMatch[] }) {
             </div>
           </article>
         )}
+      </div>
+    </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// 本日の統合シンセシス ヒーロー
+// ==========================================================================
+
+function TodaySynthesisHero({
+  synthesis,
+  dayPillar,
+  tongbian,
+}: {
+  synthesis: TodaySynthesis;
+  dayPillar: { stem: string; branch: string; ganzhi: string };
+  tongbian: { star: string; text: string };
+}) {
+  return (
+    <section className="rounded-2xl bg-kachi-fade text-sand-50 p-8 sm:p-12 relative overflow-hidden">
+      <div className="absolute -top-12 right-0 w-96 h-96 rounded-full bg-gold-500/15 blur-3xl" />
+      <div className="absolute -bottom-12 -left-12 w-72 h-72 rounded-full bg-shu-500/10 blur-3xl" />
+
+      <div className="relative">
+        <div className="text-[10px] tracking-[0.4em] uppercase text-gold-300">
+          Today's Synthesis ／ 本日の統合占断
+        </div>
+
+        {/* 本日の干支 + 通変星 */}
+        <div className="mt-5 flex flex-wrap items-baseline gap-3 sm:gap-5">
+          <div>
+            <div className="text-[9px] tracking-[0.3em] uppercase text-sand-300">日柱</div>
+            <div className="font-display text-3xl sm:text-4xl text-sand-50">
+              {dayPillar.ganzhi}
+            </div>
+          </div>
+          <div className="text-gold-400">×</div>
+          <div>
+            <div className="text-[9px] tracking-[0.3em] uppercase text-sand-300">日主 戊 から見て</div>
+            <div className="font-display text-3xl sm:text-4xl text-gold-300">
+              {tongbian.star}
+            </div>
+          </div>
+        </div>
+
+        <h2 className="mt-6 font-display text-3xl sm:text-5xl tracking-wide leading-tight text-sand-50">
+          {synthesis.headline}
+        </h2>
+        <p className="mt-2 text-gold-200 text-sm sm:text-base">
+          {synthesis.subline}
+        </p>
+
+        {/* 本日のキーワード3つ */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {synthesis.keywords.map((k) => (
+            <span
+              key={k}
+              className="text-xs px-3 py-1.5 rounded-full border border-gold-500/40 text-gold-200 bg-kachi-700/40"
+            >
+              # {k}
+            </span>
+          ))}
+        </div>
+
+        {/* シンセシス本文 */}
+        <div className="mt-7 space-y-4">
+          {synthesis.paragraphs.map((p, i) => (
+            <p key={i} className="text-sm sm:text-[15px] leading-loose text-sand-100">
+              {p}
+            </p>
+          ))}
+        </div>
+
+        {/* アファメーション */}
+        <div className="mt-8 rounded-lg bg-kachi-800/60 backdrop-blur border border-gold-500/40 p-5 text-center">
+          <div className="text-[10px] tracking-[0.4em] uppercase text-gold-300 mb-2">
+            Today's Affirmation
+          </div>
+          <div className="font-display text-xl sm:text-2xl italic text-gold-200">
+            「{synthesis.affirmation}」
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ==========================================================================
+// 12時辰盤
+// ==========================================================================
+
+function TwelveHoursChart({
+  chart,
+  luckyHours,
+}: {
+  chart: HourSlot[];
+  luckyHours: HourSlot[];
+}) {
+  const luckyBranches = new Set(luckyHours.map((h) => h.branch));
+  return (
+    <NumberedSection num="零・八" label="12 Hour Chart" title="本日の十二時辰盤（日主戊から見た吉凶）">
+      <div className="rounded-2xl border border-ink-200 bg-white p-5 sm:p-6">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+          {chart.map((h) => {
+            const isLucky = luckyBranches.has(h.branch);
+            const ratingColor =
+              h.rating === "大吉" ? "bg-gold-fade border-2 border-gold-500"
+              : h.rating === "吉" ? "bg-gold-50 border border-gold-400"
+              : h.rating === "中吉" ? "bg-sand-50 border border-ink-200"
+              : "bg-shu-50 border border-shu-300";
+            return (
+              <div
+                key={h.branch}
+                className={`rounded-lg p-3 ${ratingColor} ${isLucky ? "ring-2 ring-gold-500" : ""}`}
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className="font-display text-2xl text-ink-900">{h.branch}</span>
+                  <span className="text-[10px] text-ink-500 tabular-nums">{h.range}</span>
+                </div>
+                <div className="text-[10px] text-ink-500 mt-1">{h.ganzhi}</div>
+                <div className={`mt-2 text-xs font-medium ${
+                  h.rating === "大吉" || h.rating === "吉" ? "text-gold-700"
+                  : h.rating === "中吉" ? "text-ink-700"
+                  : "text-shu-700"
+                }`}>
+                  {h.rating}
+                </div>
+                <div className="text-[10px] text-ink-500 mt-0.5">{h.star}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 本日のラッキータイム強調 */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {luckyHours.map((h, i) => (
+            <article
+              key={h.branch}
+              className="rounded-xl bg-gold-fade border-2 border-gold-500 p-5"
+            >
+              <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">
+                Lucky Hour {i + 1}
+              </div>
+              <div className="flex items-baseline gap-3 mt-2">
+                <span className="font-display text-3xl text-gold-700">{h.branch}</span>
+                <span className="font-display text-2xl text-ink-900">{h.range}時</span>
+              </div>
+              <div className="text-xs text-ink-500 mt-1">
+                {h.ganzhi} ／ 通変星「{h.star}」（{h.rating}）
+              </div>
+              <p className="text-sm text-ink-800 mt-3">{h.desc}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// 本日のパーソナル易卦
+// ==========================================================================
+
+function PersonalHexSection({
+  hex,
+}: {
+  hex: ReturnType<typeof todayPersonalHexagram>;
+}) {
+  return (
+    <NumberedSection num="零・九" label="Personal I Ching" title="本日のあなた専用の易卦">
+      <div className="rounded-2xl border-2 border-gold-300 bg-paper p-6 sm:p-8">
+        <div className="text-xs text-ink-500 mb-4">
+          ※ 生年月日 {OWNER.birth} と本日の組合せでシードされた、あなただけの本日の卦
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <HexBlock
+            label="本卦"
+            hex={hex.hex}
+            yaos={hex.yaos}
+            upper={trigramName(hex.yaos, "upper")}
+            lower={trigramName(hex.yaos, "lower")}
+          />
+          {hex.changed && (
+            <HexBlock
+              label="之卦（本日の変化後）"
+              hex={hex.changed.hex}
+              yaos={hex.changed.yaos}
+              upper={trigramName(hex.changed.yaos, "upper")}
+              lower={trigramName(hex.changed.yaos, "lower")}
+              isChanged
+            />
+          )}
+        </div>
+        {hex.lines.length > 0 && (
+          <div className="mt-6 border-t-2 border-gold-300 pt-5">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-3">
+              本日の変爻メッセージ
+            </div>
+            <ul className="space-y-2 text-sm">
+              {hex.lines.map((l, i) => (
+                <li key={i} className="flex gap-3 bg-sand-50 rounded-md p-3">
+                  <span className="font-display text-base text-gold-700 w-14 shrink-0">
+                    第{l.pos}爻
+                  </span>
+                  <span className="text-ink-800">{l.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </NumberedSection>
+  );
+}
+
+// ==========================================================================
+// 家族への助言
+// ==========================================================================
+
+function FamilyAdviceSection({
+  advice,
+}: {
+  advice: { spouse: string; child: string };
+}) {
+  return (
+    <NumberedSection num="壱・〇" label="Family Today" title="家族への今日の関わり方">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <article className="rounded-xl bg-gold-fade border border-gold-400 p-5">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">
+            妻への接し方
+          </div>
+          <p className="text-sm text-ink-800 leading-relaxed">{advice.spouse}</p>
+        </article>
+        <article className="rounded-xl bg-paper border border-ink-200 p-5">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-ink-500 mb-2">
+            子への接し方
+          </div>
+          <p className="text-sm text-ink-800 leading-relaxed">{advice.child}</p>
+        </article>
       </div>
     </NumberedSection>
   );

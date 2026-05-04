@@ -2,6 +2,11 @@
 // すべて生年月日と当日の組み合わせで決定論的に算出
 
 import { OWNER } from "@/lib/owner";
+import { tongbianStar, TONGBIAN_TEXT, type TongbianStar } from "@/lib/shichu";
+import { hexagramFromYaos, changedHexagram, changingLineMeanings, type Yao } from "@/lib/iching";
+
+const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"] as const;
+const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"] as const;
 
 function digitSum(n: number): number {
   return String(n)
@@ -228,4 +233,296 @@ export function todayShadowBlessing(personalDayNum: number): TodayShadow {
     9: { shadow: "別れと終わりに過剰反応せず、穏やかに見送る。", blessing: "古いものが終わる清々しさ。新しいスペースが心に空く。" },
   };
   return map[personalDayNum];
+}
+
+// ==================================================================
+// 今日の日柱（干支）算出
+// 1984-05-02 = 戊申（吉田俊輔さんの日柱）を基準に、UTC日数差で算出
+// ==================================================================
+
+const OWNER_DAY_STEM_IDX = 4;   // 戊
+const OWNER_DAY_BRANCH_IDX = 8; // 申
+
+export function todayDayPillar(date: Date = new Date()): {
+  stem: string;
+  branch: string;
+  ganzhi: string;
+} {
+  const baseUTC = Date.UTC(1984, 4, 2);
+  const targetUTC = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const days = Math.floor((targetUTC - baseUTC) / 86400000);
+  const stemIdx = ((OWNER_DAY_STEM_IDX + days) % 10 + 10) % 10;
+  const branchIdx = ((OWNER_DAY_BRANCH_IDX + days) % 12 + 12) % 12;
+  const stem = STEMS[stemIdx];
+  const branch = BRANCHES[branchIdx];
+  return { stem, branch, ganzhi: stem + branch };
+}
+
+// ==================================================================
+// 今日の日干 vs Yoshida の日主（戊）の通変星
+// ==================================================================
+
+export function todayTongbianForOwner(date: Date = new Date()): {
+  star: TongbianStar;
+  text: string;
+} {
+  const dp = todayDayPillar(date);
+  const star = tongbianStar("戊", dp.stem);
+  return { star, text: TONGBIAN_TEXT[star] };
+}
+
+// ==================================================================
+// 12時辰盤: 今日の日干から各時辰の天干を導き、戊から見た通変星で吉凶を判定
+// ==================================================================
+
+const HOUR_STEM_START: Record<string, number> = {
+  甲: 0, 己: 0,
+  乙: 2, 庚: 2,
+  丙: 4, 辛: 4,
+  丁: 6, 壬: 6,
+  戊: 8, 癸: 8,
+};
+
+// 通変星 → 吉凶ランク（Yoshida 戊土から見た）
+function rateTongbian(star: TongbianStar): {
+  rating: "大吉" | "吉" | "中吉" | "注意" | "凶";
+  desc: string;
+} {
+  const map: Record<TongbianStar, { rating: "大吉" | "吉" | "中吉" | "注意" | "凶"; desc: string }> = {
+    印綬: { rating: "大吉", desc: "学び・人徳・名誉が育つ時間" },
+    正官: { rating: "大吉", desc: "規律と評価が手に入る時間" },
+    正財: { rating: "吉", desc: "堅実な収入と結果" },
+    食神: { rating: "吉", desc: "創造性と楽しみ" },
+    比肩: { rating: "中吉", desc: "自分のペースで進める" },
+    偏官: { rating: "中吉", desc: "決断と挑戦の好機" },
+    偏財: { rating: "中吉", desc: "流動的な利益・社交" },
+    偏印: { rating: "中吉", desc: "独自のアイデアが冴える" },
+    劫財: { rating: "注意", desc: "出費・競合に注意" },
+    傷官: { rating: "注意", desc: "言葉と対人衝突に注意" },
+  };
+  return map[star];
+}
+
+const BRANCH_HOURS: Record<string, string> = {
+  子: "23-1", 丑: "1-3", 寅: "3-5", 卯: "5-7", 辰: "7-9", 巳: "9-11",
+  午: "11-13", 未: "13-15", 申: "15-17", 酉: "17-19", 戌: "19-21", 亥: "21-23",
+};
+
+export type HourSlot = {
+  branch: string;
+  range: string;
+  stem: string;
+  ganzhi: string;
+  star: TongbianStar;
+  rating: "大吉" | "吉" | "中吉" | "注意" | "凶";
+  desc: string;
+};
+
+export function todayHourlyChart(date: Date = new Date()): HourSlot[] {
+  const dp = todayDayPillar(date);
+  const start = HOUR_STEM_START[dp.stem];
+  return BRANCHES.map((br, i) => {
+    const stemIdx = (start + i) % 10;
+    const stem = STEMS[stemIdx];
+    const star = tongbianStar("戊", stem);
+    const r = rateTongbian(star);
+    return {
+      branch: br,
+      range: BRANCH_HOURS[br],
+      stem,
+      ganzhi: stem + br,
+      star,
+      rating: r.rating,
+      desc: r.desc,
+    };
+  });
+}
+
+// 今日のラッキー時間帯（最も吉な時辰のトップ2）
+export function todayLuckyHours(date: Date = new Date()): HourSlot[] {
+  const chart = todayHourlyChart(date);
+  const order: Record<string, number> = { 大吉: 5, 吉: 4, 中吉: 3, 注意: 2, 凶: 1 };
+  return [...chart].sort((a, b) => order[b.rating] - order[a.rating]).slice(0, 2);
+}
+
+// 今日の注意時間帯
+export function todayCautionHours(date: Date = new Date()): HourSlot[] {
+  const chart = todayHourlyChart(date);
+  const order: Record<string, number> = { 大吉: 5, 吉: 4, 中吉: 3, 注意: 2, 凶: 1 };
+  return [...chart].sort((a, b) => order[a.rating] - order[b.rating]).slice(0, 2);
+}
+
+// ==================================================================
+// 今日のパーソナル易卦
+// 生年月日 + 当日でシードした疑似乱数で6本の爻を生成
+// → その日固有の易卦（Yoshida にとっての今日の易）が確定
+// ==================================================================
+
+function seededRand(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0xffffffff;
+  };
+}
+
+export function todayPersonalHexagram(
+  birth: string = OWNER.birth,
+  date: Date = new Date()
+): {
+  yaos: Yao[];
+  hex: ReturnType<typeof hexagramFromYaos>;
+  changed: ReturnType<typeof changedHexagram>;
+  lines: ReturnType<typeof changingLineMeanings>;
+} {
+  const birthSeed = birth.replace(/-/g, "").split("").reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 0);
+  const dateSeed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  const rand = seededRand(birthSeed ^ (dateSeed * 2654435761));
+  const yaos: Yao[] = [];
+  for (let i = 0; i < 6; i++) {
+    let sum = 0;
+    for (let j = 0; j < 3; j++) sum += rand() < 0.5 ? 2 : 3;
+    const value = sum as 6 | 7 | 8 | 9;
+    yaos.push({ value, isYang: value === 7 || value === 9, isChanging: value === 6 || value === 9 });
+  }
+  return {
+    yaos,
+    hex: hexagramFromYaos(yaos),
+    changed: changedHexagram(yaos),
+    lines: changingLineMeanings(yaos),
+  };
+}
+
+// ==================================================================
+// 今日の総合シンセシス（複数システムを編み込んだ吉田俊輔さん専用の今日の物語）
+// ==================================================================
+
+export type TodaySynthesis = {
+  headline: string;
+  subline: string;
+  paragraphs: string[];
+  keywords: string[];
+  affirmation: string;
+};
+
+export function todaySynthesis(
+  personalDay: number,
+  date: Date = new Date()
+): TodaySynthesis {
+  const dp = todayDayPillar(date);
+  const tb = todayTongbianForOwner(date);
+  const lucky = todayLuckyHours(date);
+  const caution = todayCautionHours(date);
+  const hex = todayPersonalHexagram(OWNER.birth, date);
+
+  // 通変星に基づく今日のテーマ
+  const tongbianTheme: Record<TongbianStar, { headline: string; sub: string; key: string[] }> = {
+    比肩: { headline: "自分のペースで進む日", sub: "独立心と自我が前面に出る、自分主導の一日", key: ["独立", "決断", "自分軸"] },
+    劫財: { headline: "競争と協力が交差する日", sub: "ライバルや仲間との関わりが運命を動かす", key: ["競争", "協力", "切磋琢磨"] },
+    食神: { headline: "創造と楽しみが咲く日", sub: "表現・グルメ・遊び心が運を呼ぶ柔らかな一日", key: ["創造", "楽しみ", "豊かさ"] },
+    傷官: { headline: "鋭い才能が光る日（言葉に注意）", sub: "批評眼と独自性が冴える、しかし衝突しやすい刃の日", key: ["才能", "批評", "刃"] },
+    偏財: { headline: "流通する財と社交の日", sub: "人と人の間を流れる金とチャンスが舞い込む", key: ["社交", "流動", "副収入"] },
+    正財: { headline: "堅実な蓄積の日", sub: "コツコツ積み上げる仕事・家計・関係が実る", key: ["堅実", "蓄積", "信頼"] },
+    偏官: { headline: "胆力と決断の日", sub: "リーダーシップが試される、強気で攻めるべき一日", key: ["胆力", "リーダー", "突破"] },
+    正官: { headline: "規律と名誉の日", sub: "公的な評価・組織での昇進・誠実さが光る一日", key: ["規律", "名誉", "公正"] },
+    偏印: { headline: "独自の知性が冴える日", sub: "副業・アイデア・スピリチュアルな閃きが降りる", key: ["独創", "閃き", "副業"] },
+    印綬: { headline: "学問と保護の日", sub: "学び・教養・年長者からの庇護が運を運ぶ", key: ["学問", "庇護", "人徳"] },
+  };
+
+  const theme = tongbianTheme[tb.star];
+  const luckyHourLabel = lucky.map((h) => `${h.range}時(${h.branch})`).join(" / ");
+  const cautionHourLabel = caution.map((h) => `${h.range}時(${h.branch})`).join(" / ");
+
+  const headline = theme.headline;
+  const subline = `今日の日柱「${dp.ganzhi}」が、あなたの日主『戊』に対して『${tb.star}』の関係を結びます。`;
+
+  const paragraphs: string[] = [
+    `本日の日柱は ${dp.ganzhi}。あなたの日主『戊（陽土・山）』から見ると ${tb.star}（${theme.sub}）にあたり、${tb.text} 通変星のテーマが今日一日に色濃く現れる流れです。`,
+    `パーソナルデイ${personalDay}と通変星${tb.star}の組合せは、${combineThemes(personalDay, tb.star)} 内側のエネルギーと外側の流れが共鳴する、密度の高い24時間です。`,
+    `12時辰盤を見ると、本日の最も追い風となる時間帯は ${luckyHourLabel}。逆に注意が必要なのは ${cautionHourLabel} です。重要な意思決定・連絡・移動はラッキータイムに合わせ、注意時間帯は内省・休息・確認作業にあてると吉。`,
+    `今日のあなた専用の易卦は『${hex.hex.num}. ${hex.hex.name}』(${hex.hex.reading})。${hex.hex.meaning} ${hex.changed ? `さらに変爻があり『${hex.changed.hex.num}. ${hex.changed.hex.name}』へと変化する流れが示されています。${hex.changed.hex.meaning}` : "今日は爻の変化なく、卦の意味を素直に受け止める日です。"}`,
+  ];
+
+  const keywords = theme.key;
+
+  const affirmation = generateAffirmation(personalDay, tb.star);
+
+  return { headline, subline, paragraphs, keywords, affirmation };
+}
+
+// パーソナルデイ×通変星の組合せ説明（短文）
+function combineThemes(pDay: number, tb: TongbianStar): string {
+  const map: Record<number, string> = {
+    1: "新しい挑戦のエネルギーが、",
+    2: "受容と協調のエネルギーが、",
+    3: "創造と表現のエネルギーが、",
+    4: "基盤づくりのエネルギーが、",
+    5: "変化と自由のエネルギーが、",
+    6: "愛と責任のエネルギーが、",
+    7: "内省と探求のエネルギーが、",
+    8: "達成と豊かさのエネルギーが、",
+    9: "完了と手放しのエネルギーが、",
+  };
+  const tbAdvice: Record<TongbianStar, string> = {
+    比肩: "自我主導のテーマと重なります。",
+    劫財: "対人競争のテーマと交差します。",
+    食神: "楽しみと創造のテーマを倍加させます。",
+    傷官: "鋭い表現のテーマを強めます——言葉に注意。",
+    偏財: "社交と金運のテーマを増幅します。",
+    正財: "堅実な蓄積のテーマと共鳴します。",
+    偏官: "決断と挑戦のテーマを際立たせます。",
+    正官: "公的な責任と評価のテーマと結びつきます。",
+    偏印: "独自の発想のテーマを呼び起こします。",
+    印綬: "学びと庇護のテーマを引き寄せます。",
+  };
+  return `${map[pDay]}${tbAdvice[tb]}`;
+}
+
+function generateAffirmation(pDay: number, tb: TongbianStar): string {
+  const map: Record<TongbianStar, string> = {
+    比肩: "自分の道を、自分の歩幅で。",
+    劫財: "競う相手は、昨日の自分。",
+    食神: "楽しむことが、最強の戦略。",
+    傷官: "鋭さは武器、しかし鞘も大切に。",
+    偏財: "金は流れるもの、握りしめず循環させる。",
+    正財: "今日の一歩が、明日の塔になる。",
+    偏官: "決断こそ、リーダーの存在証明。",
+    正官: "誠実は、最も長く続く成功。",
+    偏印: "ふと閃いたものは、神様からのメモ。",
+    印綬: "学ぶ姿勢が、人を惹きつける。",
+  };
+  return map[tb];
+}
+
+// ==================================================================
+// 今日のキーパーソン（家族）への助言（既存を強化）
+// ==================================================================
+
+export function todayFamilyAdvice(personalDay: number): {
+  spouse: string;
+  child: string;
+} {
+  const spouseMap: Record<number, string> = {
+    1: "今日のあなたは独立志向。妻には簡潔に意図を共有し、相手の領域を尊重する日。",
+    2: "妻と深い対話を持つ最良の日。感謝の言葉を一つでも増やすと家全体の運が上がる。",
+    3: "一緒に楽しい時間を作る日。外食・映画・旅の話など、明るい話題で結びつきを更新。",
+    4: "家計や予定など、現実的な話を整える日。一緒に書類仕事や計画を進めると吉。",
+    5: "ルーティンを少し変える日。新しいレストラン・コース・話題で関係に風を入れる。",
+    6: "結婚の原点を思い出す日。妻の好きなものを思い出し、小さなギフトを。",
+    7: "互いに一人時間を尊重する日。寄り添いすぎず、距離があるからこそ深まる愛も。",
+    8: "妻の頑張りを正面から称える日。経済・家事・介護への感謝を言葉と行動で。",
+    9: "古い不満や感情を手放す日。蒸し返さず、感謝で包み直すと関係が次の章に進む。",
+  };
+  const childMap: Record<number, string> = {
+    1: "子の挑戦を後押しする日。指示より励ましの言葉で。",
+    2: "子の話を最後まで聴く日。アドバイスは2割、共感を8割で。",
+    3: "一緒に楽しむ日。趣味・ゲーム・冗談で笑いを共有。",
+    4: "勉強や生活習慣を一緒に整える日。叱らず仕組みを作る。",
+    5: "子の興味を広げる外出の日。新しい場所・経験を共有。",
+    6: "親としての愛を行動で示す日。好きな食事・送迎・小さな贈り物を。",
+    7: "子の内面を尊重する日。一人で考える時間を保証する。",
+    8: "子の成長を本気で評価する日。具体的な努力を言葉で承認。",
+    9: "親としての古い完璧主義を手放す日。不完全な親でも、十分に愛は伝わる。",
+  };
+  return { spouse: spouseMap[personalDay], child: childMap[personalDay] };
 }
