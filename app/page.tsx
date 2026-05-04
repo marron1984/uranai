@@ -47,16 +47,16 @@ import {
   STAR_NAME,
   STAR_ELEMENT,
   STAR_DIRECTION,
-  STAR_TRAIT,
+  STAR_DEEP,
   type StarNumber,
 } from "@/lib/kyusei";
 import {
   calcKakusu,
   kichikyo,
   KAKUSU_LABEL,
-  NUMBER_TEXT,
+  NUMBER_DEEP,
 } from "@/lib/seimei";
-import { birthCards, BIRTH_CARD_THEME } from "@/lib/birthcard";
+import { birthCards, BIRTH_CARD_DEEP } from "@/lib/birthcard";
 import { fullCompat } from "@/lib/compat";
 
 type TodayResults = {
@@ -287,14 +287,24 @@ function TodayTab({
       {py && (
         <section>
           <SectionHeader en="This Year" ja={`${new Date().getFullYear()}年のテーマ`} />
-          <article className="mt-3 rounded-xl border border-ink-100 p-6 flex gap-6 items-center">
-            <div className="font-serif text-6xl tabular-nums">{personal}</div>
-            <div>
-              <div className="text-xs uppercase tracking-widest text-ink-400">
-                Personal Year
+          <article className="mt-3 rounded-xl border border-ink-100 p-6">
+            <div className="flex gap-6 items-center">
+              <div className="font-serif text-6xl tabular-nums">{personal}</div>
+              <div>
+                <div className="text-xs uppercase tracking-widest text-ink-400">
+                  Personal Year
+                </div>
+                <div className="font-serif text-lg mt-1">{py.title}</div>
+                <p className="text-sm text-ink-700 mt-1">{py.text}</p>
               </div>
-              <div className="font-serif text-lg mt-1">{py.title}</div>
-              <p className="text-sm text-ink-700 mt-1">{py.text}</p>
+            </div>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <DimensionBox title="今年やるべきこと" items={py.doList} />
+              <DimensionBox title="避けるべきこと" items={py.avoidList} />
+            </div>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <DimensionText title="恋愛・家庭" text={py.loveAdvice} />
+              <DimensionText title="仕事・キャリア" text={py.workAdvice} highlight />
             </div>
           </article>
         </section>
@@ -334,7 +344,26 @@ function TodayTab({
                   )}
                 </div>
                 <div className="text-xs text-ink-400">{c.en}</div>
-                <p className="mt-3 text-sm text-ink-700 leading-relaxed">{c.meaning}</p>
+                <p className="mt-3 text-sm text-ink-700 leading-relaxed">
+                  {c.isReversed ? c.reversedDetail : c.uprightDetail}
+                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="text-xs">
+                    <span className="text-ink-400">恋愛: </span>
+                    <span className="text-ink-700">
+                      {c.isReversed ? c.loveReversed : c.loveUpright}
+                    </span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-ink-400">仕事: </span>
+                    <span className="text-ink-700">
+                      {c.isReversed ? c.workReversed : c.workUpright}
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-ink-900 italic border-t border-ink-100 pt-2">
+                  助言: {c.advice}
+                </p>
               </div>
             </article>
           ))}
@@ -361,6 +390,24 @@ function TodayTab({
               {trigramName(today.iching.yaos, "lower")}
             </div>
             <p className="mt-4 text-sm text-ink-700 leading-relaxed">{today.iching.hex.meaning}</p>
+            {today.iching.hex.image && (
+              <div className="mt-3 text-xs">
+                <span className="text-ink-400">象: </span>
+                <span className="text-ink-600">{today.iching.hex.image}</span>
+              </div>
+            )}
+            {today.iching.hex.judgment && (
+              <div className="mt-2 text-xs">
+                <span className="text-ink-400">卦辞: </span>
+                <span className="text-ink-600">{today.iching.hex.judgment}</span>
+              </div>
+            )}
+            {today.iching.hex.advice && (
+              <div className="mt-3 rounded-md bg-ink-50 border border-ink-200 p-2 text-xs">
+                <span className="text-ink-900 font-medium">助言: </span>
+                <span className="text-ink-700">{today.iching.hex.advice}</span>
+              </div>
+            )}
           </div>
           {today.iching.changed && (
             <div className="border-t sm:border-t-0 sm:border-l border-ink-100 sm:pl-6 pt-6 sm:pt-0">
@@ -377,6 +424,12 @@ function TodayTab({
               <p className="mt-4 text-sm text-ink-700 leading-relaxed">
                 {today.iching.changed.hex.meaning}
               </p>
+              {today.iching.changed.hex.advice && (
+                <div className="mt-3 rounded-md bg-ink-50 border border-ink-200 p-2 text-xs">
+                  <span className="text-ink-900 font-medium">助言: </span>
+                  <span className="text-ink-700">{today.iching.changed.hex.advice}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -439,17 +492,57 @@ function NatalChartSection({ sun }: { sun: Zodiac }) {
         </div>
         <p className="mt-4 text-sm leading-relaxed text-ink-700">{sun.description}</p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 text-sm">
-          <Kv k="月星座" v={OWNER.natal.moonApprox} />
-          <Kv k="アセンダント" v={OWNER.natal.ascApprox} />
-          <Kv k="MC" v={OWNER.natal.mcApprox} />
-          <Kv k="出生地" v={`${OWNER.birthplace.city}`} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+          <DimensionBox title="強み・才能" items={sun.strengths} />
+          <DimensionBox title="影・弱点" items={sun.weaknesses} />
         </div>
-        <p className="mt-3 text-xs text-ink-400">
-          ※ 月・ASC・MC は精密な ephemeris 計算なしの概算値です。
-        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <DimensionText title="恋愛・パートナー" text={sun.love} />
+          <DimensionText title="仕事・天職" text={sun.career} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <DimensionText title="人生の課題" text={sun.challenge} />
+          <DimensionText title="助言" text={sun.advice} highlight />
+        </div>
+
+        <div className="border-t border-ink-100 mt-6 pt-5">
+          <div className="text-xs uppercase tracking-widest text-ink-400 mb-2">チャート要素</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+            <Kv k="月星座" v={OWNER.natal.moonApprox} />
+            <Kv k="アセンダント" v={OWNER.natal.ascApprox} />
+            <Kv k="MC" v={OWNER.natal.mcApprox} />
+            <Kv k="出生地" v={`${OWNER.birthplace.city}`} />
+          </div>
+          <p className="mt-3 text-xs text-ink-400">
+            ※ 月・ASC・MC は精密な ephemeris 計算なしの概算値です。
+          </p>
+        </div>
       </div>
     </section>
+  );
+}
+
+function DimensionBox({ title, items }: { title: string; items: readonly string[] }) {
+  return (
+    <div className="rounded-lg border border-ink-100 p-4">
+      <div className="text-xs uppercase tracking-widest text-ink-400 mb-2">{title}</div>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((it) => (
+          <span key={it} className="text-xs px-2 py-1 rounded-full border border-ink-200 text-ink-700">
+            {it}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DimensionText({ title, text, highlight }: { title: string; text: string; highlight?: boolean }) {
+  return (
+    <div className={`rounded-lg border ${highlight ? "border-ink-900 bg-ink-50" : "border-ink-100"} p-4`}>
+      <div className="text-xs uppercase tracking-widest text-ink-400 mb-1">{title}</div>
+      <p className="text-sm text-ink-700 leading-relaxed">{text}</p>
+    </div>
   );
 }
 
@@ -543,6 +636,7 @@ function KyuseiSection() {
 }
 
 function StarCard({ role, star }: { role: string; star: StarNumber }) {
+  const deep = STAR_DEEP[star];
   return (
     <article className="rounded-xl border border-ink-100 p-6">
       <div className="text-xs uppercase tracking-widest text-ink-400">{role}</div>
@@ -550,7 +644,17 @@ function StarCard({ role, star }: { role: string; star: StarNumber }) {
       <div className="text-xs text-ink-500 mt-1">
         五行: {STAR_ELEMENT[star]} / 定位方位: {STAR_DIRECTION[star]}
       </div>
-      <p className="text-sm text-ink-700 mt-3 leading-relaxed">{STAR_TRAIT[star]}</p>
+      <p className="text-sm text-ink-700 mt-3 leading-relaxed">{deep.trait}</p>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <DimensionBox title="強み" items={deep.strengths} />
+        <DimensionBox title="弱点" items={deep.weaknesses} />
+      </div>
+      <div className="mt-3 space-y-2">
+        <DimensionText title="恋愛" text={deep.love} />
+        <DimensionText title="仕事" text={deep.career} />
+        <DimensionText title="金運・健康" text={deep.fortune} />
+        <DimensionText title="助言" text={deep.advice} highlight />
+      </div>
     </article>
   );
 }
@@ -565,18 +669,30 @@ function NumerologyFullSection({
     <section>
       <SectionHeader en="Numerology" ja="数秘術（フル）" />
       <div className="mt-4 space-y-3">
-        <article className="rounded-xl border border-ink-900 p-6 flex gap-6 items-center bg-ink-50">
-          <div className="font-serif text-6xl tabular-nums">{numero.life}</div>
-          <div>
-            <div className="text-xs uppercase tracking-widest text-ink-400">ライフパスナンバー</div>
-            <div className="text-sm text-ink-500">人生全体の傾向（マスターナンバー）</div>
-            {lifeMeaning && (
-              <>
-                <div className="font-serif text-lg mt-2">{lifeMeaning.title}</div>
-                <p className="text-sm text-ink-700 mt-1">{lifeMeaning.text}</p>
-              </>
-            )}
+        <article className="rounded-xl border border-ink-900 p-6 bg-ink-50">
+          <div className="flex gap-6 items-center">
+            <div className="font-serif text-6xl tabular-nums">{numero.life}</div>
+            <div>
+              <div className="text-xs uppercase tracking-widest text-ink-400">ライフパスナンバー</div>
+              <div className="text-sm text-ink-500">人生全体の傾向（マスターナンバー）</div>
+              {lifeMeaning && (
+                <>
+                  <div className="font-serif text-lg mt-2">{lifeMeaning.title}</div>
+                  <p className="text-sm text-ink-700 mt-1">{lifeMeaning.text}</p>
+                </>
+              )}
+            </div>
           </div>
+          {lifeMeaning && (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <DimensionBox title="強み・才能" items={lifeMeaning.strengths} />
+              <DimensionBox title="影・弱点" items={lifeMeaning.weaknesses} />
+              <DimensionText title="恋愛" text={lifeMeaning.love} />
+              <DimensionText title="仕事" text={lifeMeaning.career} />
+              <DimensionText title="課題" text={lifeMeaning.challenge} />
+              <DimensionText title="助言" text={lifeMeaning.advice} highlight />
+            </div>
+          )}
         </article>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <SmallNum label="誕生日数" value={numero.birthday} />
@@ -609,27 +725,34 @@ function SeimeiSection({
           {OWNER.nameSei}（{OWNER.nameSeiKakusu.join("+")}）/ {OWNER.nameMei}（
           {OWNER.nameMeiKakusu.join("+")}）
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {items.map(({ key, n }) => {
             const lab = KAKUSU_LABEL[key];
             const k = kichikyo(n);
-            const txt = NUMBER_TEXT[n];
+            const deep = NUMBER_DEEP[n];
             return (
-              <div key={key} className="grid grid-cols-12 gap-3 items-start text-sm border-b border-ink-100 pb-3">
-                <div className="col-span-2 font-medium">{lab.label}</div>
-                <div className="col-span-2 font-serif text-2xl tabular-nums">{n}</div>
-                <div className="col-span-2">
+              <div key={key} className="border-b border-ink-100 pb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="font-medium w-12">{lab.label}</div>
+                  <div className="font-serif text-2xl tabular-nums w-12">{n}</div>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     k === "大吉" ? "bg-ink-900 text-white" :
                     k === "吉" ? "border border-ink-900 text-ink-900" :
                     k === "半吉" ? "border border-ink-300 text-ink-500" :
                     "border border-ink-300 text-ink-400"
                   }`}>{k}</span>
-                </div>
-                <div className="col-span-6">
                   <div className="text-ink-500 text-xs">{lab.sub}</div>
-                  {txt && <div className="text-ink-700 mt-1">{txt}</div>}
                 </div>
+                {deep && (
+                  <div className="ml-3 mt-2">
+                    <p className="text-sm text-ink-700 leading-relaxed">{deep.meaning}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                      <DimensionText title="仕事面" text={deep.career} />
+                      <DimensionText title="家庭・恋愛面" text={deep.love} />
+                      <DimensionText title="注意点" text={deep.caution} />
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -662,17 +785,25 @@ function BCard({
   role: string;
   card: { num: number; name: string; en: string };
 }) {
+  const deep = BIRTH_CARD_DEEP[card.num];
   return (
-    <article className="rounded-xl border border-ink-100 p-6 flex gap-5 items-center">
-      <div className="aspect-[2/3] w-20 rounded-lg border-2 border-ink-900 flex items-center justify-center text-3xl font-serif shrink-0">
-        {romanize(card.num)}
-      </div>
-      <div>
-        <div className="text-xs uppercase tracking-widest text-ink-400">{role}</div>
-        <div className="font-serif text-xl mt-1">
-          {card.name} <span className="text-xs text-ink-400 font-sans">{card.en}</span>
+    <article className="rounded-xl border border-ink-100 p-6">
+      <div className="flex gap-5 items-start">
+        <div className="aspect-[2/3] w-20 rounded-lg border-2 border-ink-900 flex items-center justify-center text-3xl font-serif shrink-0">
+          {romanize(card.num)}
         </div>
-        <p className="text-sm text-ink-700 mt-2">{BIRTH_CARD_THEME[card.num]}</p>
+        <div>
+          <div className="text-xs uppercase tracking-widest text-ink-400">{role}</div>
+          <div className="font-serif text-xl mt-1">
+            {card.name} <span className="text-xs text-ink-400 font-sans">{card.en}</span>
+          </div>
+          <p className="text-sm text-ink-700 mt-2 leading-relaxed">{deep.theme}</p>
+        </div>
+      </div>
+      <div className="mt-4 space-y-2">
+        <DimensionText title="ギフト（与えられた才能）" text={deep.gift} />
+        <DimensionText title="レッスン（学ぶ課題）" text={deep.lesson} highlight />
+        <DimensionText title="影の側面" text={deep.shadow} />
       </div>
     </article>
   );
