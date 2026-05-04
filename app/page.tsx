@@ -98,7 +98,7 @@ import {
   lifeArc,
   FENGSHUI_HOME,
   SPIRITUAL_THEME,
-  FINAL_MESSAGE,
+  finalMessage,
   COMMUNICATION_STYLE,
   DECISION_STYLE,
   LEADERSHIP_STYLE,
@@ -1128,7 +1128,7 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       </NumberedSection>
 
       {/* ━━ 最終メッセージ ━━ */}
-      <FinalMessage />
+      <FinalMessage age={basis.currentAge} />
     </div>
   );
 }
@@ -1192,7 +1192,8 @@ function SynthesisBlock({ num, card }: { num: string; card: SynthesisCard }) {
   );
 }
 
-function FinalMessage() {
+function FinalMessage({ age }: { age: number }) {
+  const msg = finalMessage(age);
   return (
     <section className="rounded-2xl bg-kachi-fade text-sand-50 p-8 sm:p-12 relative overflow-hidden">
       <div className="absolute -top-12 -left-12 w-96 h-96 rounded-full bg-gold-500/15 blur-3xl" />
@@ -1201,10 +1202,10 @@ function FinalMessage() {
           Final Message
         </div>
         <h2 className="mt-3 font-display text-2xl sm:text-3xl leading-tight tracking-wide">
-          {FINAL_MESSAGE.title}
+          {msg.title}
         </h2>
         <p className="mt-6 text-sm sm:text-[15px] leading-loose text-sand-100">
-          {FINAL_MESSAGE.body}
+          {msg.body}
         </p>
       </div>
     </section>

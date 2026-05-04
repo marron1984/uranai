@@ -73,7 +73,7 @@ export const OWNER = {
       lifePath: 4,
     },
     child: {
-      relation: "子（中学2年）",
+      relation: "子",
       birth: "2011-11-03",
       gender: null,
       sunSign: "scorpio",

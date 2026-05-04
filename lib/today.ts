@@ -1,7 +1,7 @@
 // 今日の占いを深く広く: パーソナルデイ・時間帯運・マントラ・注意事項・人間関係助言
 // すべて生年月日と当日の組み合わせで決定論的に算出
 
-import { OWNER } from "@/lib/owner";
+import { OWNER, childGradeJP, childAge } from "@/lib/owner";
 import { tongbianStar, TONGBIAN_TEXT, type TongbianStar } from "@/lib/shichu";
 import { hexagramFromYaos, changedHexagram, changingLineMeanings, type Yao } from "@/lib/iching";
 
@@ -161,18 +161,16 @@ export function todayKeyPerson(personalDayNum: number): {
   who: string;
   why: string;
 } {
-  const child = OWNER.family.child;
-  const spouse = OWNER.family.spouse;
   // 偶数日は妻、3/9は子供、それ以外は自分
   if ([2, 4, 6, 8].includes(personalDayNum)) {
     return {
-      who: `配偶者（${spouse.relation}）`,
+      who: "配偶者（妻）",
       why: "今日のエネルギーは関係性の調整に向く。妻との対話・感謝・ささやかなギフトで家庭の運が整う。",
     };
   }
   if ([3, 9].includes(personalDayNum)) {
     return {
-      who: `子供（${child.relation}）`,
+      who: `子（${childGradeJP()}・${childAge()}歳）`,
       why: "今日は子の成長と表現を支える日。話を聴き、楽しい時間を共有することが家全体の運を引き上げる。",
     };
   }
