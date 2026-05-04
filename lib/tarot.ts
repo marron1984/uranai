@@ -357,6 +357,38 @@ export function drawCards(n: number): DrawnCard[] {
     });
 }
 
+// シード付きシャッフル（同じシードなら同じ結果）
+export function drawCardsSeeded(n: number, seed: number): DrawnCard[] {
+  let s = seed >>> 0;
+  const rnd = () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0xffffffff;
+  };
+  const a = MAJOR_ARCANA.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n).map((c) => {
+    const isReversed = rnd() < 0.5;
+    return {
+      num: c.num,
+      name: c.name,
+      en: c.en,
+      keywords: c.keywords,
+      isReversed,
+      meaning: isReversed ? c.reversed : c.upright,
+      uprightDetail: c.uprightDetail,
+      reversedDetail: c.reversedDetail,
+      loveUpright: c.loveUpright,
+      loveReversed: c.loveReversed,
+      workUpright: c.workUpright,
+      workReversed: c.workReversed,
+      advice: c.advice,
+    };
+  });
+}
+
 export const SPREAD_LABELS = {
   one: ["今のあなた"],
   three: ["過去", "現在", "未来"],

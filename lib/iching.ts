@@ -128,6 +128,24 @@ export function castYao(): Yao {
   };
 }
 
+export function castHexagramSeeded(seed: number): Yao[] {
+  let s = seed >>> 0;
+  const rnd = () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0xffffffff;
+  };
+  return Array.from({ length: 6 }, () => {
+    let sum = 0;
+    for (let i = 0; i < 3; i++) sum += rnd() < 0.5 ? 2 : 3;
+    const value = sum as 6 | 7 | 8 | 9;
+    return {
+      value,
+      isYang: value === 7 || value === 9,
+      isChanging: value === 6 || value === 9,
+    };
+  });
+}
+
 export function castHexagram(): Yao[] {
   // 下から上へ 6 本
   return Array.from({ length: 6 }, () => castYao());

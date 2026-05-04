@@ -9,7 +9,7 @@ import {
   ZODIAC,
   type Zodiac,
 } from "@/lib/astrology";
-import { drawCards, SPREAD_LABELS, type DrawnCard } from "@/lib/tarot";
+import { drawCards, drawCardsSeeded, SPREAD_LABELS, type DrawnCard } from "@/lib/tarot";
 import {
   lifePathNumber,
   soulNumber,
@@ -22,6 +22,7 @@ import {
 } from "@/lib/numerology";
 import {
   castHexagram,
+  castHexagramSeeded,
   hexagramFromYaos,
   changedHexagram,
   trigramName,
@@ -135,11 +136,22 @@ type TodayResults = {
   };
 };
 
-function todayCompute(zodiacKey: string): TodayResults {
-  const yaos = castHexagram();
+function todayCompute(
+  zodiacKey: string,
+  date: Date = new Date(),
+  reshuffleSeed: number = 0
+): TodayResults {
+  const dateSeed =
+    date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  const birthSeed = OWNER.birth
+    .replace(/-/g, "")
+    .split("")
+    .reduce((a, c) => ((a * 31 + c.charCodeAt(0)) >>> 0), 0);
+  const fullSeed = (dateSeed ^ birthSeed ^ (reshuffleSeed * 2654435761)) >>> 0;
+  const yaos = castHexagramSeeded(fullSeed);
   return {
-    daily: getDailyFortune(zodiacKey, new Date()),
-    tarot: drawCards(3),
+    daily: getDailyFortune(zodiacKey, date),
+    tarot: drawCardsSeeded(3, fullSeed ^ 0xa5a5a5a5),
     iching: {
       yaos,
       hex: hexagramFromYaos(yaos),
@@ -196,26 +208,64 @@ function basisData() {
 // メインページ
 // ==========================================================================
 
+function startOfDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function dayDiff(a: Date, b: Date): number {
+  return Math.round(
+    (Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) -
+      Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) /
+      86400000
+  );
+}
+
 export default function Home() {
   const [tab, setTab] = useState<"today" | "basis">("today");
+  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+  const [reshuffleSeed, setReshuffleSeed] = useState(0);
   const [today, setToday] = useState<TodayResults | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherErr, setWeatherErr] = useState(false);
   const basis = useMemo(basisData, []);
 
-  useEffect(() => {
-    setToday(todayCompute(basis.sun.key));
-  }, [basis.sun.key]);
+  const realToday = useMemo(() => startOfDay(new Date()), []);
+  const isToday = useMemo(() => isSameDay(selectedDate, realToday), [selectedDate, realToday]);
+  const offsetDays = useMemo(() => dayDiff(selectedDate, realToday), [selectedDate, realToday]);
 
   useEffect(() => {
-    fetchOsakaWeather()
-      .then(setWeather)
-      .catch(() => setWeatherErr(true));
-  }, []);
+    setToday(todayCompute(basis.sun.key, selectedDate, reshuffleSeed));
+  }, [basis.sun.key, selectedDate, reshuffleSeed]);
 
-  const now = new Date();
-  const todayLabel = `${now.getFullYear()}年 ${now.getMonth() + 1}月 ${now.getDate()}日（${
-    ["日", "月", "火", "水", "木", "金", "土"][now.getDay()]
+  // 日付変更時、リシャッフルカウンタをリセット
+  useEffect(() => {
+    setReshuffleSeed(0);
+  }, [selectedDate]);
+
+  // 天気は当日のみ取得
+  useEffect(() => {
+    if (isToday) {
+      fetchOsakaWeather()
+        .then(setWeather)
+        .catch(() => setWeatherErr(true));
+    } else {
+      setWeather(null);
+      setWeatherErr(false);
+    }
+  }, [isToday]);
+
+  const dateLabel = `${selectedDate.getFullYear()}年 ${selectedDate.getMonth() + 1}月 ${selectedDate.getDate()}日（${
+    ["日", "月", "火", "水", "木", "金", "土"][selectedDate.getDay()]
   }）`;
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -229,14 +279,42 @@ export default function Home() {
     return <div className="text-sm text-ink-400 py-20 text-center">読み込み中…</div>;
   }
 
-  const pDay = personalDay(OWNER.birth, now.getFullYear(), now.getMonth() + 1, now.getDate());
-  const pMonth = personalMonth(OWNER.birth, now.getFullYear(), now.getMonth() + 1);
+  const pDay = personalDay(
+    OWNER.birth,
+    selectedDate.getFullYear(),
+    selectedDate.getMonth() + 1,
+    selectedDate.getDate()
+  );
+  const pMonth = personalMonth(
+    OWNER.birth,
+    selectedDate.getFullYear(),
+    selectedDate.getMonth() + 1
+  );
+
+  const onPrevDay = () => {
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() - 1);
+    if (dayDiff(next, realToday) >= -14) setSelectedDate(next);
+  };
+  const onNextDay = () => {
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + 1);
+    if (dayDiff(next, realToday) <= 14) setSelectedDate(next);
+  };
+  const onJumpToday = () => setSelectedDate(realToday);
+  const onPickDate = (s: string) => {
+    if (!s) return;
+    const [y, m, d] = s.split("-").map(Number);
+    const next = new Date(y, m - 1, d, 12);
+    const diff = dayDiff(next, realToday);
+    if (diff >= -14 && diff <= 14) setSelectedDate(next);
+  };
 
   return (
     <div>
       {/* ===== Hero ===== */}
       <Hero
-        date={todayLabel}
+        date={dateLabel}
         greeting={greeting}
         zodiacName={basis.sun.name}
         starName={STAR_NAME[OWNER.natal.kyusei.honmei as StarNumber]}
@@ -253,22 +331,183 @@ export default function Home() {
 
       <div className="mt-10">
         {tab === "today" ? (
-          <TodayTab
-            sun={basis.sun}
-            today={today}
-            personalDay={pDay}
-            personalMonth={pMonth}
-            personalYear={basis.numero.personal}
-            annual={basis.annual}
-            weather={weather}
-            weatherErr={weatherErr}
-            onReshuffle={() => setToday(todayCompute(basis.sun.key))}
-          />
+          <>
+            <DateNavigator
+              selectedDate={selectedDate}
+              isToday={isToday}
+              offsetDays={offsetDays}
+              onPrev={onPrevDay}
+              onNext={onNextDay}
+              onJumpToday={onJumpToday}
+              onPick={onPickDate}
+              realToday={realToday}
+            />
+            <div className="mt-8">
+              <TodayTab
+                sun={basis.sun}
+                today={today}
+                selectedDate={selectedDate}
+                isToday={isToday}
+                personalDay={pDay}
+                personalMonth={pMonth}
+                personalYear={basis.numero.personal}
+                annual={basis.annual}
+                weather={weather}
+                weatherErr={weatherErr}
+                onReshuffle={() => setReshuffleSeed((s) => s + 1)}
+              />
+            </div>
+          </>
         ) : (
           <BasisTab basis={basis} />
         )}
       </div>
     </div>
+  );
+}
+
+// ==========================================================================
+// 日付ナビゲーター（±14日）
+// ==========================================================================
+
+function DateNavigator({
+  selectedDate,
+  isToday,
+  offsetDays,
+  onPrev,
+  onNext,
+  onJumpToday,
+  onPick,
+  realToday,
+}: {
+  selectedDate: Date;
+  isToday: boolean;
+  offsetDays: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onJumpToday: () => void;
+  onPick: (s: string) => void;
+  realToday: Date;
+}) {
+  const dateStr = `${selectedDate.getFullYear()}-${String(
+    selectedDate.getMonth() + 1
+  ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+  const prevDisabled = offsetDays <= -14;
+  const nextDisabled = offsetDays >= 14;
+  const minStr = (() => {
+    const d = new Date(realToday);
+    d.setDate(d.getDate() - 14);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
+  const maxStr = (() => {
+    const d = new Date(realToday);
+    d.setDate(d.getDate() + 14);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
+
+  const dow = ["日", "月", "火", "水", "木", "金", "土"][selectedDate.getDay()];
+  const tag = isToday
+    ? "本日"
+    : offsetDays === -1 ? "昨日"
+    : offsetDays === 1 ? "明日"
+    : offsetDays < 0 ? `${-offsetDays}日前`
+    : `${offsetDays}日後`;
+
+  // 横スクロールできる15日タイムライン
+  const timeline: { date: Date; offset: number }[] = [];
+  for (let i = -14; i <= 14; i++) {
+    const d = new Date(realToday);
+    d.setDate(d.getDate() + i);
+    timeline.push({ date: d, offset: i });
+  }
+
+  return (
+    <section className="rounded-2xl bg-paper border border-gold-300 p-5 sm:p-6">
+      {/* 上段: prev / 中央表示 / next */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <button
+          onClick={onPrev}
+          disabled={prevDisabled}
+          className="rounded-lg border border-ink-300 px-3 py-2 hover:border-gold-500 disabled:opacity-30 disabled:cursor-not-allowed text-sm font-medium"
+        >
+          ←
+        </button>
+        <div className="flex-1 text-center">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">
+            {tag}
+          </div>
+          <div className="font-display text-2xl sm:text-3xl text-ink-900 mt-0.5">
+            {selectedDate.getMonth() + 1}月 {selectedDate.getDate()}日
+            <span className="text-sm text-ink-500 ml-2">（{dow}）</span>
+          </div>
+          <div className="text-xs text-ink-400 mt-0.5">
+            {selectedDate.getFullYear()}年
+          </div>
+        </div>
+        <button
+          onClick={onNext}
+          disabled={nextDisabled}
+          className="rounded-lg border border-ink-300 px-3 py-2 hover:border-gold-500 disabled:opacity-30 disabled:cursor-not-allowed text-sm font-medium"
+        >
+          →
+        </button>
+      </div>
+
+      {/* 中段: 15日タイムライン */}
+      <div className="flex gap-1 overflow-x-auto py-2 -mx-2 px-2 snap-x">
+        {timeline.map(({ date, offset }) => {
+          const isSelected = isSameDay(date, selectedDate);
+          const isReal = isSameDay(date, realToday);
+          const dayDow = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+          const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+          const cls = isSelected
+            ? "bg-kachi-fade text-sand-50 border-2 border-gold-500 shadow-lg"
+            : isReal
+            ? "bg-gold-50 border border-gold-400 text-ink-900"
+            : "bg-white border border-ink-200 text-ink-700 hover:border-gold-400";
+          return (
+            <button
+              key={offset}
+              onClick={() => {
+                const s = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                onPick(s);
+              }}
+              className={`shrink-0 snap-center rounded-md px-3 py-2 text-center transition-colors ${cls}`}
+            >
+              <div className={`text-[9px] tracking-widest ${isWeekend && !isSelected ? "text-shu-600" : ""}`}>
+                {dayDow}
+              </div>
+              <div className="font-display text-lg tabular-nums">
+                {date.getDate()}
+              </div>
+              {isReal && !isSelected && (
+                <div className="text-[8px] text-gold-700 font-medium">本日</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 下段: 日付ピッカー & 本日に戻る */}
+      <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-ink-200">
+        <input
+          type="date"
+          value={dateStr}
+          min={minStr}
+          max={maxStr}
+          onChange={(e) => onPick(e.target.value)}
+          className="rounded-md border border-ink-300 px-3 py-1.5 text-sm focus:outline-none focus:border-gold-500"
+        />
+        {!isToday && (
+          <button
+            onClick={onJumpToday}
+            className="rounded-md bg-kachi-fade text-sand-50 px-4 py-1.5 text-sm hover:bg-kachi-700 border border-gold-500"
+          >
+            本日に戻る
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -365,6 +604,8 @@ function TabButton({
 function TodayTab({
   sun,
   today,
+  selectedDate,
+  isToday,
   personalDay: pDay,
   personalMonth: pMonth,
   personalYear,
@@ -375,6 +616,8 @@ function TodayTab({
 }: {
   sun: Zodiac;
   today: TodayResults;
+  selectedDate: Date;
+  isToday: boolean;
   personalDay: number;
   personalMonth: number;
   personalYear: number;
@@ -394,18 +637,18 @@ function TodayTab({
   const sb = todayShadowBlessing(pDay);
   const timing = currentHourTiming();
 
-  // 新しい高精度データ
-  const todayDP = todayDayPillar();
-  const todayTB = todayTongbianForOwner();
-  const hourlyChart = todayHourlyChart();
-  const luckyHours = todayLuckyHours();
-  const personalHex = todayPersonalHexagram();
-  const synthesis = todaySynthesis(pDay);
+  // 選択日に基づく高精度データ
+  const todayDP = todayDayPillar(selectedDate);
+  const todayTB = todayTongbianForOwner(selectedDate);
+  const hourlyChart = todayHourlyChart(selectedDate);
+  const luckyHours = todayLuckyHours(selectedDate);
+  const personalHex = todayPersonalHexagram(OWNER.birth, selectedDate);
+  const synthesis = todaySynthesis(pDay, selectedDate);
   const familyAdvice = todayFamilyAdvice(pDay);
 
-  // 香水推薦
+  // 香水推薦（天気は当日のみ反映、それ以外は季節+時間+デイのみ）
   const now = new Date();
-  const weatherTags = weather
+  const weatherTags = isToday && weather
     ? classifyWeather(weather.weatherCode, weather.tempC)
     : [];
   const perfumeRecs: PerfumeMatch[] = recommendPerfumes(
@@ -418,8 +661,14 @@ function TodayTab({
 
   return (
     <div className="space-y-12">
-      {/* ━━ 0. 大阪の天気 ━━ */}
-      <WeatherCard weather={weather} weatherErr={weatherErr} />
+      {/* ━━ 0. 大阪の天気（当日のみ） ━━ */}
+      {isToday ? (
+        <WeatherCard weather={weather} weatherErr={weatherErr} />
+      ) : (
+        <article className="rounded-2xl bg-sand-50 border border-ink-200 p-5 text-sm text-ink-500 text-center">
+          天気は本日のみ表示されます（{selectedDate.getMonth() + 1}/{selectedDate.getDate()} は日付占断のみ）
+        </article>
+      )}
 
       {/* ━━ 0.5 本日の統合シンセシス（最重要） ━━ */}
       <TodaySynthesisHero
