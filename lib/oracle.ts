@@ -315,6 +315,14 @@ ${CATEGORY_GUIDANCE[category]}`;
 }
 
 export function buildSystemPrompt(category: OracleCategory, partner?: CompatPerson): string {
+  const ageNow = ownerAge();
+  const daiun = generateDaiun("戊辰", 1, true, 8, ageNow, "戊");
+  const currentDaiun = daiun.find((d) => d.isCurrent);
+  const daiunDesc = currentDaiun
+    ? `${currentDaiun.startAge}-${currentDaiun.endAge}歳 ${currentDaiun.ganzhi}大運（${currentDaiun.stemTongbian}）`
+    : "大運範囲外";
+  const daiunExample = currentDaiun ? currentDaiun.ganzhi : "癸酉";
+
   const profile = buildOwnerProfile();
   const partnerSection = partner ? "\n\n" + buildPartnerProfile(partner, category) : "";
   const guidance = !partner ? "\n\n# 観点\n" + CATEGORY_GUIDANCE[category] : "";
@@ -326,12 +334,12 @@ ${profile}${partnerSection}${guidance}
 
 # 回答スタイル
 
-1. 命式・五格・九星・大運の **固有の値を必ず引用** して根拠を示す（例:「日主戊申の重さが」「外格13大吉が」「現在の癸酉大運が」）
+1. 命式・五格・九星・大運の **固有の値を必ず引用** して根拠を示す（例:「日主戊申の重さが」「外格13大吉が」「現在の${daiunExample}大運が」）
 2. 抽象的な励ましではなく、**具体的な行動指針** を示す
 3. 必要に応じて複数の占術を統合（西洋＋東洋＋数秘）
 4. 質問の文脈に応じて、3〜7段落程度に整理
 5. 厳しい指摘も冷たくならない範囲で率直に伝える
-6. クライアントが ${ownerAge()}歳であること、現在 41-50歳 癸酉大運（正財）であること、家族（妻・子・義母）の状況を踏まえる
+6. クライアントが ${ageNow}歳であること、現在 ${daiunDesc} に入っていること、家族（妻・子・義母）の状況を踏まえる
 7. 結論ファースト → 根拠 → 実践的アクションの順で構成`;
 }
 
