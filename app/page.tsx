@@ -74,6 +74,7 @@ import {
   currentHourTiming,
   todayBestDirection,
   DAY_COLORS,
+  DAY_ITEMS,
   todayKeyPerson,
   DAY_CAUTIONS,
   DAY_FOODS,
@@ -846,7 +847,8 @@ function TodayTab({
           </article>
           <article className="rounded-xl border border-ink-200 p-6 bg-white">
             <div className="text-[10px] tracking-[0.3em] uppercase text-ink-400">Item</div>
-            <div className="font-display text-xl mt-2">{lucky.item}</div>
+            <div className="font-display text-xl mt-2">{DAY_ITEMS[pDay].item}</div>
+            <p className="text-xs text-ink-500 mt-2 leading-relaxed">{DAY_ITEMS[pDay].reason}</p>
           </article>
           <article className="rounded-xl border border-ink-200 p-6 bg-white">
             <div className="text-[10px] tracking-[0.3em] uppercase text-ink-400">Food</div>
