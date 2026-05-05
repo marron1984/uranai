@@ -167,8 +167,11 @@ export const SOLAR_TERMS: SolarTerm[] = [
 
 // 太陽が指定黄経に達する時刻を二分法で算出
 function findSolarTermDate(year: number, targetLon: number): Date {
-  // 大まかな日（黄経 0=春分=80日目相当）
-  const approxDay = ((normalize360(targetLon) + 285) % 360) / 360 * 365.2422 + 1;
+  // 1月1日の太陽黄経は約 280°（冬至 12/22=270° の約10日後）
+  // 太陽は1日に約 0.9856° 進む
+  // 黄経 L の概算日数 = ((L - 280 + 360) mod 360) / 0.9856 + 1
+  const approxDay =
+    ((normalize360(targetLon) - 280 + 360) % 360) * (365.2422 / 360) + 1;
   const approx = new Date(Date.UTC(year, 0, 1));
   approx.setUTCDate(Math.round(approxDay));
   if (approx.getUTCFullYear() !== year) {
