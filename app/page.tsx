@@ -164,6 +164,8 @@ import {
   streamOracle,
   fileToImage,
   imageToDataUrl,
+  copyProfileMarkdown,
+  downloadProfileMarkdown,
   CATEGORY_LABELS,
   MODEL_LABELS,
   type OracleCategory,
@@ -2950,6 +2952,9 @@ function OracleTab() {
         </button>
       </section>
 
+      {/* プロフィールエクスポート */}
+      <ProfileExport />
+
       {/* スレッド一覧 + 新規作成 */}
       <section className="rounded-2xl bg-paper border border-gold-300 p-5 sm:p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
@@ -3180,6 +3185,184 @@ function OracleTab() {
         </section>
       )}
     </div>
+  );
+}
+
+// ==========================================================================
+// プロフィールエクスポート（Claude.ai プロジェクト等で利用するため）
+// ==========================================================================
+
+function ProfileExport() {
+  const [includeInstructions, setIncludeInstructions] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [showHowTo, setShowHowTo] = useState(false);
+
+  const onCopy = async () => {
+    try {
+      await copyProfileMarkdown(includeInstructions);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      alert("コピーに失敗しました");
+    }
+  };
+
+  const onDownload = () => {
+    downloadProfileMarkdown(includeInstructions);
+  };
+
+  return (
+    <section className="rounded-2xl bg-paper border border-gold-300 p-5 sm:p-6">
+      <div className="flex items-baseline justify-between gap-2 mb-3 flex-wrap">
+        <div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700">
+            Profile Export ／ プロフィール書き出し
+          </div>
+          <h3 className="font-display text-xl mt-1">
+            Claude アプリで個人占術相談に使う
+          </h3>
+        </div>
+      </div>
+
+      <p className="text-sm text-ink-700 leading-relaxed">
+        命式・大運・五格・九星・家族・当日のコズミック等を含む完全なプロフィールを
+        <strong>Markdown 形式</strong>でエクスポートします。
+        Claude.ai / Claude Desktop / Claude Mobile アプリの<strong>プロジェクト機能</strong>に
+        添付すれば、いつでもどこでもあなた専用の占術相談ができます（音声入力含む）。
+      </p>
+
+      {/* オプション */}
+      <label className="flex items-center gap-2 mt-4 text-sm cursor-pointer">
+        <input
+          type="checkbox"
+          checked={includeInstructions}
+          onChange={(e) => setIncludeInstructions(e.target.checked)}
+          className="rounded"
+        />
+        <span>占い師としての回答スタイル指示も含める（推奨）</span>
+      </label>
+
+      {/* ボタン */}
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button
+          onClick={onCopy}
+          className={`rounded-md px-4 py-2 text-sm font-medium border ${
+            copied
+              ? "bg-gold-500 text-white border-gold-500"
+              : "bg-kachi-fade text-sand-50 border-gold-500 hover:bg-kachi-700"
+          }`}
+        >
+          {copied ? "✓ コピー完了" : "📋 Markdown をコピー"}
+        </button>
+        <button
+          onClick={onDownload}
+          className="rounded-md bg-white border border-ink-300 px-4 py-2 text-sm hover:border-gold-500"
+        >
+          💾 .md ファイルでダウンロード
+        </button>
+        <button
+          onClick={() => setShowHowTo((s) => !s)}
+          className="rounded-md border border-ink-300 px-4 py-2 text-sm hover:border-gold-500"
+        >
+          {showHowTo ? "使い方を閉じる" : "❓ 使い方を見る"}
+        </button>
+      </div>
+
+      {/* 使い方 */}
+      {showHowTo && (
+        <div className="mt-5 space-y-4 border-t border-gold-300 pt-5">
+          <HowToCard
+            badge="A"
+            title="Claude.ai のプロジェクトに使う（最推奨）"
+            steps={[
+              <>
+                <a
+                  href="https://claude.ai/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-gold-700"
+                >
+                  claude.ai
+                </a>{" "}
+                を開いてサインイン（Pro/Team プラン推奨）
+              </>,
+              "サイドバーから「+ 新しいプロジェクト」を作成",
+              "プロジェクト名を「占術プロフィール - しゅんすけ」など命名",
+              "上の「.md ファイルでダウンロード」を押し、生成された .md を「プロジェクト知識」にアップロード",
+              "そのプロジェクト内で会話を開始すると、Claude は常にあなたの命式を参照して回答する",
+            ]}
+            note="プロジェクト機能は Claude.ai Pro/Team 限定。Free プランの場合は B の方法で。"
+          />
+
+          <HowToCard
+            badge="B"
+            title="Claude.ai / Desktop / Mobile で会話冒頭に貼り付け"
+            steps={[
+              "上の「Markdown をコピー」を押す",
+              "Claude.ai (web/desktop/mobile) で新しい会話を開く",
+              "最初のメッセージにペースト → 送信",
+              "Claude が「了解しました」と応答したら、続けて自由に質問",
+            ]}
+            note="毎回の会話冒頭に貼る必要があるが、無料プランでも使える。Mobile アプリではコピー/ペーストが楽。"
+          />
+
+          <HowToCard
+            badge="C"
+            title="Claude モバイルアプリで音声相談"
+            steps={[
+              "B の方法でプロフィールを最初のメッセージに貼り付け",
+              "Claude モバイルアプリの音声入力ボタン🎤を押して話しかける",
+              "「日主戊申から見て、今の悩みについて教えて」など自由に",
+              "歩きながら・運転中（停車時）・寝る前にも相談可能",
+            ]}
+          />
+
+          <HowToCard
+            badge="D"
+            title="Claude Desktop で常時アシスタント化"
+            steps={[
+              "Claude Desktop で新規プロジェクト作成",
+              "Markdown を「プロジェクト知識」として添付",
+              "ピン留めしておけば、デスクトップ作業中いつでも呼び出せる",
+            ]}
+          />
+
+          <div className="rounded-md bg-shu-50 border border-shu-200 p-3 text-xs text-ink-700">
+            ⚠️ プロフィールには生年月日・出生地・家族情報など個人情報が含まれます。
+            共有 PC やパブリックなプロジェクトには載せないよう注意してください。
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function HowToCard({
+  badge,
+  title,
+  steps,
+  note,
+}: {
+  badge: string;
+  title: string;
+  steps: React.ReactNode[];
+  note?: string;
+}) {
+  return (
+    <article className="rounded-lg bg-white border border-ink-200 p-4">
+      <div className="flex items-baseline gap-3 mb-2">
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gold-500 text-white text-sm font-display">
+          {badge}
+        </span>
+        <h4 className="font-display text-base">{title}</h4>
+      </div>
+      <ol className="ml-10 list-decimal text-sm text-ink-700 space-y-1">
+        {steps.map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+      </ol>
+      {note && <p className="ml-10 mt-2 text-xs text-ink-500">{note}</p>}
+    </article>
   );
 }
 

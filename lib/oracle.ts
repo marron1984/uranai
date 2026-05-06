@@ -193,7 +193,7 @@ const CATEGORY_GUIDANCE: Record<OracleCategory, string> = {
     "**チームメンバー・同僚** としての協働相性を評価してください。役割分担、摩擦点、コミュニケーションの癖、最適なプロジェクト編成。",
 };
 
-function buildOwnerProfile(): string {
+export function buildOwnerProfile(): string {
   const now = new Date();
   const ageNow = ownerAge();
   const sunNatal = getSunSign(5, 2);
@@ -461,4 +461,76 @@ export async function streamOracle({
     }
   }
   return full;
+}
+
+// ============================================================
+// プロフィールのエクスポート（Claude.ai プロジェクト等で利用）
+// ============================================================
+
+const EXPORT_SYSTEM_INSTRUCTIONS = `# 占術相談における回答スタイル
+
+あなたは古来の占術（西洋占星術・四柱推命・九星気学・数秘術・姓名判断・易経・タロット・風水）すべてに精通した占い師として、上記のプロフィールに基づいて回答してください。
+
+## 重要な原則
+
+1. **命式・五格・九星・大運の固有値を必ず引用**して根拠を示す
+   - 例:「日主戊申の重さが」「外格13大吉が」「現在の癸酉大運（正財）が」
+2. 抽象的な励ましではなく、**具体的な行動指針**を示す
+3. 必要に応じて複数の占術を統合（西洋＋東洋＋数秘）
+4. 質問の文脈に応じて、3〜7段落程度に整理
+5. 厳しい指摘も冷たくならない範囲で率直に伝える
+6. 結論ファースト → 根拠 → 実践的アクションの順で構成
+7. 家族（妻・子・義母）の状況を踏まえて回答する
+
+## 相性鑑定をする時
+
+- ビジネスパートナー: 共同経営の長期適性、役割分担、利益分配の論点
+- 採用候補: 育成可能性、配置すべき役割、評価上の癖
+- 取引先: 信頼度、長期取引の継続性
+- 恋愛: 感情・身体性・長期同居適性、結婚観
+- 友人: 心理的距離感、楽しさの相性
+- 家族: 血縁・共同生活の相性
+- チーム: 協働性、摩擦点、最適配置`;
+
+export function buildProfileMarkdown(includeInstructions: boolean = true): string {
+  const profile = buildOwnerProfile();
+  const header = `# ${OWNER.displayName}（${OWNER.nameSei}${OWNER.nameMei}）の占術プロフィール
+
+> このドキュメントは個人占術ダッシュボードから生成されました。
+> Claude（Web / Desktop / Mobile）の会話冒頭またはプロジェクト知識として利用することで、
+> あなた専用の命式に基づいた占術相談ができます。
+>
+> 生成日時: ${new Date().toLocaleString("ja-JP")}
+
+---
+
+${profile}
+
+`;
+  return includeInstructions
+    ? header + "\n---\n\n" + EXPORT_SYSTEM_INSTRUCTIONS
+    : header;
+}
+
+// ブラウザでファイルとしてダウンロード
+export function downloadProfileMarkdown(includeInstructions: boolean = true): void {
+  if (typeof window === "undefined") return;
+  const md = buildProfileMarkdown(includeInstructions);
+  const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.download = `${OWNER.nameSei}${OWNER.nameMei}-profile-${dateStr}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// クリップボードにコピー
+export async function copyProfileMarkdown(includeInstructions: boolean = true): Promise<void> {
+  if (typeof window === "undefined") return;
+  const md = buildProfileMarkdown(includeInstructions);
+  await navigator.clipboard.writeText(md);
 }
