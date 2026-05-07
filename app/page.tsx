@@ -702,7 +702,7 @@ function TodayTab({
   const luckyHours = todayLuckyHours(selectedDate);
   const personalHex = todayPersonalHexagram(OWNER.birth, selectedDate);
   const synthesis = todaySynthesis(pDay, selectedDate);
-  const familyAdvice = todayFamilyAdvice(pDay);
+  const familyAdvice = todayFamilyAdvice(pDay, selectedDate);
 
   // 香水推薦（天気は当日のみ反映、それ以外は季節+時間+デイのみ）
   const now = new Date();
@@ -2670,7 +2670,10 @@ function PersonalHexSection({
 function FamilyAdviceSection({
   advice,
 }: {
-  advice: { spouse: string; child: string };
+  advice: {
+    spouse: { headline: string; actions: string[] };
+    child: { headline: string; actions: string[] };
+  };
 }) {
   return (
     <NumberedSection num="壱・〇" label="Family Today" title="家族への今日の関わり方">
@@ -2679,15 +2682,38 @@ function FamilyAdviceSection({
           <div className="text-[10px] tracking-[0.3em] uppercase text-gold-700 mb-2">
             妻への接し方
           </div>
-          <p className="text-sm text-ink-800 leading-relaxed">{advice.spouse}</p>
+          <p className="font-display text-base text-ink-900 leading-relaxed mb-3">
+            {advice.spouse.headline}
+          </p>
+          <ul className="space-y-2">
+            {advice.spouse.actions.map((a, i) => (
+              <li key={i} className="flex gap-2 text-sm text-ink-800 leading-relaxed">
+                <span className="text-gold-700 shrink-0">◆</span>
+                <span>{a}</span>
+              </li>
+            ))}
+          </ul>
         </article>
         <article className="rounded-xl bg-paper border border-ink-200 p-5">
           <div className="text-[10px] tracking-[0.3em] uppercase text-ink-500 mb-2">
             子への接し方
           </div>
-          <p className="text-sm text-ink-800 leading-relaxed">{advice.child}</p>
+          <p className="font-display text-base text-ink-900 leading-relaxed mb-3">
+            {advice.child.headline}
+          </p>
+          <ul className="space-y-2">
+            {advice.child.actions.map((a, i) => (
+              <li key={i} className="flex gap-2 text-sm text-ink-800 leading-relaxed">
+                <span className="text-ink-500 shrink-0">◆</span>
+                <span>{a}</span>
+              </li>
+            ))}
+          </ul>
         </article>
       </div>
+      <p className="mt-3 text-[10px] text-ink-400 text-center">
+        ※ 各日6つのアクション候補から、日付シードで3つを選定（同じ日は同じ提案、別日は変化）
+      </p>
     </NumberedSection>
   );
 }
