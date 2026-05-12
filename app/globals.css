@@ -1,26 +1,98 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Noto+Serif+JP:wght@400;500;700;900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #fafaf7;
-  --foreground: #0d0d0c;
+  --background: #0a0a0f;
+  --foreground: #efe8d4;
+  --copper: #c8a268;
+  --copper-bright: #e0b97a;
 }
 
-html, body {
+html {
+  background: var(--background);
+}
+
+body {
   background: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* 星明かりの背景（ホテルラウンジ風のグロー） */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(200, 162, 104, 0.05) 0%, transparent 35%),
+    radial-gradient(circle at 85% 88%, rgba(82, 93, 133, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(196, 69, 69, 0.03) 0%, transparent 60%);
+}
+
+/* スターダスト（点描の星） */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, rgba(255, 250, 220, 0.5), transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255, 250, 220, 0.35), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 250, 220, 0.45), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 250, 220, 0.4), transparent),
+    radial-gradient(1px 1px at 170px 20px, rgba(255, 250, 220, 0.35), transparent),
+    radial-gradient(1px 1px at 210px 110px, rgba(255, 250, 220, 0.5), transparent),
+    radial-gradient(1px 1px at 250px 50px, rgba(255, 250, 220, 0.3), transparent),
+    radial-gradient(1px 1px at 290px 90px, rgba(255, 250, 220, 0.45), transparent);
+  background-size: 320px 140px;
+  opacity: 0.55;
+  animation: stardust 200s linear infinite;
+}
+
+@keyframes stardust {
+  0% { background-position: 0 0; }
+  100% { background-position: 320px 140px; }
+}
+
+main, header, footer {
+  position: relative;
+  z-index: 1;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* 装飾的なディバイダー */
+::selection {
+  background: rgba(200, 162, 104, 0.35);
+  color: #fff5d8;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(200, 162, 104, 0.18);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 162, 104, 0.3);
+}
+
+/* 装飾的なディバイダー（銅金グラデ） */
 .divider-decorative {
   position: relative;
   text-align: center;
@@ -32,7 +104,7 @@ html, body {
   top: 50%;
   width: 40%;
   height: 1px;
-  background: linear-gradient(to right, transparent, #c5a23a, transparent);
+  background: linear-gradient(to right, transparent, #c8a268, transparent);
 }
 .divider-decorative::before { left: 0; }
 .divider-decorative::after  { right: 0; }
@@ -40,7 +112,7 @@ html, body {
   display: inline-block;
   padding: 0 12px;
   background: var(--background);
-  color: #a78627;
+  color: #d6b260;
   font-size: 12px;
   letter-spacing: 0.3em;
 }
@@ -52,9 +124,10 @@ html, body {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: 1px solid #0d0d0c;
+  border: 1px solid #c8a268;
+  color: #c8a268;
   border-radius: 9999px;
-  font-family: ui-serif, Georgia, serif;
+  font-family: "Cormorant Garamond", ui-serif, Georgia, serif;
   font-size: 12px;
   letter-spacing: 0;
 }
@@ -62,8 +135,30 @@ html, body {
 /* キーワードハイライト */
 .kw {
   font-family: ui-serif, Georgia, serif;
-  background: linear-gradient(180deg, transparent 60%, rgba(197, 162, 58, 0.25) 60%);
+  background: linear-gradient(180deg, transparent 60%, rgba(200, 162, 104, 0.3) 60%);
   padding: 0 0.1em;
+}
+
+/* グロー効果 */
+.glow-copper {
+  text-shadow: 0 0 18px rgba(200, 162, 104, 0.5), 0 0 8px rgba(200, 162, 104, 0.3);
+}
+.glow-soft {
+  box-shadow: 0 0 40px 0 rgba(200, 162, 104, 0.12), 0 0 0 1px rgba(200, 162, 104, 0.18);
+}
+
+/* ガラス風カード */
+.glass {
+  background: rgba(28, 28, 40, 0.55);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(200, 162, 104, 0.18);
+}
+.glass-elevated {
+  background: rgba(40, 40, 56, 0.7);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  border: 1px solid rgba(200, 162, 104, 0.28);
 }
 
 /* 縦書き風のセクションラベル */

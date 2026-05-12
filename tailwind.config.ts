@@ -26,6 +26,33 @@ const config: Config = {
           900: "#0d0d0c",
           950: "#050504",
         },
+        // 夜空・深淵
+        midnight: {
+          50:  "#e6e6ec",
+          100: "#bdbdc9",
+          200: "#9494a3",
+          300: "#6c6c7f",
+          400: "#48485c",
+          500: "#2e2e3e",
+          600: "#1f1f2a",
+          700: "#15151c",
+          800: "#0e0e14",
+          900: "#0a0a0f",
+          950: "#050508",
+        },
+        // 銅金（旧 gold より温かみ）
+        copper: {
+          50:  "#fbf6eb",
+          100: "#f3e6c6",
+          200: "#e6cc8e",
+          300: "#d6b260",
+          400: "#c8a268",
+          500: "#b58a4a",
+          600: "#956d35",
+          700: "#705222",
+          800: "#4a3614",
+          900: "#2b1f0c",
+        },
         // 古典的な深紫紺（kachi-iro）
         kachi: {
           50: "#eff1f7",
@@ -39,7 +66,7 @@ const config: Config = {
           800: "#0e1222",
           900: "#080b18",
         },
-        // 墨金（sumikin）— 落ち着いた金
+        // 墨金（sumikin）— 既存
         gold: {
           50: "#fbf7eb",
           100: "#f3ebcc",
@@ -52,7 +79,7 @@ const config: Config = {
           800: "#473811",
           900: "#2c220a",
         },
-        // 砂色（sand）— 高級感のある紙の色
+        // 砂色（sand）— 既存
         sand: {
           50: "#fbf8f1",
           100: "#f5efe1",
@@ -65,7 +92,7 @@ const config: Config = {
           800: "#553f1f",
           900: "#332512",
         },
-        // 朱（shu）— アクセント・警告
+        // 朱（shu）— 既存
         shu: {
           50: "#fbeeee",
           100: "#f4cbcb",
@@ -82,7 +109,13 @@ const config: Config = {
       backgroundImage: {
         "gold-fade": "linear-gradient(135deg, #fbf7eb 0%, #f5efe1 100%)",
         "kachi-fade": "linear-gradient(135deg, #0e1222 0%, #222a4a 100%)",
+        "midnight-fade": "linear-gradient(135deg, #050508 0%, #15151c 60%, #1f1f2a 100%)",
+        "copper-glow": "radial-gradient(circle, rgba(200,162,104,0.25) 0%, rgba(200,162,104,0) 70%)",
         "paper": "radial-gradient(circle at top right, #fbf8f1 0%, #fafaf7 100%)",
+      },
+      boxShadow: {
+        "copper-glow": "0 0 40px 0 rgba(200,162,104,0.15), 0 0 80px 0 rgba(200,162,104,0.08)",
+        "copper-glow-lg": "0 0 60px 0 rgba(200,162,104,0.25), 0 0 120px 0 rgba(200,162,104,0.12)",
       },
       letterSpacing: {
         "wider": "0.08em",
