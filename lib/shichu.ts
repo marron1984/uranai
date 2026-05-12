@@ -98,8 +98,37 @@ const MONTH_NODES: { month: number; day: number; branch: number }[] = [
   { month: 12, day: 7, branch: 0 },  // 大雪 → 子
 ];
 
-function monthBranchIndex(month: number, day: number): number {
-  // 当該月の節入り日に達していなければ前月の支
+// 主要節気の黄経 → 月支のマッピング
+// 立春(315)→寅(2), 啓蟄(345)→卯(3), 清明(15)→辰(4), 立夏(45)→巳(5),
+// 芒種(75)→午(6), 小暑(105)→未(7), 立秋(135)→申(8), 白露(165)→酉(9),
+// 寒露(195)→戌(10), 立冬(225)→亥(11), 大雪(255)→子(0), 小寒(285)→丑(1)
+const TERM_LON_TO_BRANCH: Record<number, number> = {
+  315: 2, 345: 3, 15: 4, 45: 5, 75: 6, 105: 7,
+  135: 8, 165: 9, 195: 10, 225: 11, 255: 0, 285: 1,
+};
+
+function monthBranchIndex(month: number, day: number, year?: number): number {
+  // Meeus 算出の節気日付があれば優先利用 (year が渡された場合)
+  if (year !== undefined) {
+    try {
+      const terms = [
+        ...solarTermsOfYear(year - 1),
+        ...solarTermsOfYear(year),
+      ].filter((t) => t.longitude in TERM_LON_TO_BRANCH);
+      const target = new Date(Date.UTC(year, month - 1, day));
+      // target 以前の最も新しい主要節気を探す
+      let latest = terms[0];
+      for (const t of terms) {
+        if (t.date.getTime() <= target.getTime() && t.date > latest.date) {
+          latest = t;
+        }
+      }
+      return TERM_LON_TO_BRANCH[latest.longitude];
+    } catch {
+      // フォールバックへ
+    }
+  }
+  // フォールバック: 固定日テーブル
   for (let i = MONTH_NODES.length - 1; i >= 0; i--) {
     const n = MONTH_NODES[i];
     if (month > n.month || (month === n.month && day >= n.day)) {
@@ -412,4 +441,46 @@ export function generateDaiun(
     });
   }
   return periods;
+}
+
+// ============================================================
+// 立運（大運起点年齢）の正確な算出
+// ============================================================
+// 男+陽干 or 女+陰干 → 順行 (next 節入りまでの日数 / 3)
+// 男+陰干 or 女+陽干 → 逆行 (prev 節入りからの日数 / 3)
+
+import { solarTermsOfYear } from "@/lib/astronomy";
+
+const YANG_STEMS = new Set(["甲", "丙", "戊", "庚", "壬"]);
+
+// 主要節気 (月柱境界) の黄経
+const MAIN_TERM_LONGITUDES = [315, 345, 15, 45, 75, 105, 135, 165, 195, 225, 255, 285];
+
+export function calcRuiun(birth: string, yearStem: string, gender: "male" | "female"): {
+  startingAge: number;
+  forward: boolean;
+  daysToTerm: number;
+} {
+  const [y, m, d] = birth.split("-").map(Number);
+  const birthDate = new Date(Date.UTC(y, m - 1, d));
+  const isYang = YANG_STEMS.has(yearStem);
+  const forward = (gender === "male" && isYang) || (gender === "female" && !isYang);
+
+  // 前後の主要節気を集める (前年・当年・翌年)
+  const allTerms = [
+    ...solarTermsOfYear(y - 1),
+    ...solarTermsOfYear(y),
+    ...solarTermsOfYear(y + 1),
+  ].filter((t) => MAIN_TERM_LONGITUDES.includes(t.longitude));
+
+  let nearestDays = Infinity;
+  for (const t of allTerms) {
+    const diffDays = (t.date.getTime() - birthDate.getTime()) / 86400000;
+    if (forward && diffDays > 0 && diffDays < nearestDays) nearestDays = diffDays;
+    if (!forward && diffDays < 0 && Math.abs(diffDays) < nearestDays)
+      nearestDays = Math.abs(diffDays);
+  }
+  if (!isFinite(nearestDays)) nearestDays = 0;
+  const startingAge = Math.max(0, Math.round(nearestDays / 3));
+  return { startingAge, forward, daysToTerm: nearestDays };
 }

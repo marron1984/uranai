@@ -17,7 +17,7 @@ import {
   ZODIAC,
   type Zodiac,
 } from "@/lib/astrology";
-import { drawCards, drawCardsSeeded, SPREAD_LABELS, type DrawnCard } from "@/lib/tarot";
+import { drawCards, drawCardsSeeded, drawCardsFullSeeded, SPREAD_LABELS, type DrawnCard } from "@/lib/tarot";
 import {
   lifePathNumber,
   soulNumber,
@@ -136,9 +136,18 @@ import {
   currentSolarTerm,
   sunLongitude,
   moonLongitude,
+  ascendant,
+  midheaven,
+  signFromLongitude,
+  fullChart,
+  aspectBetween,
+  ASPECT_LABEL,
   SOLAR_TERM_TEXT,
   MOON_PHASE_TEXT,
+  type PlanetPosition,
+  type FullChart,
 } from "@/lib/astronomy";
+import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
 import {
   type JournalEntry,
   type Hit,
@@ -206,7 +215,7 @@ function todayCompute(
   const yaos = castHexagramSeeded(fullSeed);
   return {
     daily: getDailyFortune(zodiacKey, date),
-    tarot: drawCardsSeeded(3, fullSeed ^ 0xa5a5a5a5),
+    tarot: drawCardsFullSeeded(3, fullSeed ^ 0xa5a5a5a5),
     iching: {
       yaos,
       hex: hexagramFromYaos(yaos),
@@ -3446,59 +3455,83 @@ function CosmicPanel({ date }: { date: Date }) {
   const moonSign = useMemo(() => accurateMoonSign(date), [date]);
   const phase = useMemo(() => moonPhase(date), [date]);
   const term = useMemo(() => currentSolarTerm(date), [date]);
+  // 大阪基準のフルチャート（惑星位置・ASC/MC）
+  const chart = useMemo(() => fullChart(date, OWNER.birthplace.lng, OWNER.birthplace.lat), [date]);
+  const dailyStar = useMemo(() => dailyKyuseiStar(date), [date]);
+  const hourlyStar = useMemo(() => hourlyKyuseiStar(date), [date]);
 
   return (
-    <section className="rounded-2xl bg-kachi-fade text-sand-50 p-6 sm:p-8 relative overflow-hidden">
+    <section className="rounded-2xl bg-midnight-fade text-sand-50 p-6 sm:p-8 relative overflow-hidden shadow-copper-glow ring-1 ring-copper-500/20">
       <div className="absolute -top-12 -left-12 w-72 h-72 rounded-full bg-copper-500/10 blur-3xl" />
       <div className="absolute -bottom-12 -right-12 w-72 h-72 rounded-full bg-shu-500/10 blur-3xl" />
       <div className="relative">
         <div className="text-[10px] tracking-[0.4em] uppercase text-copper-300">
           Cosmic ／ 当日の天文
         </div>
+
+        {/* 上段: 太陽・月・月相・節気 */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-          <CosmicCell
-            label="太陽"
-            big={`${sunSign.name}`}
-            sub={`${sunSign.degree.toFixed(1)}°`}
-          />
-          <CosmicCell
-            label="月"
-            big={`${moonSign.name}`}
-            sub={`${moonSign.degree.toFixed(1)}°`}
-          />
-          <CosmicCell
-            label="月相"
-            big={`${phase.emoji} ${phase.name}`}
-            sub={`${phase.age.toFixed(1)}日齢 / ${(phase.illumination * 100).toFixed(0)}%`}
-          />
-          <CosmicCell
-            label="節気"
-            big={term.term}
-            sub={`${term.daysSinceStart}日目 → ${term.nextTerm}まで${term.daysUntilNext}日`}
-          />
+          <CosmicCell label="太陽" big={sunSign.name} sub={`${sunSign.degree.toFixed(1)}°`} />
+          <CosmicCell label="月" big={moonSign.name} sub={`${moonSign.degree.toFixed(1)}°`} />
+          <CosmicCell label="月相" big={`${phase.emoji} ${phase.name}`}
+            sub={`${phase.age.toFixed(1)}日齢 / ${(phase.illumination * 100).toFixed(0)}%`} />
+          <CosmicCell label="節気" big={term.term}
+            sub={`${term.daysSinceStart}日目 → ${term.nextTerm}まで${term.daysUntilNext}日`} />
+        </div>
+
+        {/* 中段: 惑星 (水星・金星・火星・木星・土星) */}
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <PlanetCell planet={chart.mercury} />
+          <PlanetCell planet={chart.venus} />
+          <PlanetCell planet={chart.mars} />
+          <PlanetCell planet={chart.jupiter} />
+          <PlanetCell planet={chart.saturn} />
+        </div>
+
+        {/* 下段: ASC/MC + 日盤・時盤九星 */}
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <CosmicCell label="ASC (大阪基準)" big={chart.asc.sign} sub={`${chart.asc.degree.toFixed(1)}°`} />
+          <CosmicCell label="MC (天頂)" big={chart.mc.sign} sub={`${chart.mc.degree.toFixed(1)}°`} />
+          <CosmicCell label="日盤九星" big={`${dailyStar}白/黒/碧...`.replace(/\d+.*/, ["", "一白", "二黒", "三碧", "四緑", "五黄", "六白", "七赤", "八白", "九紫"][dailyStar] || "")}
+            sub="本日の中央星" />
+          <CosmicCell label="時盤九星" big={["", "一白", "二黒", "三碧", "四緑", "五黄", "六白", "七赤", "八白", "九紫"][hourlyStar] || ""}
+            sub="現時刻の中央星" />
         </div>
 
         {/* 月相と節気の解説 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
           <div className="rounded-lg bg-midnight-700/60 backdrop-blur border border-copper-500/30 p-4">
             <div className="text-[10px] tracking-[0.3em] uppercase text-copper-300">月相のテーマ</div>
-            <p className="text-sm text-sand-100 mt-2 leading-relaxed">
-              {MOON_PHASE_TEXT[phase.name]}
-            </p>
+            <p className="text-sm text-sand-100 mt-2 leading-relaxed">{MOON_PHASE_TEXT[phase.name]}</p>
           </div>
           <div className="rounded-lg bg-midnight-700/60 backdrop-blur border border-copper-500/30 p-4">
             <div className="text-[10px] tracking-[0.3em] uppercase text-copper-300">節気「{term.term}」のテーマ</div>
-            <p className="text-sm text-sand-100 mt-2 leading-relaxed">
-              {SOLAR_TERM_TEXT[term.term]}
-            </p>
+            <p className="text-sm text-sand-100 mt-2 leading-relaxed">{SOLAR_TERM_TEXT[term.term]}</p>
           </div>
         </div>
 
         <p className="mt-5 text-[11px] text-sand-300/80 text-center">
-          Meeus天文計算による太陽黄経 {sunLongitude(date).toFixed(2)}° / 月黄経 {moonLongitude(date).toFixed(2)}°
+          Meeus天文計算 ／ 太陽 {sunLongitude(date).toFixed(2)}° / 月 {moonLongitude(date).toFixed(2)}° / ASC/MC は大阪 (34.69°N, 135.54°E) 基準
         </p>
       </div>
     </section>
+  );
+}
+
+function PlanetCell({ planet }: { planet: PlanetPosition }) {
+  return (
+    <div className="rounded-lg border border-copper-500/30 bg-midnight-700/60 backdrop-blur px-3 py-2.5">
+      <div className="flex items-center gap-1.5">
+        <div className="text-[9px] tracking-[0.3em] uppercase text-copper-300/80">{planet.name}</div>
+        {planet.retrograde && (
+          <span className="text-[9px] text-shu-300" title="逆行">℞</span>
+        )}
+      </div>
+      <div className="mt-1 font-display text-sm text-sand-50">{planet.sign}</div>
+      <div className="text-[10px] text-sand-300 tabular-nums">
+        {planet.degreeInSign.toFixed(1)}° / {planet.distance.toFixed(2)} AU
+      </div>
+    </div>
   );
 }
 

@@ -188,3 +188,142 @@ export function starRelation(a: StarNumber, b: StarNumber): {
   }
   return { relation: "比和(調和)", score: 3, text: "中立的な関係。" };
 }
+
+// ============================================================
+// 日盤九星 + 時盤九星
+// ============================================================
+// 冬至 → 夏至: 陽遁 (forward 1→2→...→9→1)
+// 夏至 → 冬至: 陰遁 (backward 9→8→...→1→9)
+//
+// 三元甲子の正確な実装は複雑なので、簡易版を使用:
+//   冬至 (or 夏至) を起点に「最も近い甲子の日」を九星=1 (陽遁) または 9 (陰遁) として
+//   そこから日数で計算する
+// 注: 厳密な三元判定 (上元・中元・下元) は省略しており、
+//     180年周期内での近似値 (誤差数日以内)
+
+import { solarTermsOfYear } from "@/lib/astronomy";
+
+// 1984-05-02 を 戊申 (cycle 44) として、任意日のサイクル位置 (0=甲子)
+function dayCycleIndex(date: Date): number {
+  const baseUTC = Date.UTC(1984, 4, 2);
+  const targetUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const days = Math.floor((targetUTC - baseUTC) / 86400000);
+  return ((44 + days) % 60 + 60) % 60;
+}
+
+// 該当日の前の甲子日 (cycle index 0) を探し、そこからの経過日数を返す
+function daysSinceLastKoshi(date: Date): number {
+  const idx = dayCycleIndex(date);
+  return idx;
+}
+
+// 「陽遁か陰遁か」 + 該当する起点（冬至・夏至近傍の甲子日）からの日数
+function getKyuseiCycleInfo(date: Date): {
+  isYouton: boolean;
+  daysFromAnchor: number;
+} {
+  const year = date.getUTCFullYear();
+  const ws = solarTermsOfYear(year).find((t) => t.term === "冬至")!.date;
+  const wsPrev = solarTermsOfYear(year - 1).find((t) => t.term === "冬至")!.date;
+  const ss = solarTermsOfYear(year).find((t) => t.term === "夏至")!.date;
+
+  let nodeDate: Date;
+  let isYouton: boolean;
+  if (date.getTime() >= ws.getTime()) {
+    nodeDate = ws;
+    isYouton = true;
+  } else if (date.getTime() >= ss.getTime()) {
+    nodeDate = ss;
+    isYouton = false;
+  } else {
+    nodeDate = wsPrev;
+    isYouton = true;
+  }
+
+  // node 周辺で最も近い甲子日（cycle=0）を探す（±9日）
+  let anchor = new Date(nodeDate);
+  let bestDiff = Infinity;
+  for (let off = -9; off <= 9; off++) {
+    const d = new Date(nodeDate);
+    d.setUTCDate(d.getUTCDate() + off);
+    if (dayCycleIndex(d) === 0) {
+      const diff = Math.abs(off);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        anchor = d;
+      }
+    }
+  }
+  const daysFromAnchor = Math.floor(
+    (Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) -
+      Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate())) /
+      86400000
+  );
+  return { isYouton, daysFromAnchor };
+}
+
+// 日盤九星 (1-9)
+export function dailyKyuseiStar(date: Date = new Date()): StarNumber {
+  const { isYouton, daysFromAnchor } = getKyuseiCycleInfo(date);
+  let star: number;
+  if (isYouton) {
+    // 甲子=1, 翌日=2, ..., 9, 1, 2... (forward)
+    star = ((daysFromAnchor % 9) + 9) % 9;
+    if (star === 0) star = 9;
+  } else {
+    // 甲子=9, 翌日=8, ..., 1, 9, 8... (backward)
+    const back = ((9 - (daysFromAnchor % 9) - 1 + 9) % 9) + 1;
+    star = back;
+  }
+  return star as StarNumber;
+}
+
+// 時盤九星 (1-9) — 12時辰それぞれの中央星
+// 陽遁: 子刻=日盤星, 進行
+// 陰遁: 子刻=日盤星, 後退
+// (簡易版: 厳密には日干グループで時刻起点が変わる)
+export function hourlyKyuseiStar(date: Date = new Date()): StarNumber {
+  const day = dailyKyuseiStar(date);
+  const hour = date.getHours();
+  // 時辰 index (子=0, 丑=1, ..., 亥=11)
+  let hourIdx: number;
+  if (hour >= 23 || hour < 1) hourIdx = 0;
+  else hourIdx = Math.floor((hour + 1) / 2);
+
+  const { isYouton } = getKyuseiCycleInfo(date);
+  let star: number;
+  if (isYouton) {
+    star = (((day - 1 + hourIdx) % 9) + 9) % 9;
+    if (star === 0) star = 9;
+  } else {
+    star = (((day - 1 - hourIdx) % 9) + 9) % 9;
+    if (star === 0) star = 9;
+  }
+  return star as StarNumber;
+}
+
+// 月盤九星 (1-9)
+export function monthlyKyuseiStar(year: number, month: number): StarNumber {
+  // 年盤九星 (本命星と同じロジック)
+  let s = 0;
+  let y = year;
+  while (y > 0) { s += y % 10; y = Math.floor(y / 10); }
+  while (s > 9) { let s2 = 0; while (s > 0) { s2 += s % 10; s = Math.floor(s / 10); } s = s2; }
+  let yearStar = 11 - s;
+  if (yearStar > 9) yearStar -= 9;
+  if (yearStar < 1) yearStar += 9;
+
+  // 年盤グループ (1,4,7 / 2,5,8 / 3,6,9) で月起点が決まる
+  // 簡易: 寅月 (2月節入り後) を起点に固定
+  let monthOffset: number;
+  if ([1, 4, 7].includes(yearStar)) monthOffset = 8;       // 寅月=八白
+  else if ([2, 5, 8].includes(yearStar)) monthOffset = 5;  // 寅月=五黄
+  else monthOffset = 2;                                     // 寅月=二黒 (3,6,9)
+  // 月支 index: 寅=2, 卯=3, ..., 丑=1
+  // 月から月支への変換 (簡易: 立春≒2/4 基準)
+  const branchFromMonth = ((month - 2 + 12) % 12) || 12; // 1..12 (2月→1=寅, 3月→2=卯, ...)
+  // 月盤は月支に応じて1ずつ後退 (陰遁)
+  let star = monthOffset - (branchFromMonth - 1);
+  star = ((star - 1) % 9 + 9) % 9 + 1;
+  return star as StarNumber;
+}

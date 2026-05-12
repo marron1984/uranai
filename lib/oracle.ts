@@ -23,7 +23,8 @@ import { calcKakusu } from "@/lib/seimei";
 import { dirRatings, KUA_NAMES } from "@/lib/fengshui";
 import { partnerDayStem, partnerYearBranch, branchInteraction } from "@/lib/businessCompat";
 import { todayDayPillar, todayTongbianForOwner, personalDay } from "@/lib/today";
-import { accurateSunSign, accurateMoonSign, moonPhase, currentSolarTerm } from "@/lib/astronomy";
+import { accurateSunSign, accurateMoonSign, moonPhase, currentSolarTerm, fullChart, ascendant, midheaven, signFromLongitude } from "@/lib/astronomy";
+import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
 import { zodiacCompat } from "@/lib/compat";
 
 // ============================================================
@@ -227,6 +228,18 @@ export function buildOwnerProfile(): string {
   const phaseToday = moonPhase(now);
   const term = currentSolarTerm(now);
 
+  // 出生時刻でのネイタル天体（13:00 JST = 04:00 UTC, 大阪城東区）
+  const birthDateUTC = new Date(Date.UTC(1984, 4, 2, 4, 0)); // 13:00 JST
+  const natalChart = fullChart(birthDateUTC, OWNER.birthplace.lng, OWNER.birthplace.lat);
+
+  // 当日の天体（東京/大阪基準）
+  const transitChart = fullChart(now, OWNER.birthplace.lng, OWNER.birthplace.lat);
+
+  // 当日の日盤・時盤九星
+  const dailyStarToday = dailyKyuseiStar(now);
+  const hourlyStarToday = hourlyKyuseiStar(now);
+  const STAR_NAMES = ["", "一白水星", "二黒土星", "三碧木星", "四緑木星", "五黄土星", "六白金星", "七赤金星", "八白土星", "九紫火星"];
+
   const five = fpExtras.five;
   const totalFive = Object.values(five).reduce((a, b) => a + b, 0);
 
@@ -242,11 +255,16 @@ export function buildOwnerProfile(): string {
 - 血液型: ${OWNER.bloodType}型
 - 現年齢: ${ageNow}歳
 
-## 西洋占星術（ネイタル）
-- 太陽: ${sunNatal.name}（${sunNatal.element}・${sunNatal.quality}・守護星 ${sunNatal.ruler}）
-- 月: ${OWNER.natal.moonApprox}
-- アセンダント: ${OWNER.natal.ascApprox}
-- MC: ${OWNER.natal.mcApprox}
+## 西洋占星術（ネイタル・Meeus精密計算）
+- 太陽: ${natalChart.sun.sign} ${natalChart.sun.degree.toFixed(2)}°
+- 月: ${natalChart.moon.sign} ${natalChart.moon.degree.toFixed(2)}°
+- アセンダント: ${natalChart.asc.sign} ${natalChart.asc.degree.toFixed(2)}°（大阪 ${OWNER.birthplace.lat}°N/${OWNER.birthplace.lng}°E, 13:00 JST 出生）
+- MC（天頂）: ${natalChart.mc.sign} ${natalChart.mc.degree.toFixed(2)}°
+- 水星: ${natalChart.mercury.sign} ${natalChart.mercury.degreeInSign.toFixed(2)}°${natalChart.mercury.retrograde ? " 逆行" : ""}
+- 金星: ${natalChart.venus.sign} ${natalChart.venus.degreeInSign.toFixed(2)}°${natalChart.venus.retrograde ? " 逆行" : ""}
+- 火星: ${natalChart.mars.sign} ${natalChart.mars.degreeInSign.toFixed(2)}°${natalChart.mars.retrograde ? " 逆行" : ""}
+- 木星: ${natalChart.jupiter.sign} ${natalChart.jupiter.degreeInSign.toFixed(2)}°${natalChart.jupiter.retrograde ? " 逆行" : ""}
+- 土星: ${natalChart.saturn.sign} ${natalChart.saturn.degreeInSign.toFixed(2)}°${natalChart.saturn.retrograde ? " 逆行" : ""}
 
 ## 四柱推命（命式）
 - 年柱: ${fp.year.ganzhi}（${fpExtras.tongbian.year}・${fpExtras.twelve.year}）
@@ -291,10 +309,17 @@ ${daiun.map((d) => `- ${d.startAge}-${d.endAge}歳: ${d.ganzhi}・${d.stemTongbi
 
 ## 当日のコズミック（${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}）
 - 日柱: ${dayPillarToday.ganzhi}（日主戊から見て『${tbToday.star}』）
-- 太陽位置: ${sunToday.name} ${sunToday.degree.toFixed(1)}°
-- 月位置: ${moonToday.name} ${moonToday.degree.toFixed(1)}°
-- 月相: ${phaseToday.name}（月齢${phaseToday.age.toFixed(1)}）
+- 太陽位置: ${transitChart.sun.sign} ${transitChart.sun.degree.toFixed(1)}°
+- 月位置: ${transitChart.moon.sign} ${transitChart.moon.degree.toFixed(1)}°
+- 水星: ${transitChart.mercury.sign} ${transitChart.mercury.degreeInSign.toFixed(1)}°${transitChart.mercury.retrograde ? " 逆行" : ""}
+- 金星: ${transitChart.venus.sign} ${transitChart.venus.degreeInSign.toFixed(1)}°${transitChart.venus.retrograde ? " 逆行" : ""}
+- 火星: ${transitChart.mars.sign} ${transitChart.mars.degreeInSign.toFixed(1)}°${transitChart.mars.retrograde ? " 逆行" : ""}
+- 木星: ${transitChart.jupiter.sign} ${transitChart.jupiter.degreeInSign.toFixed(1)}°${transitChart.jupiter.retrograde ? " 逆行" : ""}
+- 土星: ${transitChart.saturn.sign} ${transitChart.saturn.degreeInSign.toFixed(1)}°${transitChart.saturn.retrograde ? " 逆行" : ""}
+- 月相: ${phaseToday.name}（月齢${phaseToday.age.toFixed(1)} / ${(phaseToday.illumination * 100).toFixed(0)}%）
 - 節気: ${term.term}（${term.daysSinceStart}日目→${term.nextTerm}まで${term.daysUntilNext}日）
+- 日盤九星: ${STAR_NAMES[dailyStarToday]}
+- 時盤九星: ${STAR_NAMES[hourlyStarToday]}
 - パーソナルデイ: ${pDayToday}`;
 }
 
