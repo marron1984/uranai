@@ -322,14 +322,16 @@ export function obliquity(date: Date): number {
 }
 
 // アセンダント (黄経 度)
+// 公式: tan(ASC) = cos(RAMC) / (-sin(RAMC)*cos(ε) - tan(φ)*sin(ε))
+// atan2 の半周ずれを回避するため (y, x) を正符号側で渡す。
 export function ascendant(date: Date, longitude: number, latitude: number): number {
   const lstDeg = lst(date, longitude);
   const eps = obliquity(date);
   const lstRad = lstDeg * DEG;
   const epsRad = eps * DEG;
   const latRad = latitude * DEG;
-  const y = -Math.cos(lstRad);
-  const x = Math.sin(lstRad) * Math.cos(epsRad) + Math.tan(latRad) * Math.sin(epsRad);
+  const y = Math.cos(lstRad);
+  const x = -(Math.sin(lstRad) * Math.cos(epsRad) + Math.tan(latRad) * Math.sin(epsRad));
   return normalize360(Math.atan2(y, x) / DEG);
 }
 
