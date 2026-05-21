@@ -71,13 +71,18 @@ import {
   personalDay,
   personalMonth,
   PERSONAL_DAY_TEXT,
+  personalDayText,
   currentHourTiming,
   todayBestDirection,
   DAY_COLORS,
+  dayColorOf,
   DAY_ITEMS,
+  dayItemOf,
   todayKeyPerson,
   DAY_CAUTIONS,
+  dayCautionsOf,
   DAY_FOODS,
+  dayFoodOf,
   todayShadowBlessing,
   todayDayPillar,
   todayTongbianForOwner,
@@ -143,7 +148,9 @@ import {
   aspectBetween,
   ASPECT_LABEL,
   SOLAR_TERM_TEXT,
+  solarTermText,
   MOON_PHASE_TEXT,
+  moonPhaseText,
   type PlanetPosition,
   type FullChart,
 } from "@/lib/astronomy";
@@ -695,13 +702,14 @@ function TodayTab({
 }) {
   const lucky = LUCKY[sun.key];
   const py = PERSONAL_YEAR_TEXT[personalYear];
-  const pdText = PERSONAL_DAY_TEXT[pDay];
-  const dayColor = DAY_COLORS[pDay];
+  const pdText = personalDayText(pDay, selectedDate);
+  const dayColor = dayColorOf(pDay, selectedDate);
   const direction = todayBestDirection(pDay);
   const keyPerson = todayKeyPerson(pDay);
-  const cautions = DAY_CAUTIONS[pDay];
-  const food = DAY_FOODS[pDay];
-  const sb = todayShadowBlessing(pDay);
+  const cautions = dayCautionsOf(pDay, selectedDate);
+  const food = dayFoodOf(pDay, selectedDate);
+  const sb = todayShadowBlessing(pDay, selectedDate);
+  const dayItem = dayItemOf(pDay, selectedDate);
   const timing = currentHourTiming();
 
   // 選択日に基づく高精度データ
@@ -858,8 +866,8 @@ function TodayTab({
           </article>
           <article className="rounded-xl border border-copper-500/20 p-6 bg-midnight-800/50 backdrop-blur-sm">
             <div className="text-[10px] tracking-[0.3em] uppercase text-sand-500">Item</div>
-            <div className="font-display text-xl mt-2">{DAY_ITEMS[pDay].item}</div>
-            <p className="text-xs text-sand-400 mt-2 leading-relaxed">{DAY_ITEMS[pDay].reason}</p>
+            <div className="font-display text-xl mt-2">{dayItem.item}</div>
+            <p className="text-xs text-sand-400 mt-2 leading-relaxed">{dayItem.reason}</p>
           </article>
           <article className="rounded-xl border border-copper-500/20 p-6 bg-midnight-800/50 backdrop-blur-sm">
             <div className="text-[10px] tracking-[0.3em] uppercase text-sand-500">Food</div>
@@ -3502,11 +3510,11 @@ function CosmicPanel({ date }: { date: Date }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
           <div className="rounded-lg bg-midnight-700/60 backdrop-blur border border-copper-500/30 p-4">
             <div className="text-[10px] tracking-[0.3em] uppercase text-copper-300">月相のテーマ</div>
-            <p className="text-sm text-sand-100 mt-2 leading-relaxed">{MOON_PHASE_TEXT[phase.name]}</p>
+            <p className="text-sm text-sand-100 mt-2 leading-relaxed">{moonPhaseText(phase.name, date)}</p>
           </div>
           <div className="rounded-lg bg-midnight-700/60 backdrop-blur border border-copper-500/30 p-4">
             <div className="text-[10px] tracking-[0.3em] uppercase text-copper-300">節気「{term.term}」のテーマ</div>
-            <p className="text-sm text-sand-100 mt-2 leading-relaxed">{SOLAR_TERM_TEXT[term.term]}</p>
+            <p className="text-sm text-sand-100 mt-2 leading-relaxed">{solarTermText(term.term, date)}</p>
           </div>
         </div>
 
