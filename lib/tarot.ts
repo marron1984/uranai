@@ -405,6 +405,44 @@ export type Spread = keyof typeof SPREAD_LABELS;
 //   Swords:    300-313
 //   Pentacles: 400-413
 
+// suit ごとに領域別の文脈を生成 — 同じカードでも、恋愛/仕事/総合で異なる解釈
+const SUIT_CONTEXT: Record<string, {
+  element: string;
+  domain: string;
+  loveAngle: string;
+  workAngle: string;
+  adviceVerb: string;
+}> = {
+  ワンド: {
+    element: "火",
+    domain: "情熱・行動・創造のフィールド",
+    loveAngle: "情熱的な恋・スピード感・主導権",
+    workAngle: "起業・営業・プロジェクト立ち上げ・リーダーシップ",
+    adviceVerb: "行動に移す",
+  },
+  カップ: {
+    element: "水",
+    domain: "感情・関係・霊性のフィールド",
+    loveAngle: "感情の深さ・絆・心の通い合い",
+    workAngle: "対人サービス・芸術・カウンセリング・癒し",
+    adviceVerb: "感じ取る",
+  },
+  ソード: {
+    element: "風",
+    domain: "知性・思考・判断・葛藤のフィールド",
+    loveAngle: "理性的な選択・言葉のすれ違い・決断",
+    workAngle: "意思決定・交渉・分析・法務・契約",
+    adviceVerb: "明確に言語化する",
+  },
+  ペンタクル: {
+    element: "地",
+    domain: "物質・お金・身体・実務のフィールド",
+    loveAngle: "現実的な相性・経済的安定・長期的な関係",
+    workAngle: "蓄積・投資・実務・健康・キャリア",
+    adviceVerb: "地に足をつけて積み上げる",
+  },
+};
+
 function mkMinor(
   num: number,
   name: string,
@@ -414,6 +452,12 @@ function mkMinor(
   reversed: string,
   keywords: string[]
 ): TarotCard {
+  const ctx = SUIT_CONTEXT[suit];
+  const element = ctx?.element ?? "";
+  const domain = ctx?.domain ?? suit;
+  const loveAngle = ctx?.loveAngle ?? "";
+  const workAngle = ctx?.workAngle ?? "";
+  const adviceVerb = ctx?.adviceVerb ?? "意識する";
   return {
     num,
     name,
@@ -421,13 +465,29 @@ function mkMinor(
     upright,
     reversed,
     keywords,
-    uprightDetail: upright + " " + suit + "のエネルギーが具体的な形で現れる時。",
-    reversedDetail: reversed + " " + suit + "のエネルギーが歪み、本来の力が発揮できない状態。",
-    loveUpright: upright,
-    loveReversed: reversed,
-    workUpright: upright,
-    workReversed: reversed,
-    advice: keywords[0] + "を意識して動く。",
+    uprightDetail:
+      `${upright} ${suit}（${element}のエネルギー）が${domain}で具体的な形を取って現れる時。` +
+      `${keywords.join("・")}のテーマが日常の選択や出来事の中に滲み出る数日〜数週間。` +
+      `自分の中の${element}を意識的に活かすと、運の流れが加速する。`,
+    reversedDetail:
+      `${reversed} ${suit}の${element}が歪み、本来の力が出ない・出し過ぎる・方向を間違えている状態。` +
+      `${keywords[0]}が過剰になるか、逆に枯渇しているかのどちらかで、バランスの再調整が必要。` +
+      `焦って状況を変えようとせず、まず自分の${element}の使い方を点検すること。`,
+    loveUpright:
+      `${upright} 恋愛・パートナーシップにおいては、${loveAngle}の側面が前面に出る。` +
+      `${keywords[0]}のテーマが二人の関係に影響し、新しい局面を作る可能性。`,
+    loveReversed:
+      `${reversed} 恋愛では${loveAngle}が裏目に出やすい時期。` +
+      `${keywords[0]}が崩れたり、過剰になったりして、関係に歪みを生む。冷静さと対話で軌道修正を。`,
+    workUpright:
+      `${upright} 仕事では${workAngle}の領域に追い風。` +
+      `${keywords[0]}を発揮できる場面が増え、評価や成果に繋がりやすい。`,
+    workReversed:
+      `${reversed} 仕事の${workAngle}領域で停滞・摩擦・誤算が生じやすい。` +
+      `${keywords[0]}を見直し、ペースを落として基盤を固め直すタイミング。`,
+    advice:
+      `${keywords[0]}と${keywords[1] ?? ""}を意識して${adviceVerb}。` +
+      `${suit}（${element}）の流れに逆らわず、しかし主体性を失わずに動くと、運命の歯車が回る。`,
   };
 }
 
