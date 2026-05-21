@@ -9,6 +9,76 @@
   --foreground: #efe8d4;
   --copper: #c8a268;
   --copper-bright: #e0b97a;
+  --menu-bg: #1c1c28;
+  --card-bg: rgba(28, 28, 40, 0.55);
+  --card-bg-elevated: rgba(40, 40, 56, 0.7);
+  --star-opacity: 0.55;
+  --glow-overlay-opacity: 1;
+}
+
+/* === テーマ: ミッドナイト (既定) === */
+:root[data-theme="midnight"] {
+  --background: #0a0a0f;
+  --foreground: #efe8d4;
+  --copper: #c8a268;
+  --copper-bright: #e0b97a;
+  --menu-bg: #1c1c28;
+  --card-bg: rgba(28, 28, 40, 0.55);
+  --card-bg-elevated: rgba(40, 40, 56, 0.7);
+  --star-opacity: 0.55;
+  --glow-overlay-opacity: 1;
+}
+
+/* === テーマ: トワイライト (夕闇の青藍) === */
+:root[data-theme="twilight"] {
+  --background: #1a2334;
+  --foreground: #e5e8f0;
+  --copper: #d4b285;
+  --copper-bright: #ecc99a;
+  --menu-bg: #243149;
+  --card-bg: rgba(45, 60, 88, 0.55);
+  --card-bg-elevated: rgba(58, 76, 110, 0.7);
+  --star-opacity: 0.4;
+  --glow-overlay-opacity: 0.7;
+}
+
+/* === テーマ: フォレスト (深緑) === */
+:root[data-theme="forest"] {
+  --background: #131e18;
+  --foreground: #e8e4cf;
+  --copper: #c9b07a;
+  --copper-bright: #e3c891;
+  --menu-bg: #1f2d24;
+  --card-bg: rgba(38, 56, 44, 0.6);
+  --card-bg-elevated: rgba(52, 74, 60, 0.7);
+  --star-opacity: 0.35;
+  --glow-overlay-opacity: 0.6;
+}
+
+/* === テーマ: ペーパー (明るい羊皮紙) === */
+:root[data-theme="paper"] {
+  --background: #f3ecdc;
+  --foreground: #2a261c;
+  --copper: #8b6a30;
+  --copper-bright: #6e5224;
+  --menu-bg: #fdf9ed;
+  --card-bg: rgba(255, 250, 235, 0.85);
+  --card-bg-elevated: rgba(255, 247, 225, 0.95);
+  --star-opacity: 0;
+  --glow-overlay-opacity: 0.3;
+}
+
+/* === テーマ: クリーム (最も明るい) === */
+:root[data-theme="cream"] {
+  --background: #fbf6e8;
+  --foreground: #2e2818;
+  --copper: #8a6322;
+  --copper-bright: #6e4f1c;
+  --menu-bg: #ffffff;
+  --card-bg: rgba(255, 252, 240, 0.92);
+  --card-bg-elevated: rgba(255, 250, 232, 1);
+  --star-opacity: 0;
+  --glow-overlay-opacity: 0.2;
 }
 
 html {
@@ -31,6 +101,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  opacity: var(--glow-overlay-opacity, 1);
   background:
     radial-gradient(circle at 15% 12%, rgba(200, 162, 104, 0.05) 0%, transparent 35%),
     radial-gradient(circle at 85% 88%, rgba(82, 93, 133, 0.06) 0%, transparent 40%),
@@ -54,7 +125,7 @@ body::after {
     radial-gradient(1px 1px at 250px 50px, rgba(255, 250, 220, 0.3), transparent),
     radial-gradient(1px 1px at 290px 90px, rgba(255, 250, 220, 0.45), transparent);
   background-size: 320px 140px;
-  opacity: 0.55;
+  opacity: var(--star-opacity, 0.55);
   animation: stardust 200s linear infinite;
 }
 
@@ -165,5 +236,165 @@ main, header, footer {
 .tate {
   writing-mode: vertical-rl;
   letter-spacing: 0.3em;
+}
+
+/* ==================================================================
+   テーマごとの Tailwind utility class 上書き
+   ベースは midnight (黒系)。light 系テーマでは色が反転する必要があるため
+   主要な hardcoded classes をテーマ別に書き換える。
+   ================================================================== */
+
+/* スクロールバーをテーマに合わせる */
+[data-theme="paper"] ::-webkit-scrollbar-track,
+[data-theme="cream"] ::-webkit-scrollbar-track {
+  background: var(--background);
+}
+[data-theme="twilight"] ::-webkit-scrollbar-track {
+  background: #1a2334;
+}
+[data-theme="forest"] ::-webkit-scrollbar-track {
+  background: #131e18;
+}
+
+/* divider の中央パッチ背景を CSS 変数に */
+.divider-decorative > span {
+  background: var(--background) !important;
+}
+
+/* ==== ライトテーマ (paper / cream) の全体上書き ==== */
+[data-theme="paper"],
+[data-theme="cream"] {
+  color: var(--foreground);
+}
+
+/* body の bg-midnight-900 を上書き */
+[data-theme="paper"] body,
+[data-theme="cream"] body,
+[data-theme="twilight"] body,
+[data-theme="forest"] body {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* midnight 系の背景クラスをテーマ色に */
+[data-theme="paper"] .bg-midnight-900,
+[data-theme="cream"] .bg-midnight-900 { background-color: var(--background) !important; }
+[data-theme="twilight"] .bg-midnight-900 { background-color: #1a2334 !important; }
+[data-theme="forest"]   .bg-midnight-900 { background-color: #131e18 !important; }
+
+[data-theme="paper"] .bg-midnight-800,
+[data-theme="cream"] .bg-midnight-800 { background-color: rgba(255, 250, 235, 0.85) !important; }
+[data-theme="twilight"] .bg-midnight-800 { background-color: #2a3a52 !important; }
+[data-theme="forest"]   .bg-midnight-800 { background-color: #1f2d24 !important; }
+
+/* card 半透明背景 */
+[data-theme="paper"] .bg-midnight-800\/50,
+[data-theme="cream"] .bg-midnight-800\/50 { background-color: var(--card-bg) !important; }
+[data-theme="twilight"] .bg-midnight-800\/50 { background-color: var(--card-bg) !important; }
+[data-theme="forest"]   .bg-midnight-800\/50 { background-color: var(--card-bg) !important; }
+
+[data-theme="paper"] .bg-midnight-900\/60,
+[data-theme="cream"] .bg-midnight-900\/60 { background-color: rgba(255, 250, 235, 0.75) !important; }
+[data-theme="twilight"] .bg-midnight-900\/60 { background-color: rgba(26, 35, 52, 0.75) !important; }
+[data-theme="forest"]   .bg-midnight-900\/60 { background-color: rgba(19, 30, 24, 0.75) !important; }
+
+[data-theme="paper"] .bg-midnight-900\/50,
+[data-theme="cream"] .bg-midnight-900\/50 { background-color: rgba(255, 250, 235, 0.65) !important; }
+[data-theme="twilight"] .bg-midnight-900\/50 { background-color: rgba(26, 35, 52, 0.65) !important; }
+[data-theme="forest"]   .bg-midnight-900\/50 { background-color: rgba(19, 30, 24, 0.65) !important; }
+
+/* sand (テキスト) クラス - ライト系は反転 */
+[data-theme="paper"] .text-sand-100,
+[data-theme="cream"] .text-sand-100 { color: #1a1610 !important; }
+[data-theme="paper"] .text-sand-200,
+[data-theme="cream"] .text-sand-200 { color: #2a261c !important; }
+[data-theme="paper"] .text-sand-300,
+[data-theme="cream"] .text-sand-300 { color: #423a28 !important; }
+[data-theme="paper"] .text-sand-400,
+[data-theme="cream"] .text-sand-400 { color: #5a4e30 !important; }
+[data-theme="paper"] .text-sand-500,
+[data-theme="cream"] .text-sand-500 { color: #6e603a !important; }
+
+/* 暗いテーマ (twilight/forest) は sand 系の色相を少し変更 */
+[data-theme="twilight"] .text-sand-100 { color: #e8ecf4 !important; }
+[data-theme="twilight"] .text-sand-200 { color: #ccd2e0 !important; }
+[data-theme="twilight"] .text-sand-300 { color: #aab2c4 !important; }
+[data-theme="twilight"] .text-sand-400 { color: #8a92a4 !important; }
+[data-theme="twilight"] .text-sand-500 { color: #6e7488 !important; }
+
+[data-theme="forest"] .text-sand-100 { color: #ebe7d4 !important; }
+[data-theme="forest"] .text-sand-200 { color: #d2cdb2 !important; }
+[data-theme="forest"] .text-sand-300 { color: #b3ae90 !important; }
+[data-theme="forest"] .text-sand-400 { color: #908b6e !important; }
+[data-theme="forest"] .text-sand-500 { color: #6f6b52 !important; }
+
+/* copper 系 - ライトでは少し暗く */
+[data-theme="paper"] .text-copper-200,
+[data-theme="cream"] .text-copper-200 { color: #5a3f10 !important; }
+[data-theme="paper"] .text-copper-300,
+[data-theme="cream"] .text-copper-300 { color: #6a4818 !important; }
+[data-theme="paper"] .text-copper-400,
+[data-theme="cream"] .text-copper-400 { color: #7a521a !important; }
+[data-theme="paper"] .text-copper-400\/80,
+[data-theme="cream"] .text-copper-400\/80 { color: rgba(122, 82, 26, 0.8) !important; }
+
+/* glow-copper は light でも見える色に */
+[data-theme="paper"] .glow-copper,
+[data-theme="cream"] .glow-copper {
+  text-shadow: 0 0 12px rgba(138, 99, 34, 0.35), 0 0 4px rgba(138, 99, 34, 0.25) !important;
+}
+
+/* border-copper の透過は維持されるが、light では色が異なる必要 */
+[data-theme="paper"] [class*="border-copper-500"],
+[data-theme="cream"] [class*="border-copper-500"] { border-color: rgba(138, 99, 34, 0.3) !important; }
+
+/* glass cards */
+[data-theme="paper"] .glass,
+[data-theme="cream"] .glass {
+  background: var(--card-bg) !important;
+  border-color: rgba(138, 99, 34, 0.25) !important;
+}
+[data-theme="paper"] .glass-elevated,
+[data-theme="cream"] .glass-elevated {
+  background: var(--card-bg-elevated) !important;
+  border-color: rgba(138, 99, 34, 0.35) !important;
+}
+[data-theme="twilight"] .glass,
+[data-theme="forest"] .glass {
+  background: var(--card-bg) !important;
+}
+[data-theme="twilight"] .glass-elevated,
+[data-theme="forest"] .glass-elevated {
+  background: var(--card-bg-elevated) !important;
+}
+
+/* kw ハイライト (キーワード下線) - light では下線色を変更 */
+[data-theme="paper"] .kw,
+[data-theme="cream"] .kw {
+  background: linear-gradient(180deg, transparent 60%, rgba(200, 162, 104, 0.55) 60%) !important;
+}
+
+/* selection color - light でも見えるように */
+[data-theme="paper"] ::selection,
+[data-theme="cream"] ::selection {
+  background: rgba(200, 162, 104, 0.45);
+  color: #2a1f08;
+}
+
+/* セクション番号バッジ - light テーマ調整 */
+[data-theme="paper"] .section-num,
+[data-theme="cream"] .section-num {
+  border-color: #8a6322;
+  color: #6e4f1c;
+}
+
+/* テーマ切替ボタン自身は背景を CSS 変数に合わせる */
+.theme-btn {
+  background: rgba(0, 0, 0, 0.15);
+  color: inherit;
+}
+[data-theme="paper"] .theme-btn,
+[data-theme="cream"] .theme-btn {
+  background: rgba(255, 250, 235, 0.6);
 }
 
