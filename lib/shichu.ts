@@ -73,7 +73,16 @@ function pillar(stemIdx: number, branchIdx: number): Pillar {
 
 // 年柱: 立春(2/4 簡易)を境に。実年=立春前は 西暦-1
 function yearPillar(year: number, month: number, day: number): Pillar {
-  const effectiveYear = month < 2 || (month === 2 && day < 4) ? year - 1 : year;
+  // 立春境界は年によって 2/3〜2/5 に変動 — Meeus で実日付を取得
+  let risshunDay = 4;
+  try {
+    const risshun = solarTermsOfYear(year).find((t) => t.longitude === 315);
+    if (risshun) risshunDay = risshun.date.getUTCDate();
+  } catch {
+    // フォールバック: 固定 2/4
+  }
+  const effectiveYear =
+    month < 2 || (month === 2 && day < risshunDay) ? year - 1 : year;
   const stemIdx = (effectiveYear - 4) % 10;
   const branchIdx = (effectiveYear - 4) % 12;
   return pillar(stemIdx, branchIdx);
@@ -200,7 +209,7 @@ export function calcFourPillars(
   hour: number | null
 ): FourPillars {
   const yp = yearPillar(year, month, day);
-  const mbIdx = monthBranchIndex(month, day);
+  const mbIdx = monthBranchIndex(month, day, year);
   const msIdx = monthStemIndex(yp.stem, mbIdx);
   const mp = pillar(msIdx, mbIdx);
   const dp = dayPillar(year, month, day);
