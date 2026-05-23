@@ -55,6 +55,7 @@ export const OWNER = {
       lifePath: 11,
       birthday: 2,
     },
+    mbti: "INFJ" as const,
     birthCard: {
       personality: 11,
       soul: 2,

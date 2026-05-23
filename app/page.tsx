@@ -155,6 +155,8 @@ import {
   type FullChart,
 } from "@/lib/astronomy";
 import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
+import Link from "next/link";
+import { MBTI_PROFILES, MBTI_DIVINATION_INTEGRATION } from "@/lib/mbti";
 import {
   type JournalEntry,
   type Hit,
@@ -1051,6 +1053,9 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       {/* ━━ 統合: 性格の核 ━━ */}
       <SynthesisBlock num="壱" card={PERSONALITY_CORE} />
 
+      {/* ━━ MBTI セクション ━━ */}
+      <MbtiSection />
+
       {/* ━━ ネイタル + 太陽星座詳細 ━━ */}
       <NumberedSection num="弐" label="Astrology" title="ネイタルチャート（西洋占星術）">
         <NatalChartSection sun={basis.sun} />
@@ -1238,6 +1243,60 @@ function SectionDivider({ title }: { title: string }) {
     <div className="divider-decorative my-8">
       <span>{title}</span>
     </div>
+  );
+}
+
+function MbtiSection() {
+  const ownerType = OWNER.natal.mbti;
+  const profile = MBTI_PROFILES[ownerType];
+  const integration = MBTI_DIVINATION_INTEGRATION[ownerType];
+  return (
+    <NumberedSection num="壱之弐" label="MBTI · 16Types" title={`人格の型 — ${ownerType} (${profile.name})`}>
+      <article className="rounded-2xl bg-midnight-700/60 backdrop-blur-sm border border-copper-500/30 p-6 sm:p-8 space-y-5">
+        <div className="flex items-baseline justify-between flex-wrap gap-3">
+          <div>
+            <div className="font-display text-2xl">{ownerType} <span className="text-copper-200">— {profile.name}</span></div>
+            <p className="text-sm text-sand-300 italic mt-1">"{profile.nickname}"</p>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-sand-400">人口の {profile.populationRate}</div>
+            <div className="text-[10px] text-sand-500 tracking-wider mt-0.5">{profile.group} · 認知機能: {profile.cognitive.dominant}-{profile.cognitive.auxiliary}-{profile.cognitive.tertiary}-{profile.cognitive.inferior}</div>
+          </div>
+        </div>
+
+        <p className="text-sm sm:text-[15px] leading-loose text-sand-100">{profile.description}</p>
+
+        <div className="border-t border-copper-500/30 pt-5">
+          <div className="text-[10px] tracking-[0.3em] uppercase text-copper-300 mb-3">命式 × 数秘 × タロット との響き合い</div>
+          <ul className="space-y-2">
+            {integration.map((line, i) => (
+              <li key={i} className="text-sm text-sand-200 leading-relaxed pl-4 border-l-2 border-copper-400">{line}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3 pt-2">
+          <div className="rounded-xl border border-green-500/25 p-4 bg-green-950/15">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-green-300 mb-2">強み</div>
+            <ul className="space-y-1">
+              {profile.strengths.slice(0, 5).map((s) => (
+                <li key={s} className="text-xs text-sand-200">・{s}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-xl border border-orange-500/25 p-4 bg-orange-950/15">
+            <div className="text-[10px] tracking-[0.3em] uppercase text-orange-300 mb-2">成長の方向性</div>
+            <p className="text-xs text-sand-200 leading-relaxed">{profile.growthPath}</p>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Link href="/mbti" className="inline-block text-xs text-copper-300 hover:text-copper-200 transition-colors tracking-wider">
+            → 16タイプを探索する (MBTI 専用ページへ)
+          </Link>
+        </div>
+      </article>
+    </NumberedSection>
   );
 }
 

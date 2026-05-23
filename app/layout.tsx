@@ -46,13 +46,14 @@ export default function RootLayout({
               <span className="text-copper-400/80 text-[10px] tracking-[0.4em] uppercase hidden md:inline">私的占断</span>
             </Link>
             <div className="flex items-center gap-4">
-              <nav className="text-xs text-sand-300 hidden sm:flex gap-5 tracking-wider">
+              <nav className="text-xs text-sand-300 hidden sm:flex gap-4 tracking-wider">
                 <Link href="/astrology" className="hover:text-copper-300 transition-colors">星占</Link>
                 <Link href="/tarot" className="hover:text-copper-300 transition-colors">塔羅</Link>
                 <Link href="/numerology" className="hover:text-copper-300 transition-colors">数秘</Link>
                 <Link href="/iching" className="hover:text-copper-300 transition-colors">易経</Link>
                 <Link href="/shichu" className="hover:text-copper-300 transition-colors">四柱</Link>
                 <Link href="/fengshui" className="hover:text-copper-300 transition-colors">風水</Link>
+                <Link href="/mbti" className="hover:text-copper-300 transition-colors">MBTI</Link>
               </nav>
               <ThemeSwitcher />
             </div>
