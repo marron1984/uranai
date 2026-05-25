@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Noto+Serif+JP:wght@400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Serif+JP:wght@400;500;700;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -79,6 +79,19 @@
   --card-bg-elevated: rgba(255, 250, 232, 1);
   --star-opacity: 0;
   --glow-overlay-opacity: 0.2;
+}
+
+/* === テーマ: エディトリアル (純白×漆黒・編集デザイン) === */
+:root[data-theme="editorial"] {
+  --background: #fafaf7;
+  --foreground: #0a0a0a;
+  --copper: #0a0a0a;
+  --copper-bright: #1a1a1a;
+  --menu-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-bg-elevated: #ffffff;
+  --star-opacity: 0;
+  --glow-overlay-opacity: 0;
 }
 
 html {
@@ -396,5 +409,226 @@ main, header, footer {
 [data-theme="paper"] .theme-btn,
 [data-theme="cream"] .theme-btn {
   background: rgba(255, 250, 235, 0.6);
+}
+
+/* =====================================================================
+ * EDITORIAL テーマ — 純白×漆黒の編集デザイン
+ * 巨大タイポ・シャープ枠線・コントラスト全振り
+ * ===================================================================== */
+
+[data-theme="editorial"] body {
+  background: #fafaf7 !important;
+  color: #0a0a0a !important;
+}
+
+/* 背景クラス全部白に */
+[data-theme="editorial"] .bg-midnight-900,
+[data-theme="editorial"] .bg-midnight-800,
+[data-theme="editorial"] .bg-midnight-800\/50,
+[data-theme="editorial"] .bg-midnight-700\/60,
+[data-theme="editorial"] .bg-midnight-900\/60,
+[data-theme="editorial"] .bg-midnight-900\/50,
+[data-theme="editorial"] .bg-midnight-900\/40,
+[data-theme="editorial"] .bg-midnight-900\/30,
+[data-theme="editorial"] .bg-midnight-fade {
+  background: #ffffff !important;
+}
+
+/* テキストすべて黒に */
+[data-theme="editorial"] .text-sand-50,
+[data-theme="editorial"] .text-sand-100,
+[data-theme="editorial"] .text-sand-200,
+[data-theme="editorial"] .text-sand-300 {
+  color: #0a0a0a !important;
+}
+[data-theme="editorial"] .text-sand-400,
+[data-theme="editorial"] .text-sand-400\/80,
+[data-theme="editorial"] .text-sand-500 {
+  color: #555555 !important;
+}
+
+/* copper も黒系 */
+[data-theme="editorial"] .text-copper-200,
+[data-theme="editorial"] .text-copper-300,
+[data-theme="editorial"] .text-copper-400,
+[data-theme="editorial"] .text-copper-400\/80,
+[data-theme="editorial"] .text-gold-200 {
+  color: #0a0a0a !important;
+}
+
+/* 銅色グロー削除 */
+[data-theme="editorial"] .glow-copper {
+  text-shadow: none !important;
+}
+[data-theme="editorial"] .glow-soft {
+  box-shadow: none !important;
+}
+[data-theme="editorial"] .shadow-copper-glow {
+  box-shadow: none !important;
+}
+
+/* 全ての border-copper を漆黒に */
+[data-theme="editorial"] [class*="border-copper-500"],
+[data-theme="editorial"] [class*="border-copper-400"] {
+  border-color: #0a0a0a !important;
+}
+[data-theme="editorial"] [class*="ring-copper-500"] {
+  --tw-ring-color: #0a0a0a !important;
+}
+
+/* 角丸を抑える: 大きな rounded を四角に */
+[data-theme="editorial"] .rounded-2xl,
+[data-theme="editorial"] .rounded-xl {
+  border-radius: 0 !important;
+}
+[data-theme="editorial"] .rounded-lg {
+  border-radius: 2px !important;
+}
+
+/* selection */
+[data-theme="editorial"] ::selection {
+  background: #0a0a0a !important;
+  color: #fafaf7 !important;
+}
+
+/* スクロールバー */
+[data-theme="editorial"] ::-webkit-scrollbar-track {
+  background: #fafaf7;
+}
+[data-theme="editorial"] ::-webkit-scrollbar-thumb {
+  background: #0a0a0a;
+  border-radius: 0;
+}
+
+/* divider */
+[data-theme="editorial"] .divider-decorative::before,
+[data-theme="editorial"] .divider-decorative::after {
+  background: linear-gradient(to right, transparent, #0a0a0a, transparent) !important;
+}
+[data-theme="editorial"] .divider-decorative > span {
+  background: #fafaf7 !important;
+  color: #0a0a0a !important;
+}
+
+/* セクション番号バッジ */
+[data-theme="editorial"] .section-num {
+  border-color: #0a0a0a !important;
+  color: #0a0a0a !important;
+  background: transparent;
+}
+
+/* kw ハイライト */
+[data-theme="editorial"] .kw {
+  background: linear-gradient(180deg, transparent 60%, rgba(255, 220, 0, 0.6) 60%) !important;
+}
+
+/* theme btn */
+[data-theme="editorial"] .theme-btn {
+  background: #ffffff;
+  color: #0a0a0a;
+  border-color: #0a0a0a !important;
+}
+
+/* ヘッダー周り */
+[data-theme="editorial"] header {
+  background: #fafaf7 !important;
+  border-bottom-color: #0a0a0a !important;
+}
+[data-theme="editorial"] header .border-copper-500\/20 {
+  border-color: #0a0a0a !important;
+}
+
+/* ===== 巨大ディスプレイタイポ用クラス ===== */
+.editorial-display {
+  font-family: "Archivo Black", "Anton", "Inter", system-ui, sans-serif;
+  font-weight: 900;
+  font-stretch: 90%;
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+  font-feature-settings: "ss01", "cv11";
+}
+.editorial-display-jp {
+  font-family: "Noto Serif JP", serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+.editorial-mono {
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-feature-settings: "tnum";
+}
+
+/* X 印プレースホルダー (装飾用) */
+.editorial-xbox {
+  border: 1.5px solid #0a0a0a;
+  position: relative;
+  overflow: hidden;
+}
+.editorial-xbox::before,
+.editorial-xbox::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top right, transparent 49.5%, #0a0a0a 49.5%, #0a0a0a 50.5%, transparent 50.5%);
+}
+.editorial-xbox::after {
+  background: linear-gradient(to top left, transparent 49.5%, #0a0a0a 49.5%, #0a0a0a 50.5%, transparent 50.5%);
+}
+
+/* チップ型ナビ (テーマ追従) */
+.editorial-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.45em 1em;
+  border: 1.5px solid currentColor;
+  background: var(--background);
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.editorial-chip:hover {
+  background: var(--foreground);
+  color: var(--background);
+}
+.editorial-chip-num {
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  opacity: 0.7;
+}
+.editorial-chip-dark {
+  background: var(--foreground);
+  color: var(--background);
+}
+.editorial-chip-dark:hover {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* 回転 EXPLORE バッジ */
+@keyframes editorial-spin {
+  to { transform: rotate(360deg); }
+}
+.editorial-spinner {
+  animation: editorial-spin 12s linear infinite;
+}
+
+/* タブボタンの active 反転 */
+.tab-btn-active {
+  background: var(--foreground) !important;
+  color: var(--background) !important;
+}
+.tab-btn-active .editorial-mono,
+.tab-btn-active .editorial-display-jp {
+  color: var(--background) !important;
 }
 

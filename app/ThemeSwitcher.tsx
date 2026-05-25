@@ -2,18 +2,19 @@
 
 import { useEffect, useState, useRef } from "react";
 
-export type ThemeId = "midnight" | "twilight" | "paper" | "cream" | "forest";
+export type ThemeId = "editorial" | "midnight" | "twilight" | "paper" | "cream" | "forest";
 
 export const THEMES: { id: ThemeId; label: string; swatch: string; description: string }[] = [
-  { id: "midnight", label: "ミッドナイト",  swatch: "#0a0a0f", description: "深い闇と銅金 (既定)" },
-  { id: "twilight", label: "トワイライト", swatch: "#1f2a3a", description: "夕闇の青藍" },
-  { id: "forest",   label: "フォレスト",   swatch: "#1a2620", description: "深緑と苔金" },
-  { id: "paper",    label: "ペーパー",     swatch: "#f3ecdc", description: "明るい羊皮紙 (見やすい)" },
-  { id: "cream",    label: "クリーム",     swatch: "#fbf6e8", description: "最も明るい配色" },
+  { id: "editorial", label: "エディトリアル", swatch: "#fafaf7", description: "純白×漆黒の編集デザイン (既定)" },
+  { id: "midnight",  label: "ミッドナイト",   swatch: "#0a0a0f", description: "深い闇と銅金" },
+  { id: "twilight",  label: "トワイライト",   swatch: "#1f2a3a", description: "夕闇の青藍" },
+  { id: "forest",    label: "フォレスト",     swatch: "#1a2620", description: "深緑と苔金" },
+  { id: "paper",     label: "ペーパー",       swatch: "#f3ecdc", description: "明るい羊皮紙" },
+  { id: "cream",     label: "クリーム",       swatch: "#fbf6e8", description: "最も明るい配色" },
 ];
 
 export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState<ThemeId>("midnight");
+  const [theme, setTheme] = useState<ThemeId>("editorial");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

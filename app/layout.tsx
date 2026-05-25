@@ -17,13 +17,13 @@ const themeBootstrap = `
 (function(){
   try {
     var t = localStorage.getItem('uranai-theme');
-    if (t && ['midnight','twilight','forest','paper','cream'].indexOf(t) >= 0) {
+    if (t && ['editorial','midnight','twilight','forest','paper','cream'].indexOf(t) >= 0) {
       document.documentElement.setAttribute('data-theme', t);
     } else {
-      document.documentElement.setAttribute('data-theme', 'midnight');
+      document.documentElement.setAttribute('data-theme', 'editorial');
     }
   } catch(e) {
-    document.documentElement.setAttribute('data-theme', 'midnight');
+    document.documentElement.setAttribute('data-theme', 'editorial');
   }
 })();
 `;
@@ -34,26 +34,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" data-theme="midnight">
+    <html lang="ja" data-theme="editorial">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body className="min-h-screen bg-midnight-900 text-sand-100">
         <header className="border-b border-copper-500/20 bg-midnight-900/60 backdrop-blur supports-[backdrop-filter]:bg-midnight-900/50 sticky top-0 z-20">
-          <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-baseline gap-3 min-w-0">
-              <span className="font-display text-2xl tracking-wide text-copper-300 glow-copper">Uranai</span>
-              <span className="text-copper-400/80 text-[10px] tracking-[0.4em] uppercase hidden md:inline">私的占断</span>
+          <div className="mx-auto max-w-5xl px-6 py-3 flex items-center justify-between gap-4">
+            <Link href="/" className="flex items-center gap-3 min-w-0">
+              <span className="editorial-display text-2xl tracking-tight">URANAI</span>
+              <span className="editorial-mono text-[10px] opacity-70 hidden md:inline">私的占断 ／ N°143</span>
             </Link>
-            <div className="flex items-center gap-4">
-              <nav className="text-xs text-sand-300 hidden sm:flex gap-4 tracking-wider">
-                <Link href="/astrology" className="hover:text-copper-300 transition-colors">星占</Link>
-                <Link href="/tarot" className="hover:text-copper-300 transition-colors">塔羅</Link>
-                <Link href="/numerology" className="hover:text-copper-300 transition-colors">数秘</Link>
-                <Link href="/iching" className="hover:text-copper-300 transition-colors">易経</Link>
-                <Link href="/shichu" className="hover:text-copper-300 transition-colors">四柱</Link>
-                <Link href="/fengshui" className="hover:text-copper-300 transition-colors">風水</Link>
-                <Link href="/mbti" className="hover:text-copper-300 transition-colors">MBTI</Link>
+            <div className="flex items-center gap-3">
+              <nav className="hidden sm:flex gap-2 items-center">
+                <Link href="/astrology" className="editorial-chip text-[10px]"><span>星占</span></Link>
+                <Link href="/tarot" className="editorial-chip text-[10px]"><span>塔羅</span></Link>
+                <Link href="/numerology" className="editorial-chip text-[10px]"><span>数秘</span></Link>
+                <Link href="/iching" className="editorial-chip text-[10px]"><span>易経</span></Link>
+                <Link href="/shichu" className="editorial-chip text-[10px]"><span>四柱</span></Link>
+                <Link href="/fengshui" className="editorial-chip text-[10px]"><span>風水</span></Link>
+                <Link href="/mbti" className="editorial-chip text-[10px]"><span>MBTI</span></Link>
               </nav>
               <ThemeSwitcher />
             </div>

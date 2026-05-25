@@ -397,10 +397,10 @@ export default function Home() {
       />
 
       {/* ===== Tab ===== */}
-      <nav className="mt-10 flex gap-1 border-b border-copper-500/20 overflow-x-auto">
-        <TabButton active={tab === "today"} onClick={() => setTab("today")} label="今日の占い" sub="Daily Reading" />
-        <TabButton active={tab === "basis"} onClick={() => setTab("basis")} label="基礎の占い" sub="Natal & Synthesis" />
-        <TabButton active={tab === "oracle"} onClick={() => setTab("oracle")} label="Oracle" sub="AI 個人相談" />
+      <nav className="mt-10 flex gap-2 overflow-x-auto pb-2">
+        <TabButton active={tab === "today"} onClick={() => setTab("today")} label="今日" sub="Today" count={9} />
+        <TabButton active={tab === "basis"} onClick={() => setTab("basis")} label="基礎" sub="Basis" count={22} />
+        <TabButton active={tab === "oracle"} onClick={() => setTab("oracle")} label="相談" sub="Oracle" count={1} />
       </nav>
 
       <div className="mt-10">
@@ -609,28 +609,66 @@ function Hero({
   kua: number;
 }) {
   return (
-    <section className="rounded-2xl bg-midnight-fade text-sand-50 p-8 sm:p-12 relative overflow-hidden shadow-copper-glow ring-1 ring-copper-500/20">
-      <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-copper-500/10 blur-3xl" />
-      <div className="absolute -bottom-12 -left-12 w-72 h-72 rounded-full bg-shu-500/10 blur-3xl" />
-      <div className="relative">
-        <div className="text-[10px] sm:text-xs tracking-[0.4em] text-copper-300 uppercase">
-          {date}
+    <section className="relative -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-10 border-b border-current">
+      {/* 上部チップ行 */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="editorial-chip">
+          <span>{date}</span>
         </div>
-        <h1 className="mt-3 font-display text-3xl sm:text-5xl tracking-wide leading-tight">
-          {greeting}、<br className="sm:hidden" />
-          {OWNER.displayName}さん。
-        </h1>
-        <p className="mt-3 text-sand-200 text-sm sm:text-base">
-          本日の天と地、あなたの命を読み解きます。
-        </p>
+        <div className="editorial-chip editorial-chip-dark">
+          <span>Today's Reading</span>
+          <span className="editorial-chip-num">(LP {lifePath})</span>
+        </div>
+      </div>
 
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
-          <BadgeChip label="太陽星座" value={zodiacName} />
-          <BadgeChip label="本命星" value={starName} />
-          <BadgeChip label="日主" value={dayMaster} />
-          <BadgeChip label="ライフパス" value={String(lifePath)} mono />
-          <BadgeChip label="本命卦" value={KUA_NAMES[kua]?.name ?? String(kua)} />
+      {/* メガ・ディスプレイ・ヒーロー */}
+      <div className="relative">
+        <h1 className="editorial-display text-[14vw] sm:text-[12vw] lg:text-[140px] uppercase">
+          OFF TRACK,
+          <br />
+          ON PURPOSE,
+          <br />
+          IN LIFE
+        </h1>
+
+        {/* 右下サブヘッド */}
+        <div className="mt-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="editorial-display-jp text-3xl sm:text-5xl">
+            逸れても、道はある。<br />
+            <span className="text-2xl sm:text-4xl">{greeting}、{OWNER.displayName}さん。</span>
+          </div>
+          <div className="editorial-mono text-[10px] sm:text-xs leading-relaxed max-w-xs opacity-80">
+            FOLLOW INTUITION,
+            <br />
+            REDEFINE YOUR ROAD
+            <br />
+            <span className="opacity-60">本日の天・地・命を読み解きます。</span>
+          </div>
         </div>
+
+        {/* 回転 EXPLORE バッジ (装飾) */}
+        <div className="absolute top-0 right-0 sm:right-4 lg:right-12 w-20 h-20 sm:w-28 sm:h-28 pointer-events-none hidden sm:block">
+          <svg viewBox="0 0 100 100" className="w-full h-full editorial-spinner">
+            <defs>
+              <path id="circle-path" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+            </defs>
+            <text fontSize="11" fontFamily="Inter,sans-serif" fontWeight="700" letterSpacing="2" fill="currentColor">
+              <textPath href="#circle-path">EXPLORE · EXPLORE · EXPLORE · </textPath>
+            </text>
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center text-[8px] font-bold">★</div>
+          </div>
+        </div>
+      </div>
+
+      {/* バッジチップ群 */}
+      <div className="mt-10 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+        <BadgeChip label="SUN ／ 太陽星座" value={zodiacName} />
+        <BadgeChip label="STAR ／ 本命星" value={starName} />
+        <BadgeChip label="DAY ／ 日主" value={dayMaster} />
+        <BadgeChip label="LP ／ ライフパス" value={String(lifePath)} mono />
+        <BadgeChip label="KUA ／ 本命卦" value={KUA_NAMES[kua]?.name ?? String(kua)} />
       </div>
     </section>
   );
@@ -638,9 +676,9 @@ function Hero({
 
 function BadgeChip({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-lg border border-copper-500/30 bg-midnight-700/60 backdrop-blur px-3 py-2.5">
-      <div className="text-[9px] tracking-[0.3em] uppercase text-copper-300/80">{label}</div>
-      <div className={`mt-1 font-display text-base sm:text-lg ${mono ? "tabular-nums" : ""}`}>
+    <div className="border border-current px-3 py-3" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="editorial-mono text-[9px] opacity-70 truncate">{label}</div>
+      <div className={`editorial-display-jp text-xl sm:text-2xl mt-1 ${mono ? "tabular-nums" : ""}`}>
         {value}
       </div>
     </div>
@@ -652,23 +690,26 @@ function TabButton({
   onClick,
   label,
   sub,
+  count,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   sub: string;
+  count?: number;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`flex-1 sm:flex-none px-5 sm:px-8 py-3 text-left transition-all ${
-        active
-          ? "border-b-2 border-copper-500 text-sand-50"
-          : "border-b-2 border-transparent text-sand-500 hover:text-sand-200"
+      className={`tab-btn px-4 sm:px-5 py-2 transition-all flex items-center gap-2 border border-current ${
+        active ? "tab-btn-active" : "hover:bg-black/5"
       }`}
     >
-      <div className={`font-display text-lg ${active ? "text-sand-50" : ""}`}>{label}</div>
-      <div className="text-[10px] tracking-[0.3em] uppercase mt-0.5">{sub}</div>
+      <span className="editorial-mono text-[11px] opacity-90">{sub}</span>
+      {count !== undefined && (
+        <span className="editorial-mono text-[10px] opacity-70">({count})</span>
+      )}
+      <span className="editorial-display-jp text-base">{label}</span>
     </button>
   );
 }
@@ -1165,27 +1206,30 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
 
 function SynthesisHero() {
   return (
-    <section className="relative">
-      <div className="rounded-2xl bg-midnight-fade text-sand-50 p-8 sm:p-12 relative overflow-hidden shadow-copper-glow ring-1 ring-copper-500/20">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-copper-500/10 blur-3xl" />
-        <div className="relative">
-          <div className="text-[10px] tracking-[0.4em] uppercase text-copper-300">
-            Synthesis ／ 統合占断
-          </div>
-          <h2 className="mt-3 font-display text-2xl sm:text-4xl leading-tight tracking-wide">
-            {HERO_SYNTHESIS.headline}
-          </h2>
-          <p className="mt-3 text-gold-200 text-sm sm:text-base">
-            {HERO_SYNTHESIS.subline}
+    <section className="relative border border-current p-6 sm:p-10" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <span className="editorial-chip">Synthesis</span>
+        <span className="editorial-chip editorial-chip-dark">統合占断</span>
+        <span className="editorial-chip">
+          <span className="editorial-chip-num">N°</span>
+          <span>001</span>
+        </span>
+      </div>
+      <h2 className="editorial-display-jp text-3xl sm:text-5xl lg:text-6xl leading-[1.05]">
+        {HERO_SYNTHESIS.headline}
+      </h2>
+      <p className="editorial-mono text-[11px] sm:text-xs mt-4 opacity-80 leading-relaxed">
+        {HERO_SYNTHESIS.subline}
+      </p>
+      <div className="mt-8 space-y-5 max-w-4xl">
+        {HERO_SYNTHESIS.paragraphs.map((p, i) => (
+          <p key={i} className="text-sm sm:text-[15px] leading-loose">
+            <span className="editorial-mono text-[10px] mr-2 opacity-50">
+              ({String(i + 1).padStart(2, "0")})
+            </span>
+            {p}
           </p>
-          <div className="mt-8 space-y-4">
-            {HERO_SYNTHESIS.paragraphs.map((p, i) => (
-              <p key={i} className="text-sm sm:text-[15px] leading-loose text-sand-100">
-                {p}
-              </p>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );
