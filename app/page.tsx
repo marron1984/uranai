@@ -72,6 +72,7 @@ import {
   personalMonth,
   PERSONAL_DAY_TEXT,
   personalDayText,
+  todayOneLiner,
   currentHourTiming,
   todayBestDirection,
   DAY_COLORS,
@@ -662,6 +663,9 @@ function Hero({
         </div>
       </div>
 
+      {/* 今日の一言 */}
+      <OneLinerBlock />
+
       {/* バッジチップ群 */}
       <div className="mt-10 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
         <BadgeChip label="SUN ／ 太陽星座" value={zodiacName} />
@@ -671,6 +675,33 @@ function Hero({
         <BadgeChip label="KUA ／ 本命卦" value={KUA_NAMES[kua]?.name ?? String(kua)} />
       </div>
     </section>
+  );
+}
+
+function OneLinerBlock() {
+  // クライアントサイドで日替わりで生成
+  const [data, setData] = useState<{ line: string; flavor: string | null; reading: string } | null>(null);
+  useEffect(() => {
+    setData(todayOneLiner(new Date()));
+  }, []);
+  if (!data) {
+    return <div className="mt-10 h-32 border border-current opacity-40" />;
+  }
+  return (
+    <div className="mt-10 border border-current p-6 sm:p-8 relative" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <span className="editorial-chip">Today's One-Liner ／ 今日の一言</span>
+        <span className="editorial-mono text-[10px] opacity-60">{data.reading}</span>
+      </div>
+      <p className="editorial-display-jp text-2xl sm:text-4xl lg:text-5xl leading-[1.15]">
+        {data.line}
+      </p>
+      {data.flavor && (
+        <p className="editorial-display-jp text-lg sm:text-2xl opacity-70 mt-3 leading-snug">
+          ── {data.flavor}
+        </p>
+      )}
+    </div>
   );
 }
 
