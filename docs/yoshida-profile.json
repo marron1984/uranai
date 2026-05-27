@@ -1,0 +1,466 @@
+{
+  "$schema": "uranai-yoshida-profile-v1",
+  "generatedAt": "2026-05-27T02:09:20.138Z",
+  "identity": {
+    "displayName": "しゅんすけ",
+    "nameSei": "吉田",
+    "nameMei": "駿成",
+    "nameRoman": "YOSHIDA SHUNSUKE",
+    "birth": "1984-05-02",
+    "hour": 13,
+    "age": 42,
+    "gender": "male",
+    "bloodType": "B",
+    "birthplace": {
+      "pref": "大阪府",
+      "city": "大阪市城東区",
+      "lat": 34.6913,
+      "lng": 135.5447,
+      "tz": "JST (UTC+9)"
+    },
+    "residence": {
+      "pref": "大阪府",
+      "city": "大阪市天王寺区",
+      "detail": "筆ヶ崎町2丁目10番 リーバーガーデンタワー筆ヶ崎 2302号室",
+      "floor": 23,
+      "fromBirthplaceDirection": "南西"
+    }
+  },
+  "astrology": {
+    "sunSign": {
+      "key": "taurus",
+      "name": "牡牛座",
+      "degree": 12.3084385048193
+    },
+    "approx": {
+      "moon": "射手座〜山羊座圏",
+      "asc": "獅子座圏",
+      "mc": "牡牛座圏"
+    }
+  },
+  "shichu": {
+    "fourPillars": {
+      "year": {
+        "ganzhi": "甲子",
+        "stem": "甲",
+        "branch": "子",
+        "element": "陽木",
+        "branchElement": "陽水"
+      },
+      "month": {
+        "ganzhi": "戊辰",
+        "stem": "戊",
+        "branch": "辰",
+        "element": "陽土",
+        "branchElement": "陽土"
+      },
+      "day": {
+        "ganzhi": "戊申",
+        "stem": "戊",
+        "branch": "申",
+        "element": "陽土",
+        "branchElement": "陽金"
+      },
+      "hour": {
+        "ganzhi": "己未",
+        "stem": "己",
+        "branch": "未",
+        "element": "陰土",
+        "branchElement": "陰土"
+      }
+    },
+    "dayMaster": {
+      "stem": "戊",
+      "element": "陽土"
+    },
+    "tongbianByPillar": {
+      "year": "偏官",
+      "month": "比肩",
+      "day": "日主",
+      "hour": "劫財"
+    },
+    "twelveByPillar": {
+      "year": "胎",
+      "month": "冠帯",
+      "day": "病",
+      "hour": "衰"
+    },
+    "fiveElementCount": {
+      "木": 0,
+      "火": 0,
+      "土": 0,
+      "金": 0,
+      "水": 0,
+      "陽木": null,
+      "陽土": null,
+      "陰土": null,
+      "陽水": null,
+      "陽金": null
+    },
+    "isOverbalanced": {
+      "element": "土",
+      "description": "偏土命 (土が三柱以上)"
+    },
+    "ruiun": {
+      "startingAge": 1,
+      "forward": true,
+      "daysToTerm": 3.318865729166667
+    },
+    "daiun": [
+      {
+        "index": 1,
+        "ageRange": [
+          1,
+          10
+        ],
+        "ganzhi": "己巳",
+        "stem": "己",
+        "branch": "巳",
+        "tongbian": "劫財",
+        "stemElement": "陰土",
+        "branchElement": "陰火",
+        "isCurrent": false,
+        "theme": "出費と試練のフェーズ。仲間・兄弟・友人との関わりが運命を動かす波乱期。"
+      },
+      {
+        "index": 2,
+        "ageRange": [
+          11,
+          20
+        ],
+        "ganzhi": "庚午",
+        "stem": "庚",
+        "branch": "午",
+        "tongbian": "食神",
+        "stemElement": "陽金",
+        "branchElement": "陽火",
+        "isCurrent": false,
+        "theme": "創造と楽しみのフェーズ。表現力と才能が花開き、衣食住も豊かになる黄金期。"
+      },
+      {
+        "index": 3,
+        "ageRange": [
+          21,
+          30
+        ],
+        "ganzhi": "辛未",
+        "stem": "辛",
+        "branch": "未",
+        "tongbian": "傷官",
+        "stemElement": "陰金",
+        "branchElement": "陰土",
+        "isCurrent": false,
+        "theme": "才能と批評のフェーズ。鋭さで頭角を現すが衝突も多い、内省と挑戦の10年。"
+      },
+      {
+        "index": 4,
+        "ageRange": [
+          31,
+          40
+        ],
+        "ganzhi": "壬申",
+        "stem": "壬",
+        "branch": "申",
+        "tongbian": "偏財",
+        "stemElement": "陽水",
+        "branchElement": "陽金",
+        "isCurrent": false,
+        "theme": "流動する財のフェーズ。ビジネス・社交・副業で大きく稼ぐチャンス期。"
+      },
+      {
+        "index": 5,
+        "ageRange": [
+          41,
+          50
+        ],
+        "ganzhi": "癸酉",
+        "stem": "癸",
+        "branch": "酉",
+        "tongbian": "正財",
+        "stemElement": "陰水",
+        "branchElement": "陰金",
+        "isCurrent": true,
+        "theme": "堅実な財のフェーズ。コツコツ蓄積し、家庭と仕事の安定を築く充実期。"
+      },
+      {
+        "index": 6,
+        "ageRange": [
+          51,
+          60
+        ],
+        "ganzhi": "甲戌",
+        "stem": "甲",
+        "branch": "戌",
+        "tongbian": "偏官",
+        "stemElement": "陽木",
+        "branchElement": "陽土",
+        "isCurrent": false,
+        "theme": "胆力と挑戦のフェーズ。改革者・経営者として頂点を目指す試練と栄光の10年。"
+      },
+      {
+        "index": 7,
+        "ageRange": [
+          61,
+          70
+        ],
+        "ganzhi": "乙亥",
+        "stem": "乙",
+        "branch": "亥",
+        "tongbian": "正官",
+        "stemElement": "陰木",
+        "branchElement": "陰水",
+        "isCurrent": false,
+        "theme": "規律と名誉のフェーズ。社会的地位・公的評価が頂点に達する充実期。"
+      },
+      {
+        "index": 8,
+        "ageRange": [
+          71,
+          80
+        ],
+        "ganzhi": "丙子",
+        "stem": "丙",
+        "branch": "子",
+        "tongbian": "偏印",
+        "stemElement": "陽火",
+        "branchElement": "陽水",
+        "isCurrent": false,
+        "theme": "独自の知性のフェーズ。副業・専門性・霊性が深まる、内向きで静かな実りの期。"
+      },
+      {
+        "index": 9,
+        "ageRange": [
+          81,
+          90
+        ],
+        "ganzhi": "丁丑",
+        "stem": "丁",
+        "branch": "丑",
+        "tongbian": "印綬",
+        "stemElement": "陰火",
+        "branchElement": "陰土",
+        "isCurrent": false,
+        "theme": "学問と人徳のフェーズ。教養・名誉・年長者の庇護が満ちる、人格完成の10年。"
+      }
+    ]
+  },
+  "kyusei": {
+    "honmei": {
+      "num": 7,
+      "name": "七赤金星",
+      "element": "金",
+      "direction": "西"
+    },
+    "getsumei": {
+      "num": 3,
+      "name": "三碧木星",
+      "element": "木"
+    }
+  },
+  "fengshui": {
+    "kua": 6,
+    "kuaAlgorithm": 7,
+    "name": "乾",
+    "group": "西四命",
+    "directions": [
+      {
+        "dir": "北",
+        "rating": "六殺",
+        "kind": "凶"
+      },
+      {
+        "dir": "東北",
+        "rating": "天医",
+        "kind": "吉"
+      },
+      {
+        "dir": "東",
+        "rating": "五鬼",
+        "kind": "凶"
+      },
+      {
+        "dir": "東南",
+        "rating": "禍害",
+        "kind": "凶"
+      },
+      {
+        "dir": "南",
+        "rating": "絶命",
+        "kind": "凶"
+      },
+      {
+        "dir": "西南",
+        "rating": "延年",
+        "kind": "吉"
+      },
+      {
+        "dir": "西",
+        "rating": "生気",
+        "kind": "吉"
+      },
+      {
+        "dir": "西北",
+        "rating": "伏位",
+        "kind": "吉"
+      }
+    ]
+  },
+  "numerology": {
+    "lifePath": 11,
+    "birthday": 2,
+    "soul": 7,
+    "personality": 3,
+    "expression": 1,
+    "personalYear": {
+      "year": 2026,
+      "value": 8
+    }
+  },
+  "birthCard": {
+    "personality": {
+      "num": 11,
+      "name": "正義",
+      "en": "Justice"
+    },
+    "soul": {
+      "num": 2,
+      "name": "女教皇",
+      "en": "The High Priestess"
+    }
+  },
+  "seimei": {
+    "kakusu": {
+      "ten": 11,
+      "jin": 22,
+      "chi": 24,
+      "gai": 13,
+      "so": 35
+    },
+    "kichikyo": {
+      "ten": "大吉",
+      "jin": "凶",
+      "chi": "大吉",
+      "gai": "大吉",
+      "so": "吉"
+    },
+    "detail": {
+      "ten": {
+        "value": 11,
+        "label": "天格",
+        "sub": "祖運（家系から受け継ぐ運勢）",
+        "kichikyo": "大吉"
+      },
+      "jin": {
+        "value": 22,
+        "label": "人格",
+        "sub": "中年運・性格の核",
+        "kichikyo": "凶"
+      },
+      "chi": {
+        "value": 24,
+        "label": "地格",
+        "sub": "初年運・幼〜青年期",
+        "kichikyo": "大吉"
+      },
+      "gai": {
+        "value": 13,
+        "label": "外格",
+        "sub": "対人運・周囲との関わり",
+        "kichikyo": "大吉"
+      },
+      "so": {
+        "value": 35,
+        "label": "総格",
+        "sub": "晩年運・人生総合",
+        "kichikyo": "吉"
+      }
+    }
+  },
+  "mbti": {
+    "type": "INFJ",
+    "name": "提唱者",
+    "nickname": "静かな預言者・魂の翻訳者",
+    "populationRate": "1.5%",
+    "group": "外交官",
+    "cognitive": {
+      "dominant": "Ni",
+      "auxiliary": "Fe",
+      "tertiary": "Ti",
+      "inferior": "Se"
+    },
+    "axes": {
+      "ei": 75,
+      "sn": 80,
+      "tf": 70,
+      "jp": 25
+    },
+    "bestMatch": [
+      "ENFP",
+      "ENTP"
+    ],
+    "goodMatch": [
+      "INFJ",
+      "INTJ",
+      "INFP",
+      "ENFJ"
+    ],
+    "challenging": [
+      "ESTP",
+      "ESTJ"
+    ]
+  },
+  "family": {
+    "spouse": {
+      "birth": "1969-12-21",
+      "fourPillars": {
+        "year": "己酉",
+        "month": "丙子",
+        "day": "壬午",
+        "hour": null
+      },
+      "dayStem": "壬",
+      "yearBranch": "酉",
+      "honmei": 4,
+      "kua": 2,
+      "lifePath": 4,
+      "birthday": 3,
+      "birthCards": {
+        "personality": 4,
+        "soul": 4
+      },
+      "tongbianVsYoshida": "偏財"
+    },
+    "child": {
+      "birth": "2011-11-03",
+      "fourPillars": {
+        "year": "辛卯",
+        "month": "戊戌",
+        "day": "甲戌",
+        "hour": null
+      },
+      "dayStem": "甲",
+      "yearBranch": "卯",
+      "honmei": 7,
+      "kua": 8,
+      "lifePath": 9,
+      "birthday": 3,
+      "birthCards": {
+        "personality": 9,
+        "soul": 9
+      },
+      "tongbianVsYoshida": "偏官"
+    }
+  },
+  "compatKeys": {
+    "dayStem": "戊",
+    "dayBranch": "申",
+    "yearBranch": "子",
+    "honmei": 7,
+    "sunSign": "taurus",
+    "lifePath": 11,
+    "kua": 6,
+    "mbti": "INFJ",
+    "birthCardPersonality": 11,
+    "birthCardSoul": 2
+  }
+}

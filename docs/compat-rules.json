@@ -1,0 +1,326 @@
+{
+  "$schema": "uranai-compat-rules-v1",
+  "description": "yoshida-profile.json と任意の人物のプロファイルを使って相互相性を算出するためのルール集。各セクションが算出のレシピと参照テーブルを含む。",
+  "version": "1.0.0",
+  "generatedFrom": "https://github.com/marron1984/uranai",
+
+  "howToUse": {
+    "step1": "相手の生年月日・性別・氏名から、本ルールの formulas に従って 4 柱・九星・本命卦・数秘・MBTI(任意) を算出する",
+    "step2": "yoshida-profile.json の compatKeys と相手の同等キーを下記 6 軸で比較する",
+    "step3": "各軸のスコア (1-5) を重み付き平均して総合相性を出す"
+  },
+
+  "scoringAxes": [
+    {
+      "id": "shichu.dayMaster",
+      "name": "日干同士の通変星",
+      "weight": 1.0,
+      "lookup": "tables.tongbianScore",
+      "compute": "tongbianStar(yoshida.dayStem='戊', partner.dayStem) → score",
+      "description": "ビジネス・恋愛・人間関係すべての基礎。戊から見て相手がどの通変星に当たるかで関係性の質が決まる"
+    },
+    {
+      "id": "shichu.yearBranch",
+      "name": "年支の干支関係",
+      "weight": 1.0,
+      "lookup": "tables.branchInteraction",
+      "compute": "yoshida.yearBranch='子' と partner.yearBranch の関係 (三合/六合/沖/害/刑/なし)",
+      "description": "幼少期からの相性。世代・気質の根本的な調和度"
+    },
+    {
+      "id": "kyusei.honmei",
+      "name": "九星本命星の五行関係",
+      "weight": 0.8,
+      "lookup": "tables.kyuseiRelation",
+      "compute": "starRelation(yoshida.honmei=7, partner.honmei) → score",
+      "description": "対人運の核。性質的な相性"
+    },
+    {
+      "id": "astrology.sun",
+      "name": "太陽星座の関係",
+      "weight": 0.6,
+      "lookup": "tables.zodiacCompat",
+      "compute": "yoshida.sunSign='taurus' と partner.sunSign のアスペクト (三分/対向/隣接/etc)",
+      "description": "外面的な気質・第一印象の合致度"
+    },
+    {
+      "id": "numerology.lifePath",
+      "name": "ライフパス相性",
+      "weight": 0.7,
+      "lookup": "tables.lifePathCompat",
+      "compute": "yoshida.lifePath=11 と partner.lifePath の組合せ",
+      "description": "魂のレベルの相性。価値観の共鳴度"
+    },
+    {
+      "id": "mbti",
+      "name": "MBTI 認知機能の補完",
+      "weight": 0.8,
+      "lookup": "tables.mbtiCompat",
+      "compute": "yoshida.mbti='INFJ' と partner.mbti を bestMatch/goodMatch/challenging で判定",
+      "description": "思考と感情の処理パターン。深い対話の可能性"
+    }
+  ],
+
+  "overallFormula": "overall = Σ(score_i × weight_i) / Σ(weight_i); 5段階に丸める",
+
+  "tables": {
+    "tongbianStar": {
+      "description": "日干 X 日干 → 通変星 10 種",
+      "stems": ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"],
+      "elements": { "甲":"陽木","乙":"陰木","丙":"陽火","丁":"陰火","戊":"陽土","己":"陰土","庚":"陽金","辛":"陰金","壬":"陽水","癸":"陰水" },
+      "rule": "日干と相手の干の五行関係 + 陰陽で 10 種に分類",
+      "classification": {
+        "同五行 + 同陰陽": "比肩",
+        "同五行 + 異陰陽": "劫財",
+        "日干が生む + 同陰陽": "食神",
+        "日干が生む + 異陰陽": "傷官",
+        "日干が剋す + 同陰陽": "偏財",
+        "日干が剋す + 異陰陽": "正財",
+        "日干が剋される + 同陰陽": "偏官",
+        "日干が剋される + 異陰陽": "正官",
+        "日干を生む + 同陰陽": "偏印",
+        "日干を生む + 異陰陽": "印綬"
+      },
+      "fiveElements": {
+        "生 (相生)": { "木": "火", "火": "土", "土": "金", "金": "水", "水": "木" },
+        "剋 (相剋)": { "木": "土", "土": "水", "水": "火", "火": "金", "金": "木" }
+      },
+      "tableForYoshida戊": {
+        "甲": "偏官",
+        "乙": "正官",
+        "丙": "偏印",
+        "丁": "印綬",
+        "戊": "比肩",
+        "己": "劫財",
+        "庚": "食神",
+        "辛": "傷官",
+        "壬": "偏財",
+        "癸": "正財"
+      }
+    },
+
+    "tongbianScore": {
+      "description": "戊土から見た通変星別の関係性スコア (1-5)",
+      "general": {
+        "印綬": { "score": 5, "kind": "守護者", "desc": "学び・人徳・名誉を授ける師" },
+        "正官": { "score": 5, "kind": "規律", "desc": "公正な伴侶・組織のパートナー" },
+        "正財": { "score": 4, "kind": "堅実な財", "desc": "コツコツ蓄積を支える現実家" },
+        "食神": { "score": 4, "kind": "創造", "desc": "穏やかに楽しみと豊かさを共有" },
+        "偏官": { "score": 4, "kind": "胆力", "desc": "決断と挑戦の場で頼れる" },
+        "偏財": { "score": 4, "kind": "流動財", "desc": "社交と機転で財を運ぶ" },
+        "偏印": { "score": 3, "kind": "独創", "desc": "アイデア・特殊技能の交換" },
+        "比肩": { "score": 3, "kind": "同志", "desc": "対等な仲間・切磋琢磨" },
+        "傷官": { "score": 3, "kind": "鋭知", "desc": "刺激的だが衝突しやすい" },
+        "劫財": { "score": 2, "kind": "競合", "desc": "出費と裏切りに注意" }
+      },
+      "businessByAxis": {
+        "decision": { "比肩":3, "劫財":2, "食神":4, "傷官":3, "偏財":4, "正財":5, "偏官":4, "正官":5, "偏印":3, "印綬":5 },
+        "finance":  { "比肩":2, "劫財":1, "食神":4, "傷官":3, "偏財":5, "正財":5, "偏官":3, "正官":4, "偏印":3, "印綬":3 },
+        "longterm": { "比肩":3, "劫財":2, "食神":4, "傷官":2, "偏財":3, "正財":4, "偏官":3, "正官":4, "偏印":3, "印綬":5 }
+      },
+      "businessRoles": {
+        "甲": { "role": "ビジョン・新規開拓のパイオニア", "complement": "あなたの土壌に伸びる大樹" },
+        "乙": { "role": "渉外・調整・ソフト営業", "complement": "柔らかな蔓のように人と人を繋ぐ役" },
+        "丙": { "role": "ブランド・PR・対外発信", "complement": "太陽のように事業を照らす顔役" },
+        "丁": { "role": "職人・専門家", "complement": "灯火のような深い専門性" },
+        "戊": { "role": "ナンバー 2・地ならし", "complement": "同じ山として相互補完" },
+        "己": { "role": "サポート・運用", "complement": "丁寧に育てる長期メンテ役" },
+        "庚": { "role": "改革・営業先鋒", "complement": "鉄のような決断力" },
+        "辛": { "role": "プロデュース・品質管理", "complement": "宝石のような繊細な品格" },
+        "壬": { "role": "流通・国際展開", "complement": "大河のように財と人を流す" },
+        "癸": { "role": "リサーチ・分析", "complement": "雨のような細やかな知性" }
+      }
+    },
+
+    "branchInteraction": {
+      "description": "年支同士の干支関係 (吉田の年支=子)",
+      "branches": ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"],
+      "rules": {
+        "三合 (申子辰 / 寅午戌 / 巳酉丑 / 亥卯未)": {
+          "score": 5,
+          "desc": "最強の結びつき、長期の協力に最適"
+        },
+        "六合 (子丑 / 寅亥 / 卯戌 / 辰酉 / 巳申 / 午未)": {
+          "score": 5,
+          "desc": "穏やかで調和的、信頼を育てやすい"
+        },
+        "沖 (子午 / 丑未 / 寅申 / 卯酉 / 辰戌 / 巳亥)": {
+          "score": 2,
+          "desc": "緊張感あり、対立しやすいが刺激にもなる"
+        },
+        "害 (子未 / 丑午 / 寅巳 / 卯辰 / 申亥 / 酉戌)": {
+          "score": 2,
+          "desc": "小さな摩擦が積み重なりやすい"
+        },
+        "刑 (子卯 / 寅巳申 / 丑戌未 / 辰午酉亥)": {
+          "score": 2,
+          "desc": "意見の食い違いが多い"
+        }
+      },
+      "tableForYoshida子": {
+        "子": { "type": "比和", "score": 3, "desc": "同じ干支・似た気質" },
+        "丑": { "type": "六合", "score": 5, "desc": "穏やかで調和的" },
+        "寅": { "type": "なし", "score": 3, "desc": "中立" },
+        "卯": { "type": "刑", "score": 2, "desc": "意見の食い違い" },
+        "辰": { "type": "三合", "score": 5, "desc": "最強の結びつき" },
+        "巳": { "type": "なし", "score": 3, "desc": "中立" },
+        "午": { "type": "沖", "score": 2, "desc": "対立しやすいが刺激にもなる" },
+        "未": { "type": "害", "score": 2, "desc": "小さな摩擦" },
+        "申": { "type": "三合", "score": 5, "desc": "最強の結びつき" },
+        "酉": { "type": "なし", "score": 3, "desc": "中立" },
+        "戌": { "type": "なし", "score": 3, "desc": "中立" },
+        "亥": { "type": "なし", "score": 3, "desc": "中立" }
+      }
+    },
+
+    "kyuseiRelation": {
+      "description": "九星本命星の五行関係 (吉田=七赤金)",
+      "stars": {
+        "1": { "name": "一白水星", "element": "水" },
+        "2": { "name": "二黒土星", "element": "土" },
+        "3": { "name": "三碧木星", "element": "木" },
+        "4": { "name": "四緑木星", "element": "木" },
+        "5": { "name": "五黄土星", "element": "土" },
+        "6": { "name": "六白金星", "element": "金" },
+        "7": { "name": "七赤金星", "element": "金" },
+        "8": { "name": "八白土星", "element": "土" },
+        "9": { "name": "九紫火星", "element": "火" }
+      },
+      "relations": {
+        "比和 (同五行)": { "score": 4, "desc": "安定して理解し合える関係" },
+        "相生 (相手→自分)": { "score": 5, "desc": "相手があなたを生かす関係。発展・吉" },
+        "洩気 (自分→相手)": { "score": 3, "desc": "気を与えるが疲れやすい" },
+        "相剋 (自分→相手剋)": { "score": 2, "desc": "あなたが相手を抑える、圧迫しがち" },
+        "受剋 (相手→自分剋)": { "score": 1, "desc": "相手から抑えられる、配慮と距離感が必要" }
+      },
+      "tableForYoshida7": {
+        "1": { "type": "洩気", "score": 3, "desc": "金→水・気を与える側" },
+        "2": { "type": "相生", "score": 5, "desc": "土→金・育てられる側 ◎" },
+        "3": { "type": "相剋", "score": 2, "desc": "金→木を剋す・あなたが抑える側" },
+        "4": { "type": "相剋", "score": 2, "desc": "金→木・あなたが抑える (現在妻)" },
+        "5": { "type": "相生", "score": 5, "desc": "土→金・育てられる側" },
+        "6": { "type": "比和", "score": 4, "desc": "同じ金・調和" },
+        "7": { "type": "比和", "score": 4, "desc": "同じ金・調和 (現在子)" },
+        "8": { "type": "相生", "score": 5, "desc": "土→金・育てられる側" },
+        "9": { "type": "受剋", "score": 1, "desc": "火→金・剋される側、要注意" }
+      }
+    },
+
+    "zodiacCompat": {
+      "description": "12 星座の関係 (吉田=牡牛座)",
+      "elements": {
+        "牡羊": "火", "獅子": "火", "射手": "火",
+        "牡牛": "地", "乙女": "地", "山羊": "地",
+        "双子": "風", "天秤": "風", "水瓶": "風",
+        "蟹":   "水", "蠍":   "水", "魚":   "水"
+      },
+      "aspects": {
+        "同星座": { "score": 4, "desc": "似た気質を共有・弱点も共有" },
+        "三分 (同エレメント・120度)": { "score": 5, "desc": "価値観が共鳴する最良の組合せ" },
+        "対向 (180度)": { "score": 4, "desc": "惹かれ合い補完する関係" },
+        "セクスタイル (60度)": { "score": 4, "desc": "協力し合いやすい良好な関係" },
+        "クインカンクス (150度)": { "score": 3, "desc": "調整が必要だが学びは深い" },
+        "スクエア (90度)": { "score": 2, "desc": "摩擦が多いが成長の刺激" },
+        "隣接 (30度)": { "score": 2, "desc": "価値観が異なり距離感が必要" }
+      },
+      "tableForYoshidaTaurus": {
+        "aries":       { "aspect": "隣接 (30度)",       "score": 2 },
+        "taurus":      { "aspect": "同星座",             "score": 4 },
+        "gemini":      { "aspect": "隣接 (30度)",       "score": 2 },
+        "cancer":      { "aspect": "セクスタイル (60度)", "score": 4 },
+        "leo":         { "aspect": "スクエア (90度)",   "score": 2 },
+        "virgo":       { "aspect": "三分 (地)",         "score": 5 },
+        "libra":       { "aspect": "クインカンクス",     "score": 3 },
+        "scorpio":     { "aspect": "対向",               "score": 4 },
+        "sagittarius": { "aspect": "クインカンクス",     "score": 3 },
+        "capricorn":   { "aspect": "三分 (地)",         "score": 5 },
+        "aquarius":    { "aspect": "スクエア (90度)",   "score": 2 },
+        "pisces":      { "aspect": "セクスタイル (60度)", "score": 4 }
+      }
+    },
+
+    "lifePathCompat": {
+      "description": "ライフパス相性 (吉田=11 マスター数)",
+      "rules": "11 はマスター数。9 (完了) と 22 (マスタービルダー) との組合せが特に深い。同 11 同士は鏡。一桁数字との相性は数字テーマで決まる",
+      "tableForYoshida11": {
+        "1":  { "score": 4, "theme": "始動 × 直感", "desc": "あなたが彼の独立志向を受け止める" },
+        "2":  { "score": 5, "theme": "11=2の上位", "desc": "繊細さの共鳴・最も親密" },
+        "3":  { "score": 4, "theme": "霊感 × 表現", "desc": "あなたの直感を彼が言葉に" },
+        "4":  { "score": 4, "theme": "理想 × 実務", "desc": "現実家が地に下ろす (現在妻)" },
+        "5":  { "score": 3, "theme": "深さ × 自由", "desc": "リズムが合わないが学びはある" },
+        "6":  { "score": 4, "theme": "霊性 × 愛", "desc": "二人で世界を癒す関係" },
+        "7":  { "score": 5, "theme": "二重の内省", "desc": "霊性と知性の最深部で対話" },
+        "8":  { "score": 4, "theme": "理想 × 物質化", "desc": "彼があなたの理想を世に出す" },
+        "9":  { "score": 5, "theme": "完了 × 開示", "desc": "二人で時代を区切る (現在子)" },
+        "11": { "score": 5, "theme": "鏡 (マスター)", "desc": "魂のレベルで対話できる稀有な相手" },
+        "22": { "score": 5, "theme": "理想 × 実装", "desc": "あなたが構想・彼が建設・最強ペア" },
+        "33": { "score": 5, "theme": "霊性 × 愛", "desc": "全マスター数の組合せは深い意味を持つ" }
+      }
+    },
+
+    "mbtiCompat": {
+      "description": "MBTI 16 タイプ相性 (吉田=INFJ)",
+      "bestMatch": ["ENFP", "ENTP"],
+      "goodMatch": ["INFJ", "INTJ", "INFP", "ENFJ"],
+      "challenging": ["ESTP", "ESTJ"],
+      "tableForYoshidaINFJ": {
+        "INTJ": { "level": "good", "score": 4, "desc": "Ni 共鳴・知性で対話" },
+        "INTP": { "level": "neutral", "score": 3, "desc": "穏やかな知的交流" },
+        "ENTJ": { "level": "neutral", "score": 3, "desc": "ビジョン共有・スピード差" },
+        "ENTP": { "level": "best", "score": 5, "desc": "Ne でアイデア交換・Ni-Ne の補完" },
+        "INFJ": { "level": "good", "score": 4, "desc": "鏡・最深部で通じる" },
+        "INFP": { "level": "good", "score": 4, "desc": "Fi-Fe の柔らかな調和" },
+        "ENFJ": { "level": "good", "score": 4, "desc": "Fe 共鳴・人を導くペア" },
+        "ENFP": { "level": "best", "score": 5, "desc": "Ne で世界を開き・Ni で深める最高ペア" },
+        "ISTJ": { "level": "neutral", "score": 3, "desc": "穏やか・現実派とのバランス" },
+        "ISFJ": { "level": "neutral", "score": 3, "desc": "Fe 共鳴・温かい補完" },
+        "ESTJ": { "level": "challenging", "score": 2, "desc": "Te-Ni のリズム差・成長機会" },
+        "ESFJ": { "level": "neutral", "score": 3, "desc": "Fe 共鳴・表面で繋がる" },
+        "ISTP": { "level": "neutral", "score": 3, "desc": "対極だが学びの組合せ" },
+        "ISFP": { "level": "neutral", "score": 3, "desc": "Fi-Fe の深い穏やかさ" },
+        "ESTP": { "level": "challenging", "score": 2, "desc": "Se-Ni 対極・刺激と疲労" },
+        "ESFP": { "level": "neutral", "score": 3, "desc": "Se で現場感を学ぶ" }
+      }
+    },
+
+    "fengshui": {
+      "description": "本命卦の東四命/西四命グループ (吉田=乾6・西四命)",
+      "groups": {
+        "東四命": [1, 3, 4, 9],
+        "西四命": [2, 6, 7, 8]
+      },
+      "tableForYoshida6": {
+        "1": { "score": 2, "desc": "東四 vs 西四・住環境が合わない" },
+        "2": { "score": 5, "desc": "同じ西四・延年関係" },
+        "3": { "score": 2, "desc": "東四 vs 西四・五鬼関係" },
+        "4": { "score": 2, "desc": "東四 vs 西四・禍害関係" },
+        "6": { "score": 4, "desc": "同じ乾・伏位・自然な調和" },
+        "7": { "score": 5, "desc": "同じ西四・生気関係 ◎" },
+        "8": { "score": 5, "desc": "同じ西四・天医関係" },
+        "9": { "score": 2, "desc": "東四 vs 西四・絶命関係 注意" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "comment": "吉田氏 × 妻 (1969-12-21・四緑木星・LP4・射手座・酉年) のサンプル計算",
+      "partner": {
+        "birth": "1969-12-21",
+        "yearBranch": "酉",
+        "dayStem": "戊 (実際の妻の日干は別計算が必要)",
+        "honmei": 4,
+        "sunSign": "sagittarius",
+        "lifePath": 4
+      },
+      "scores": {
+        "tongbianScore (戊×戊=比肩)": { "score": 3 },
+        "branchInteraction (子×酉)": { "score": 3, "type": "なし" },
+        "kyuseiRelation (7×4)": { "score": 2, "type": "相剋・金剋木" },
+        "zodiacCompat (taurus×sagittarius)": { "score": 3, "type": "クインカンクス" },
+        "lifePathCompat (11×4)": { "score": 4, "type": "理想×実務" }
+      },
+      "overall": "3.0 / 5.0 (中庸)。違いを受け入れる柔らかさで深い関係に育つ典型"
+    }
+  ]
+}
