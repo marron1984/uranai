@@ -90,7 +90,7 @@ const accurate = accurateSunSign(birthDate);
 const mbtiProfile = MBTI_PROFILES[o.natal.mbti];
 
 // 家族
-function familyProfile(person: { birth: string; gender?: string }, defaultGender: "male" | "female") {
+function familyProfile(person: { birth: string; gender?: string | null }, defaultGender: "male" | "female") {
   const [py, pm, pd] = person.birth.split("-").map(Number);
   const g = (person.gender as "male" | "female") ?? defaultGender;
   const pfp = calcFourPillars(py, pm, pd, null);
