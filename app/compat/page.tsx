@@ -117,46 +117,46 @@ export default function CompatPage() {
   return (
     <div className="space-y-10">
       {/* ヘッダー */}
-      <header className="border-b border-current pb-6">
+      <header className="border-b border-current pb-5 sm:pb-6">
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="editorial-chip">Compatibility</span>
-          <span className="editorial-chip editorial-chip-dark">相性鑑定</span>
-          <span className="editorial-chip"><span className="editorial-chip-num">vs</span>{OWNER.displayName}</span>
+          <span className="editorial-chip text-[10px] sm:text-xs">Compatibility</span>
+          <span className="editorial-chip editorial-chip-dark text-[10px] sm:text-xs">相性鑑定</span>
+          <span className="editorial-chip text-[10px] sm:text-xs"><span className="editorial-chip-num">vs</span>{OWNER.displayName}</span>
         </div>
-        <h1 className="editorial-display text-[12vw] lg:text-[110px] leading-[0.85] uppercase">
+        <h1 className="editorial-display text-[18vw] sm:text-[12vw] lg:text-[110px] leading-[0.85] uppercase break-words">
           DO WE
           <br />
           MATCH?
         </h1>
-        <p className="editorial-display-jp text-2xl sm:text-3xl mt-4">
+        <p className="editorial-display-jp text-xl sm:text-3xl mt-3 sm:mt-4 leading-snug">
           二人の星と数字を、6 軸で照合する。
         </p>
-        <p className="editorial-mono text-[10px] mt-3 opacity-70 max-w-xl">
+        <p className="editorial-mono text-[10px] mt-3 opacity-70 max-w-xl leading-relaxed">
           通変星 / 年支 / 九星 / 太陽星座 / ライフパス / 本命卦 / MBTI の 7 軸を
           重み付き平均で総合スコア化。家族・友人・ビジネスパートナーまで。
         </p>
       </header>
 
       {/* 入力フォーム */}
-      <section className="border border-current p-6 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
-        <div className="editorial-chip mb-6">入力 ／ Input</div>
+      <section className="border border-current p-4 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <div className="editorial-chip mb-5 sm:mb-6 text-[10px] sm:text-xs">入力 ／ Input</div>
 
         {/* プリセット */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-5 sm:mb-6">
           <span className="editorial-mono text-[10px] opacity-70 self-center mr-1">PRESET:</span>
           {(Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => applyPreset(k)}
-              className="editorial-chip"
+              className="editorial-chip text-[10px] sm:text-xs"
             >
               {k} ({PRESETS[k].birth.slice(0, 4)})
             </button>
           ))}
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
           <label className="block">
             <span className="editorial-mono text-[10px] opacity-70">NAME ／ 名前</span>
             <input
@@ -164,7 +164,7 @@ export default function CompatPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="例: 山田太郎"
-              className="mt-1 w-full border border-current px-3 py-2 bg-transparent focus:outline-none editorial-display-jp text-lg"
+              className="mt-1 w-full border border-current px-3 py-3 sm:py-2 bg-transparent focus:outline-none editorial-display-jp text-base sm:text-lg min-h-[44px]"
             />
           </label>
 
@@ -175,7 +175,7 @@ export default function CompatPage() {
               value={relation}
               onChange={(e) => setRelation(e.target.value)}
               placeholder="例: 友人 / 同僚 / 取引先"
-              className="mt-1 w-full border border-current px-3 py-2 bg-transparent focus:outline-none editorial-display-jp text-lg"
+              className="mt-1 w-full border border-current px-3 py-3 sm:py-2 bg-transparent focus:outline-none editorial-display-jp text-base sm:text-lg min-h-[44px]"
             />
           </label>
 
@@ -185,7 +185,7 @@ export default function CompatPage() {
               type="date"
               value={birth}
               onChange={(e) => setBirth(e.target.value)}
-              className="mt-1 w-full border border-current px-3 py-2 bg-transparent focus:outline-none editorial-display-jp text-lg"
+              className="mt-1 w-full border border-current px-3 py-3 sm:py-2 bg-transparent focus:outline-none editorial-display-jp text-base sm:text-lg min-h-[44px]"
             />
           </label>
 
@@ -194,7 +194,7 @@ export default function CompatPage() {
             <select
               value={gender}
               onChange={(e) => setGender(e.target.value as "male" | "female")}
-              className="mt-1 w-full border border-current px-3 py-2 bg-transparent focus:outline-none editorial-display-jp text-lg"
+              className="mt-1 w-full border border-current px-3 py-3 sm:py-2 bg-transparent focus:outline-none editorial-display-jp text-base sm:text-lg min-h-[44px]"
             >
               <option value="male">男性</option>
               <option value="female">女性</option>
@@ -203,11 +203,11 @@ export default function CompatPage() {
 
           <label className="block sm:col-span-2">
             <span className="editorial-mono text-[10px] opacity-70">MBTI ／ 任意 (本人テスト or 観察)</span>
-            <div className="mt-1 flex gap-2 flex-wrap">
+            <div className="mt-1 flex gap-2 flex-col sm:flex-row">
               <select
                 value={mbti}
                 onChange={(e) => setMbti(e.target.value as MbtiType | "")}
-                className="border border-current px-3 py-2 bg-transparent focus:outline-none editorial-display-jp text-lg flex-1 min-w-[150px]"
+                className="border border-current px-3 py-3 sm:py-2 bg-transparent focus:outline-none editorial-display-jp text-base sm:text-lg flex-1 min-w-0 sm:min-w-[150px] min-h-[44px]"
               >
                 {MBTI_OPTIONS.map((t) => (
                   <option key={t} value={t}>{t || "未設定"}</option>
@@ -216,22 +216,22 @@ export default function CompatPage() {
               <button
                 type="button"
                 onClick={() => setAutoMbti((a) => !a)}
-                className={autoMbti ? "editorial-chip editorial-chip-dark" : "editorial-chip"}
+                className={`${autoMbti ? "editorial-chip editorial-chip-dark" : "editorial-chip"} min-h-[44px] justify-center sm:flex-shrink-0`}
               >
                 {autoMbti ? "✓ 自動推定 ON" : "自動推定 OFF"}
               </button>
             </div>
-            <p className="editorial-mono text-[10px] mt-1 opacity-60">
+            <p className="editorial-mono text-[10px] mt-1.5 opacity-60 leading-relaxed">
               ※ 自動推定は星座 + LP から簡易判定 (参考程度・本人テスト推奨)
             </p>
           </label>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          <button type="button" onClick={onSave} disabled={!birth} className="editorial-chip">
+        <div className="mt-5 sm:mt-6 flex flex-wrap gap-2">
+          <button type="button" onClick={onSave} disabled={!birth} className="editorial-chip min-h-[44px] flex-1 sm:flex-none justify-center disabled:opacity-40">
             保存 ／ SAVE
           </button>
-          <button type="button" onClick={exportJson} disabled={!result} className="editorial-chip">
+          <button type="button" onClick={exportJson} disabled={!result} className="editorial-chip min-h-[44px] flex-1 sm:flex-none justify-center disabled:opacity-40">
             JSON エクスポート ／ EXPORT
           </button>
         </div>
@@ -283,45 +283,45 @@ export default function CompatPage() {
 
 function ResultView({ result }: { result: CompatResult }) {
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       {/* 総合スコア */}
-      <div className="border border-current p-6 sm:p-10 text-center relative" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
-        <div className="editorial-chip mb-4 inline-flex">RESULT ／ 総合相性</div>
-        <div className="editorial-display text-[18vw] sm:text-[120px] leading-none my-4">
+      <div className="border border-current p-5 sm:p-10 text-center relative" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <div className="editorial-chip mb-3 sm:mb-4 inline-flex text-[10px] sm:text-xs">RESULT ／ 総合相性</div>
+        <div className="editorial-display text-[26vw] sm:text-[120px] leading-none my-3 sm:my-4">
           {result.weightedScore.toFixed(1)}
-          <span className="text-3xl opacity-60"> / 5.0</span>
+          <span className="text-2xl sm:text-3xl opacity-60"> / 5</span>
         </div>
-        <div className="text-4xl tracking-wider mb-3">
+        <div className="text-3xl sm:text-4xl tracking-wider mb-2 sm:mb-3">
           {"★".repeat(result.overall)}{"☆".repeat(5 - result.overall)}
         </div>
-        <p className="editorial-display-jp text-xl sm:text-2xl mt-4 max-w-2xl mx-auto leading-snug">
+        <p className="editorial-display-jp text-base sm:text-2xl mt-3 sm:mt-4 max-w-2xl mx-auto leading-snug">
           {result.summary}
         </p>
       </div>
 
       {/* 占術師ナレーション */}
-      <div className="border border-current p-6 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
-        <div className="editorial-chip mb-4">占術師の総評 ／ Narrative</div>
-        <p className="text-base sm:text-lg leading-loose">{result.narrative}</p>
+      <div className="border border-current p-4 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <div className="editorial-chip mb-3 sm:mb-4 text-[10px] sm:text-xs">占術師の総評 ／ Narrative</div>
+        <p className="text-sm sm:text-lg leading-relaxed sm:leading-loose">{result.narrative}</p>
       </div>
 
       {/* 軸別スコア */}
       <div>
-        <div className="editorial-chip mb-4">軸別スコア ／ Axis Breakdown</div>
+        <div className="editorial-chip mb-3 sm:mb-4 text-[10px] sm:text-xs">軸別スコア ／ Axis Breakdown</div>
         <div className="space-y-2">
           {result.axes.map((ax) => (
-            <div key={ax.id} className="border border-current p-4 flex items-start gap-4 flex-wrap" style={{ background: "var(--background)" }}>
+            <div key={ax.id} className="border border-current p-3 sm:p-4 flex items-start gap-3 sm:gap-4" style={{ background: "var(--background)" }}>
               <div className="flex-shrink-0">
-                <div className="text-2xl tracking-wider tabular-nums">
+                <div className="text-lg sm:text-2xl tracking-wider tabular-nums whitespace-nowrap">
                   {"★".repeat(ax.score)}{"☆".repeat(5 - ax.score)}
                 </div>
-                <div className="editorial-mono text-[10px] opacity-60 mt-1 text-center">
+                <div className="editorial-mono text-[9px] sm:text-[10px] opacity-60 mt-1 text-center">
                   w={ax.weight.toFixed(1)} · {ax.score}/5
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="editorial-display-jp text-lg leading-snug">{ax.label}</div>
-                <div className="text-sm opacity-80 mt-1 leading-relaxed">{ax.detail}</div>
+                <div className="editorial-display-jp text-sm sm:text-lg leading-snug break-words">{ax.label}</div>
+                <div className="text-xs sm:text-sm opacity-80 mt-1 leading-relaxed">{ax.detail}</div>
               </div>
             </div>
           ))}
@@ -329,24 +329,24 @@ function ResultView({ result }: { result: CompatResult }) {
       </div>
 
       {/* 相手プロファイル詳細 */}
-      <div className="border border-current p-6 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
-        <div className="editorial-chip mb-4">相手プロファイル ／ Partner Profile</div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+      <div className="border border-current p-4 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <div className="editorial-chip mb-3 sm:mb-4 text-[10px] sm:text-xs">相手プロファイル ／ Partner Profile</div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
           {([
             ["生年月日", result.partner.birth],
             ["性別", result.partner.gender === "male" ? "男性" : "女性"],
-            ["日干 / 年支", `${result.partner.dayStem} / ${result.partner.yearBranch}`],
+            ["日干/年支", `${result.partner.dayStem} / ${result.partner.yearBranch}`],
             ["九星本命", String(result.partner.honmei)],
             ["本命卦", String(result.partner.kua)],
             ["太陽星座", result.partner.sunSignName],
             ["ライフパス", String(result.partner.lifePath)],
-            ["バースカード Personality", `${result.partner.birthCardPersonalityName} (${result.partner.birthCardPersonality})`],
-            ["バースカード Soul", `${result.partner.birthCardSoulName} (${result.partner.birthCardSoul})`],
+            ["BC Personality", `${result.partner.birthCardPersonalityName} (${result.partner.birthCardPersonality})`],
+            ["BC Soul", `${result.partner.birthCardSoulName} (${result.partner.birthCardSoul})`],
             ["MBTI", result.partner.mbti ?? "未設定"],
           ] as [string, string][]).map(([k, v]) => (
             <div key={k} className="border-b border-current/30 pb-2">
               <div className="editorial-mono text-[9px] opacity-60">{k}</div>
-              <div className="editorial-display-jp text-base mt-0.5">{v}</div>
+              <div className="editorial-display-jp text-sm sm:text-base mt-0.5 break-words">{v}</div>
             </div>
           ))}
         </div>

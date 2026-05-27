@@ -610,13 +610,13 @@ function Hero({
   kua: number;
 }) {
   return (
-    <section className="relative -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-10 border-b border-current">
+    <section className="relative -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-8 sm:pb-10 border-b border-current overflow-hidden">
       {/* 上部チップ行 */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div className="editorial-chip">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-5 sm:mb-6">
+        <div className="editorial-chip text-[10px] sm:text-xs">
           <span>{date}</span>
         </div>
-        <div className="editorial-chip editorial-chip-dark">
+        <div className="editorial-chip editorial-chip-dark text-[10px] sm:text-xs">
           <span>Today's Reading</span>
           <span className="editorial-chip-num">(LP {lifePath})</span>
         </div>
@@ -624,7 +624,7 @@ function Hero({
 
       {/* メガ・ディスプレイ・ヒーロー */}
       <div className="relative">
-        <h1 className="editorial-display text-[14vw] sm:text-[12vw] lg:text-[140px] uppercase">
+        <h1 className="editorial-display text-[15vw] sm:text-[12vw] lg:text-[140px] uppercase break-words">
           OFF TRACK,
           <br />
           ON PURPOSE,
@@ -632,13 +632,13 @@ function Hero({
           IN LIFE
         </h1>
 
-        {/* 右下サブヘッド */}
-        <div className="mt-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div className="editorial-display-jp text-3xl sm:text-5xl">
+        {/* サブヘッド */}
+        <div className="mt-4 sm:mt-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
+          <div className="editorial-display-jp text-2xl sm:text-5xl leading-tight">
             逸れても、道はある。<br />
-            <span className="text-2xl sm:text-4xl">{greeting}、{OWNER.displayName}さん。</span>
+            <span className="text-lg sm:text-4xl opacity-80">{greeting}、{OWNER.displayName}さん。</span>
           </div>
-          <div className="editorial-mono text-[10px] sm:text-xs leading-relaxed max-w-xs opacity-80">
+          <div className="editorial-mono text-[9px] sm:text-xs leading-relaxed sm:max-w-xs opacity-80">
             FOLLOW INTUITION,
             <br />
             REDEFINE YOUR ROAD
@@ -647,8 +647,8 @@ function Hero({
           </div>
         </div>
 
-        {/* 回転 EXPLORE バッジ (装飾) */}
-        <div className="absolute top-0 right-0 sm:right-4 lg:right-12 w-20 h-20 sm:w-28 sm:h-28 pointer-events-none hidden sm:block">
+        {/* 回転 EXPLORE バッジ (装飾・モバイルは小さく) */}
+        <div className="absolute top-0 right-0 sm:right-4 lg:right-12 w-14 h-14 sm:w-28 sm:h-28 pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full editorial-spinner">
             <defs>
               <path id="circle-path" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
@@ -658,7 +658,7 @@ function Hero({
             </text>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center text-[8px] font-bold">★</div>
+            <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-yellow-400 flex items-center justify-center text-[7px] sm:text-[8px] font-bold">★</div>
           </div>
         </div>
       </div>
@@ -666,13 +666,15 @@ function Hero({
       {/* 今日の一言 */}
       <OneLinerBlock />
 
-      {/* バッジチップ群 */}
-      <div className="mt-10 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
-        <BadgeChip label="SUN ／ 太陽星座" value={zodiacName} />
-        <BadgeChip label="STAR ／ 本命星" value={starName} />
-        <BadgeChip label="DAY ／ 日主" value={dayMaster} />
-        <BadgeChip label="LP ／ ライフパス" value={String(lifePath)} mono />
-        <BadgeChip label="KUA ／ 本命卦" value={KUA_NAMES[kua]?.name ?? String(kua)} />
+      {/* バッジチップ群 (モバイル: 横スクロール / sm 以上: グリッド) */}
+      <div className="mt-8 sm:mt-10 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto sm:overflow-visible">
+        <div className="flex sm:grid sm:grid-cols-5 gap-2 sm:gap-3 min-w-max sm:min-w-0">
+          <BadgeChip label="SUN ／ 太陽星座" value={zodiacName} />
+          <BadgeChip label="STAR ／ 本命星" value={starName} />
+          <BadgeChip label="DAY ／ 日主" value={dayMaster} />
+          <BadgeChip label="LP ／ ライフパス" value={String(lifePath)} mono />
+          <BadgeChip label="KUA ／ 本命卦" value={KUA_NAMES[kua]?.name ?? String(kua)} />
+        </div>
       </div>
     </section>
   );
@@ -688,16 +690,16 @@ function OneLinerBlock() {
     return <div className="mt-10 h-32 border border-current opacity-40" />;
   }
   return (
-    <div className="mt-10 border border-current p-6 sm:p-8 relative" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <span className="editorial-chip">Today's One-Liner ／ 今日の一言</span>
-        <span className="editorial-mono text-[10px] opacity-60">{data.reading}</span>
+    <div className="mt-8 sm:mt-10 border border-current p-4 sm:p-8 relative" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
+        <span className="editorial-chip text-[10px] sm:text-xs">Today's One-Liner ／ 今日の一言</span>
+        <span className="editorial-mono text-[9px] sm:text-[10px] opacity-60">{data.reading}</span>
       </div>
-      <p className="editorial-display-jp text-2xl sm:text-4xl lg:text-5xl leading-[1.15]">
+      <p className="editorial-display-jp text-xl sm:text-4xl lg:text-5xl leading-[1.2] sm:leading-[1.15]">
         {data.line}
       </p>
       {data.flavor && (
-        <p className="editorial-display-jp text-lg sm:text-2xl opacity-70 mt-3 leading-snug">
+        <p className="editorial-display-jp text-sm sm:text-2xl opacity-70 mt-2 sm:mt-3 leading-snug">
           ── {data.flavor}
         </p>
       )}
@@ -707,9 +709,9 @@ function OneLinerBlock() {
 
 function BadgeChip({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="border border-current px-3 py-3" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+    <div className="border border-current px-3 py-2.5 sm:py-3 flex-shrink-0 min-w-[120px] sm:min-w-0" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
       <div className="editorial-mono text-[9px] opacity-70 truncate">{label}</div>
-      <div className={`editorial-display-jp text-xl sm:text-2xl mt-1 ${mono ? "tabular-nums" : ""}`}>
+      <div className={`editorial-display-jp text-lg sm:text-2xl mt-1 ${mono ? "tabular-nums" : ""}`}>
         {value}
       </div>
     </div>
@@ -732,15 +734,15 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`tab-btn px-4 sm:px-5 py-2 transition-all flex items-center gap-2 border border-current ${
+      className={`tab-btn px-3 sm:px-5 py-2 transition-all flex items-center gap-1.5 sm:gap-2 border border-current flex-shrink-0 ${
         active ? "tab-btn-active" : "hover:bg-black/5"
       }`}
     >
-      <span className="editorial-mono text-[11px] opacity-90">{sub}</span>
+      <span className="editorial-mono text-[10px] sm:text-[11px] opacity-90">{sub}</span>
       {count !== undefined && (
-        <span className="editorial-mono text-[10px] opacity-70">({count})</span>
+        <span className="editorial-mono text-[9px] sm:text-[10px] opacity-70">({count})</span>
       )}
-      <span className="editorial-display-jp text-base">{label}</span>
+      <span className="editorial-display-jp text-sm sm:text-base">{label}</span>
     </button>
   );
 }

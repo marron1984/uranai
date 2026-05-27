@@ -96,6 +96,30 @@
 
 html {
   background: var(--background);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+html, body {
+  overflow-x: hidden;
+}
+
+/* iOS Safari: フォーム要素のズーム抑制 (16px 未満で自動ズーム発動) */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* タッチデバイス: hover を弱める */
+@media (hover: none) {
+  .editorial-chip:hover {
+    background: var(--background);
+    color: var(--foreground);
+  }
+  .editorial-chip-dark:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
 }
 
 body {
