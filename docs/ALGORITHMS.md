@@ -639,6 +639,129 @@ Claude API への問い合わせ。命式の全データを context に注入し
 
 ---
 
+## 15-A. 相性鑑定 (`lib/compatCheck.ts` + `app/compat/`)
+
+任意の人物 × 吉田氏の相性を 7 軸で重み付き平均する。
+ブラウザ UI (`/compat`) と Node スクリプト両方から利用可。
+
+### 入力
+```
+PartnerInput = { name, birth: "YYYY-MM-DD", gender, mbti? }
+```
+
+### 7 軸スコア (各 1-5)
+| 軸 | 重み | 算出 |
+|---|---|---|
+| 通変星 | 1.0 | `tongbianStar(戊, partner.dayStem)` → 通変星別固定スコア |
+| 年支 | 1.0 | `branchInteraction(子, partner.yearBranch)` (三合/六合/沖/害/刑/なし) |
+| 九星 | 0.8 | `starRelation(7, partner.honmei)` (五行相生・相剋・比和) |
+| 太陽星座 | 0.6 | `zodiacCompat(taurus, partner.sunSign)` (アスペクト判定) |
+| ライフパス | 0.7 | LP 11 × partner.LP の組合せテーブル |
+| 本命卦 | 0.5 | 乾 6 × partner.kua の互換性 (東四命/西四命) |
+| MBTI | 0.8 | INFJ vs partner.mbti (best/good/neutral/challenging) ※任意 |
+
+### 総合スコア
+```
+weightedScore = Σ(score_i × weight_i) / Σ(weight_i)
+overall = round(weightedScore)  // 1-5 (整数)
+```
+
+### MBTI 自動推定 (`guessMbti`)
+本人テストできない時の簡易推定:
+- E/I: 太陽星座が火/風 (牡羊/獅子/射手/双子/天秤/水瓶) なら E、それ以外は I
+- S/N: LP が 3/5/7/9/11/22/33 (霊的・直感系) なら N、それ以外は S
+- T/F: 太陽星座が蟹/魚/蠍/牡牛/天秤 なら F、それ以外は T
+- J/P: LP が 3/5/7 (流動性高い) なら P、それ以外は J
+
+### YOSHIDA_KEYS (確定値)
+```
+dayStem: "戊"
+dayBranch: "申"
+yearBranch: "子"
+honmei: 7
+sunSign: "taurus"
+lifePath: 11
+kua: 6
+mbti: "INFJ"
+birthCardPersonality: 11
+birthCardSoul: 2
+```
+
+### narrative 生成
+軸を score 降順ソート → 最高軸 (best) と最低軸 (worst) を抽出 → 物語形式で連結。
+
+---
+
+## 15-B. 今日の一言 (`lib/today.ts > todayOneLiner`)
+
+パーソナルデイ × 通変星 で日替わりの一言とフレーバーを返す。
+
+### 算出
+```
+pd = personalDay(OWNER.birth, year, month, day)  // 1-9
+dp = todayDayPillar(date)                         // 干支
+tb = tongbianStar(戊, dp.stem)                    // 通変星
+
+line   = pickByDate(ONE_LINER_VARIANTS[pd], date, 701)
+flavor = pickByDate(TONGBIAN_FLAVOR[tb.star], date, 703)   // 通変星別
+reading = `PD ${pd} × ${tb.star} (${dp.ganzhi})`
+```
+
+### バリエーション数
+- ONE_LINER_VARIANTS: 9 (PD) × 5 (variant) = **45 行**
+- TONGBIAN_FLAVOR: 10 (通変星) × 2-3 (variant) = **約 25 行**
+- pickByDate の salt:
+  - `701` → メイン一言
+  - `703` → 通変星フレーバー
+
+### 表示位置
+Hero (`app/page.tsx > OneLinerBlock`) — 巨大明朝で表示。
+
+---
+
+## 16. UI / テーマシステム (`app/globals.css` + `app/ThemeSwitcher.tsx`)
+
+CSS 変数によるテーマ切替。`data-theme="..."` を `<html>` に設定。
+
+### 6 テーマ
+| ID | 既定 | --background | 説明 |
+|---|---|---|---|
+| `editorial` | ✓ | `#fafaf7` | 純白×漆黒の編集デザイン |
+| `midnight` | | `#0a0a0f` | 深い闇と銅金 |
+| `twilight` | | `#1a2334` | 夕闇の青藍 |
+| `forest` | | `#131e18` | 深緑と苔金 |
+| `paper` | | `#f3ecdc` | 明るい羊皮紙 |
+| `cream` | | `#fbf6e8` | 最も明るい |
+
+### CSS 変数
+```
+--background       基本背景色
+--foreground       基本テキスト色
+--copper           アクセント (チップ枠線・装飾)
+--card-bg          ガラスカード背景
+--star-opacity     スターダスト透明度 (0=非表示)
+```
+
+### Tailwind utility class の上書き
+ダーク系→ライト系 (paper/cream) への切替時、
+`bg-midnight-*` / `text-sand-*` / `border-copper-*` 系を全て上書きする
+specificity ルールを globals.css 末尾に集約。
+
+### 編集スタイル限定クラス
+- `.editorial-display` — Archivo Black 大文字 (巨大欧文)
+- `.editorial-display-jp` — Noto Serif JP 900 (明朝太字日本語)
+- `.editorial-mono` — Inter 700 小キャップ
+- `.editorial-chip` / `.editorial-chip-dark` — 反転チップ
+- `.editorial-spinner` — 12 秒で 1 回転する装飾バッジ
+
+### モバイル対応
+- `MobileMenu.tsx` ハンバーガー → 全画面オーバーレイ
+- `<input>/<select>/<textarea>` は `@media (max-width:640px)` で 16px 強制 (iOS Safari ズーム抑制)
+- `@media (hover:none)` でホバー反転を無効化
+- 全てのタッチターゲットに `min-h-[44px]` (Apple HIG 準拠)
+
+---
+
 ## 16. 計算順序 (アプリ起動時)
 
 ```
