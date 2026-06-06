@@ -158,6 +158,7 @@ import {
 import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
 import Link from "next/link";
 import { MBTI_PROFILES, MBTI_DIVINATION_INTEGRATION } from "@/lib/mbti";
+import { todayQuote, todayQuoteByCategory, type Quote, type QuoteCategory } from "@/lib/quotes";
 import {
   type JournalEntry,
   type Hit,
@@ -666,6 +667,9 @@ function Hero({
       {/* 今日の一言 */}
       <OneLinerBlock />
 
+      {/* 今日の格言 */}
+      <QuoteBlock />
+
       {/* バッジチップ群 (モバイル: 横スクロール / sm 以上: グリッド) */}
       <div className="mt-8 sm:mt-10 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto sm:overflow-visible">
         <div className="flex sm:grid sm:grid-cols-5 gap-2 sm:gap-3 min-w-max sm:min-w-0">
@@ -701,6 +705,85 @@ function OneLinerBlock() {
       {data.flavor && (
         <p className="editorial-display-jp text-sm sm:text-2xl opacity-70 mt-2 sm:mt-3 leading-snug">
           ── {data.flavor}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function QuoteBlock() {
+  const [data, setData] = useState<Quote | null>(null);
+  const [category, setCategory] = useState<QuoteCategory | "all">("all");
+
+  useEffect(() => {
+    // 初期値は全カテゴリから日替わり
+    setData(todayQuote(new Date()));
+  }, []);
+
+  const onCategoryChange = (c: QuoteCategory | "all") => {
+    setCategory(c);
+    if (c === "all") {
+      setData(todayQuote(new Date()));
+    } else {
+      const q = todayQuoteByCategory(c, new Date());
+      if (q) setData(q);
+    }
+  };
+
+  if (!data) return <div className="mt-6 h-32 border border-current opacity-40" />;
+
+  const categories: (QuoteCategory | "all")[] = [
+    "all", "経営者", "投資家", "思想家", "戦略家", "芸術家", "科学者", "政治家", "霊性",
+  ];
+
+  return (
+    <div className="mt-6 sm:mt-8 border border-current p-4 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
+        <span className="editorial-chip text-[10px] sm:text-xs">Quote of the Day ／ 今日の格言</span>
+        <span className="editorial-mono text-[9px] sm:text-[10px] opacity-60">
+          {data.category}{data.era ? " · " + data.era : ""}
+        </span>
+      </div>
+
+      {/* カテゴリ切替 */}
+      <div className="flex gap-1.5 mb-4 sm:mb-5 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+        {categories.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => onCategoryChange(c)}
+            className={`editorial-chip text-[10px] flex-shrink-0 ${category === c ? "editorial-chip-dark" : ""}`}
+          >
+            {c === "all" ? "ALL" : c}
+          </button>
+        ))}
+      </div>
+
+      {/* 格言本文 */}
+      <blockquote className="editorial-display-jp text-lg sm:text-3xl lg:text-4xl leading-[1.3] sm:leading-[1.25] relative pl-4 sm:pl-6 border-l-2 border-current">
+        {data.text}
+      </blockquote>
+
+      {/* 著者 */}
+      <div className="mt-4 sm:mt-5 flex items-baseline justify-between flex-wrap gap-2">
+        <div>
+          <div className="editorial-display-jp text-base sm:text-xl">— {data.author}</div>
+          {data.authorEn && (
+            <div className="editorial-mono text-[10px] opacity-60 mt-0.5">{data.authorEn}</div>
+          )}
+        </div>
+        {data.mbtiHint && (
+          <span className="editorial-chip text-[10px]">
+            <span className="editorial-chip-num">推定</span>
+            <span>{data.mbtiHint}</span>
+          </span>
+        )}
+      </div>
+
+      {/* コンテキスト */}
+      {data.context && (
+        <p className="text-xs sm:text-sm mt-4 opacity-70 leading-relaxed border-t border-current/30 pt-3">
+          {data.context}
         </p>
       )}
     </div>
