@@ -120,6 +120,11 @@ import {
   legacyQuestion,
   relationshipSpouse,
   relationshipChild,
+  ASTRO_DEEP_TAURUS,
+  ASTRO_DEEP_LEO_ASC,
+  ASTRO_DEEP_MOON,
+  ASTRO_HOUSES,
+  ASTRO_TRANSIT_2026,
   type SynthesisCard,
 } from "@/lib/synthesis";
 import { generateDaiun, type DaiunPeriod } from "@/lib/shichu";
@@ -159,6 +164,28 @@ import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
 import Link from "next/link";
 import { MBTI_PROFILES, MBTI_DIVINATION_INTEGRATION } from "@/lib/mbti";
 import { todayQuote, todayQuoteByCategory, type Quote, type QuoteCategory } from "@/lib/quotes";
+import {
+  SHICHU_DEEP_TONGBIAN,
+  SHICHU_DEEP_TWELVE_STAGES,
+  SHICHU_DEEP_FIVE_BALANCE,
+  SHICHU_DEEP_DAIUN_TRANSITION,
+  SHICHU_DEEP_SHENSHA,
+  NUMEROLOGY_DEEP_LIFEPATH11,
+  NUMEROLOGY_DEEP_BIRTHDAY2,
+  NUMEROLOGY_PERSONAL_CYCLE,
+  BIRTHCARD_DEEP_JUSTICE_PRIESTESS,
+  NUMEROLOGY_NAME,
+  FENGSHUI_KUA6_DEEP,
+  FENGSHUI_ROOM_BY_ROOM,
+  KYUSEI_7RED_DEEP,
+  KYUSEI_2026_ANNUAL,
+  FAMILY_FENGSHUI,
+  ANNUAL_2026_DEEP,
+  INFJ_HISTORICAL_FIGURES,
+  ROLE_FOR_SOCIETY,
+  FAMILY_LINEAGE,
+  SHADOW_INTEGRATION,
+} from "@/lib/synthesisDeep";
 import {
   type JournalEntry,
   type Hit,
@@ -1199,119 +1226,291 @@ function TodayTab({
 // ==========================================================================
 
 function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
+  // 目次 (TOC) データ — セクションと項目の構造
+  const tocSections: TocSection[] = [
+    {
+      id: "core",
+      label: "01 ／ コア",
+      items: [
+        { id: "patterns", num: "○", title: "パターン分析 (蓄積データ)" },
+        { id: "hero", num: "○", title: "統合占断ヒーロー" },
+        { id: "personality", num: "壱", title: "性格の核 (三層構造)" },
+        { id: "mbti", num: "壱之弐", title: "MBTI ／ INFJ (提唱者)" },
+      ],
+    },
+    {
+      id: "natal",
+      label: "02 ／ 命の基礎データ",
+      items: [
+        { id: "astro", num: "弐", title: "ネイタルチャート (西洋占星術)" },
+        { id: "shichu", num: "参", title: "四柱推命 (命式)" },
+        { id: "kyusei", num: "肆", title: "九星気学" },
+        { id: "numerology", num: "伍", title: "数秘術 (フル)" },
+        { id: "seimei", num: "陸", title: "姓名判断 (五格)" },
+        { id: "birthcard", num: "漆", title: "タロット バースカード" },
+        { id: "fengshui", num: "捌", title: "風水 (本命卦)" },
+        { id: "daiun", num: "玖", title: "大運表 (10 年周期)" },
+      ],
+    },
+    {
+      id: "deep-shichu",
+      label: "03 ／ 四柱推命の深掘り",
+      items: [
+        { id: "shichu-tongbian", num: "玖之壱", title: "命式の通変星の組合せ" },
+        { id: "shichu-twelve", num: "玖之弐", title: "四柱十二運のリズム" },
+        { id: "shichu-balance", num: "玖之参", title: "偏土命の五行バランス" },
+        { id: "shichu-daiun-transition", num: "玖之肆", title: "大運切替期 (41→51)" },
+        { id: "shichu-shensha", num: "玖之伍", title: "神殺 (魁罡・天乙貴人 等)" },
+      ],
+    },
+    {
+      id: "deep-numerology",
+      label: "04 ／ 数秘・バースカードの深掘り",
+      items: [
+        { id: "num-lp11", num: "伍之壱", title: "マスター数 11 の完全解説" },
+        { id: "num-birthday2", num: "伍之弐", title: "誕生日数 2 の二重構造" },
+        { id: "num-personal-cycle", num: "伍之参", title: "パーソナルイヤー 9 年周期" },
+        { id: "num-birthcard-deep", num: "漆之壱", title: "正義 + 女教皇 の深層" },
+        { id: "num-name", num: "陸之壱", title: "YOSHIDA SHUNSUKE 数秘" },
+      ],
+    },
+    {
+      id: "deep-astro",
+      label: "05 ／ 西洋占星術の深掘り",
+      items: [
+        { id: "astro-taurus", num: "弐之壱", title: "牡牛座太陽 12° の深層" },
+        { id: "astro-leo-asc", num: "弐之弐", title: "獅子座 ASC + 牡牛座 MC" },
+        { id: "astro-moon", num: "弐之参", title: "月星座と感情処理" },
+        { id: "astro-houses", num: "弐之肆", title: "重要 4 ハウスの活性" },
+        { id: "astro-transit-2026", num: "弐之伍", title: "2026 年のトランジット" },
+      ],
+    },
+    {
+      id: "deep-fengshui",
+      label: "06 ／ 風水・九星気学の深掘り",
+      items: [
+        { id: "fs-kua6", num: "捌之壱", title: "本命卦 乾 6 (西四命) 完全解説" },
+        { id: "fs-room-by-room", num: "捌之弐", title: "23 階の部屋別実践" },
+        { id: "ks-7red", num: "肆之壱", title: "七赤金星の完全解説" },
+        { id: "ks-2026", num: "肆之弐", title: "2026 年流年方位" },
+        { id: "fs-family", num: "捌之参", title: "家族 3 人の方位バランス" },
+      ],
+    },
+    {
+      id: "synthesis-character",
+      label: "07 ／ 統合・性格と行動",
+      items: [
+        { id: "career", num: "拾", title: "仕事・天職" },
+        { id: "communication", num: "拾壱", title: "コミュニケーションスタイル" },
+        { id: "decision", num: "拾弐", title: "決断スタイル" },
+        { id: "leadership", num: "拾参", title: "リーダーシップ" },
+        { id: "conflict", num: "拾肆", title: "衝突パターン" },
+      ],
+    },
+    {
+      id: "synthesis-family",
+      label: "08 ／ 関係と家族",
+      items: [
+        { id: "spouse", num: "拾伍", title: "妻との関係" },
+        { id: "child", num: "拾陸", title: "子との関係" },
+        { id: "parenting", num: "拾漆", title: "父としての深層" },
+        { id: "family-care", num: "拾捌", title: "義母 (認知症) と家族" },
+        { id: "parents", num: "拾玖", title: "両親との縁" },
+        { id: "family-compat", num: "弐拾", title: "家族との相性スコア" },
+        { id: "family-lineage", num: "弐拾之壱", title: "家系図と先祖の物語" },
+      ],
+    },
+    {
+      id: "synthesis-wealth-health",
+      label: "09 ／ 財・健康・心",
+      items: [
+        { id: "wealth", num: "弐拾壱", title: "金運・財運の核" },
+        { id: "money", num: "弐拾弐", title: "金銭心理" },
+        { id: "health", num: "弐拾参", title: "健康・体質" },
+        { id: "body", num: "弐拾肆", title: "体質と養生" },
+        { id: "mental", num: "弐拾伍", title: "メンタルパターン" },
+      ],
+    },
+    {
+      id: "synthesis-life-soul",
+      label: "10 ／ 人生と魂",
+      items: [
+        { id: "lifearc", num: "弐拾陸", title: "人生の三大時期" },
+        { id: "midlife", num: "弐拾漆", title: "中年期の転換" },
+        { id: "fengshui-home", num: "弐拾捌", title: "住まいの風水" },
+        { id: "spiritual", num: "弐拾玖", title: "魂のテーマ" },
+        { id: "practice", num: "参拾", title: "霊性の実践" },
+        { id: "legacy", num: "参拾壱", title: "次世代に残すもの" },
+        { id: "shadow", num: "参拾之壱", title: "影 (シャドウ) の統合" },
+        { id: "role-society", num: "参拾之弐", title: "社会的役割" },
+        { id: "infj-historical", num: "参拾之参", title: "同型 INFJ の歴史人物" },
+        { id: "annual-2026", num: "参拾之肆", title: "2026 年運勢の深掘り" },
+      ],
+    },
+    {
+      id: "tools",
+      label: "11 ／ ツール",
+      items: [
+        { id: "business-compat", num: "参拾弐", title: "ビジネス相性チェッカー" },
+        { id: "final", num: "○", title: "最終メッセージ" },
+      ],
+    },
+  ];
+
   return (
     <div className="space-y-12">
+      {/* ━━ 目次 ━━ */}
+      <BasisTOC sections={tocSections} />
+
       {/* ━━ パターン分析（蓄積データから） ━━ */}
-      <PatternsSection />
+      <div id="patterns" className="scroll-mt-20"><PatternsSection /></div>
 
       {/* ━━ 統合占断 ヒーロー ━━ */}
-      <SynthesisHero />
+      <div id="hero" className="scroll-mt-20"><SynthesisHero /></div>
 
       {/* ━━ 統合: 性格の核 ━━ */}
-      <SynthesisBlock num="壱" card={PERSONALITY_CORE} />
+      <SynthesisBlock id="personality" num="壱" card={PERSONALITY_CORE} />
 
       {/* ━━ MBTI セクション ━━ */}
-      <MbtiSection />
+      <div id="mbti" className="scroll-mt-20"><MbtiSection /></div>
+
+      <SectionDivider title="命の基礎データ ／ Natal Data" />
 
       {/* ━━ ネイタル + 太陽星座詳細 ━━ */}
-      <NumberedSection num="弐" label="Astrology" title="ネイタルチャート（西洋占星術）">
+      <NumberedSection id="astro" num="弐" label="Astrology" title="ネイタルチャート（西洋占星術）">
         <NatalChartSection sun={basis.sun} />
       </NumberedSection>
 
       {/* ━━ 四柱推命 ━━ */}
-      <NumberedSection num="参" label="Shichu Suimei" title="四柱推命（命式）">
+      <NumberedSection id="shichu" num="参" label="Shichu Suimei" title="四柱推命（命式）">
         <ShichuFullSection fp={basis.fp} fpExtras={basis.fpExtras} />
       </NumberedSection>
 
       {/* ━━ 九星気学 ━━ */}
-      <NumberedSection num="肆" label="Nine Star Ki" title="九星気学">
+      <NumberedSection id="kyusei" num="肆" label="Nine Star Ki" title="九星気学">
         <KyuseiSection />
       </NumberedSection>
 
       {/* ━━ 数秘術 ━━ */}
-      <NumberedSection num="伍" label="Numerology" title="数秘術（フル）">
+      <NumberedSection id="numerology" num="伍" label="Numerology" title="数秘術（フル）">
         <NumerologyFullSection numero={basis.numero} />
       </NumberedSection>
 
       {/* ━━ 姓名判断 ━━ */}
-      <NumberedSection num="陸" label="Seimei Handan" title="姓名判断（五格）">
+      <NumberedSection id="seimei" num="陸" label="Seimei Handan" title="姓名判断（五格）">
         <SeimeiSection kakusu={basis.kakusu} />
       </NumberedSection>
 
       {/* ━━ バースカード ━━ */}
-      <NumberedSection num="漆" label="Birth Card" title="タロット バースカード">
+      <NumberedSection id="birthcard" num="漆" label="Birth Card" title="タロット バースカード">
         <BirthCardSection bc={basis.bc} />
       </NumberedSection>
 
       {/* ━━ 風水 ━━ */}
-      <NumberedSection num="捌" label="Feng Shui" title="風水（本命卦）">
+      <NumberedSection id="fengshui" num="捌" label="Feng Shui" title="風水（本命卦）">
         <FengShuiFullSection ratings={basis.ratings} />
       </NumberedSection>
 
       {/* ━━ 大運（10年周期） ━━ */}
-      <NumberedSection num="玖" label="Daiun / Decade Luck" title="大運表 — 10年周期のライフサイクル">
+      <NumberedSection id="daiun" num="玖" label="Daiun / Decade Luck" title="大運表 — 10年周期のライフサイクル">
         <DaiunTable periods={basis.daiun} currentAge={basis.currentAge} />
       </NumberedSection>
 
-      {/* ━━ 統合占断シリーズ ━━ */}
-      <SectionDivider title="統合占断・性格と行動" />
+      {/* ━━━━ 占術深掘りシリーズ (5 エージェント研究) ━━━━ */}
+      <SectionDivider title="四柱推命の深掘り ／ Shichu Deep Dive" />
 
-      <SynthesisBlock num="拾" card={CAREER_DEEP} />
-      <SynthesisBlock num="拾壱" card={COMMUNICATION_STYLE} />
-      <SynthesisBlock num="拾弐" card={DECISION_STYLE} />
-      <SynthesisBlock num="拾参" card={LEADERSHIP_STYLE} />
-      <SynthesisBlock num="拾肆" card={CONFLICT_PATTERN} />
+      {/* エージェント 1 (四柱推命) */}
+      <DeepCardSlot id="shichu-tongbian" num="玖之壱" label="Shichu Deep" title={SHICHU_DEEP_TONGBIAN.title} card={SHICHU_DEEP_TONGBIAN} />
+      <DeepCardSlot id="shichu-twelve" num="玖之弐" label="Shichu Deep" title={SHICHU_DEEP_TWELVE_STAGES.title} card={SHICHU_DEEP_TWELVE_STAGES} />
+      <DeepCardSlot id="shichu-balance" num="玖之参" label="Shichu Deep" title={SHICHU_DEEP_FIVE_BALANCE.title} card={SHICHU_DEEP_FIVE_BALANCE} />
+      <DeepCardSlot id="shichu-daiun-transition" num="玖之肆" label="Shichu Deep" title={SHICHU_DEEP_DAIUN_TRANSITION.title} card={SHICHU_DEEP_DAIUN_TRANSITION} />
+      <DeepCardSlot id="shichu-shensha" num="玖之伍" label="Shichu Deep" title={SHICHU_DEEP_SHENSHA.title} card={SHICHU_DEEP_SHENSHA} />
 
-      <SectionDivider title="統合占断・関係と家族" />
+      <SectionDivider title="数秘・バースカードの深掘り ／ Numerology Deep" />
 
-      <SynthesisBlock
-        num="拾伍"
-        card={relationshipSpouse(spouseAge(), spouseAgeDiff())}
-      />
-      <SynthesisBlock
-        num="拾陸"
-        card={relationshipChild(childAge(), childGradeJP())}
-      />
-      <SynthesisBlock
-        num="拾漆"
-        card={parentingStyleDeep(childAge(), childGradeJP())}
-      />
-      <SynthesisBlock num="拾捌" card={FAMILY_CARE} />
-      <SynthesisBlock num="拾玖" card={PARENT_RELATIONSHIPS} />
+      {/* エージェント 2 (数秘・バースカード) */}
+      <DeepCardSlot id="num-lp11" num="伍之壱" label="Numerology Deep" title={NUMEROLOGY_DEEP_LIFEPATH11.title} card={NUMEROLOGY_DEEP_LIFEPATH11} />
+      <DeepCardSlot id="num-birthday2" num="伍之弐" label="Numerology Deep" title={NUMEROLOGY_DEEP_BIRTHDAY2.title} card={NUMEROLOGY_DEEP_BIRTHDAY2} />
+      <DeepCardSlot id="num-personal-cycle" num="伍之参" label="Numerology Deep" title={NUMEROLOGY_PERSONAL_CYCLE.title} card={NUMEROLOGY_PERSONAL_CYCLE} />
+      <DeepCardSlot id="num-birthcard-deep" num="漆之壱" label="Birthcard Deep" title={BIRTHCARD_DEEP_JUSTICE_PRIESTESS.title} card={BIRTHCARD_DEEP_JUSTICE_PRIESTESS} />
+      <DeepCardSlot id="num-name" num="陸之壱" label="Numerology Deep" title={NUMEROLOGY_NAME.title} card={NUMEROLOGY_NAME} />
+
+      <SectionDivider title="西洋占星術の深掘り ／ Astrology Deep" />
+
+      {/* エージェント 3 (西洋占星術) */}
+      <DeepCardSlot id="astro-taurus" num="弐之壱" label="Astrology Deep" title={ASTRO_DEEP_TAURUS.title} card={ASTRO_DEEP_TAURUS} />
+      <DeepCardSlot id="astro-leo-asc" num="弐之弐" label="Astrology Deep" title={ASTRO_DEEP_LEO_ASC.title} card={ASTRO_DEEP_LEO_ASC} />
+      <DeepCardSlot id="astro-moon" num="弐之参" label="Astrology Deep" title={ASTRO_DEEP_MOON.title} card={ASTRO_DEEP_MOON} />
+      <DeepCardSlot id="astro-houses" num="弐之肆" label="Astrology Deep" title={ASTRO_HOUSES.title} card={ASTRO_HOUSES} />
+      <DeepCardSlot id="astro-transit-2026" num="弐之伍" label="Astrology Deep" title={ASTRO_TRANSIT_2026.title} card={ASTRO_TRANSIT_2026} />
+
+      <SectionDivider title="風水・九星気学の深掘り ／ Feng Shui Deep" />
+
+      {/* エージェント 4 (風水・九星) */}
+      <DeepCardSlot id="fs-kua6" num="捌之壱" label="Fengshui Deep" title={FENGSHUI_KUA6_DEEP.title} card={FENGSHUI_KUA6_DEEP} />
+      <DeepCardSlot id="fs-room-by-room" num="捌之弐" label="Fengshui Deep" title={FENGSHUI_ROOM_BY_ROOM.title} card={FENGSHUI_ROOM_BY_ROOM} />
+      <DeepCardSlot id="ks-7red" num="肆之壱" label="Kyusei Deep" title={KYUSEI_7RED_DEEP.title} card={KYUSEI_7RED_DEEP} />
+      <DeepCardSlot id="ks-2026" num="肆之弐" label="Kyusei Deep" title={KYUSEI_2026_ANNUAL.title} card={KYUSEI_2026_ANNUAL} />
+      <DeepCardSlot id="fs-family" num="捌之参" label="Fengshui Deep" title={FAMILY_FENGSHUI.title} card={FAMILY_FENGSHUI} />
+
+      <SectionDivider title="統合占断・性格と行動 ／ Character & Action" />
+
+      <SynthesisBlock id="career" num="拾" card={CAREER_DEEP} />
+      <SynthesisBlock id="communication" num="拾壱" card={COMMUNICATION_STYLE} />
+      <SynthesisBlock id="decision" num="拾弐" card={DECISION_STYLE} />
+      <SynthesisBlock id="leadership" num="拾参" card={LEADERSHIP_STYLE} />
+      <SynthesisBlock id="conflict" num="拾肆" card={CONFLICT_PATTERN} />
+
+      <SectionDivider title="統合占断・関係と家族 ／ Family & Relations" />
+
+      <SynthesisBlock id="spouse" num="拾伍" card={relationshipSpouse(spouseAge(), spouseAgeDiff())} />
+      <SynthesisBlock id="child" num="拾陸" card={relationshipChild(childAge(), childGradeJP())} />
+      <SynthesisBlock id="parenting" num="拾漆" card={parentingStyleDeep(childAge(), childGradeJP())} />
+      <SynthesisBlock id="family-care" num="拾捌" card={FAMILY_CARE} />
+      <SynthesisBlock id="parents" num="拾玖" card={PARENT_RELATIONSHIPS} />
 
       {/* ━━ 家族との相性スコア ━━ */}
-      <NumberedSection num="弐拾" label="Family Compatibility" title="家族との相性スコア">
+      <NumberedSection id="family-compat" num="弐拾" label="Family Compatibility" title="家族との相性スコア">
         <CompatSection
           spouseCompat={basis.spouseCompat}
           childCompat={basis.childCompat}
         />
       </NumberedSection>
 
-      <SectionDivider title="統合占断・財・健康・心" />
+      {/* エージェント 5 (家系) */}
+      <DeepCardSlot id="family-lineage" num="弐拾之壱" label="Synthesis Deep" title={FAMILY_LINEAGE.title} card={FAMILY_LINEAGE} />
 
-      <SynthesisBlock num="弐拾壱" card={WEALTH_CORE} />
-      <SynthesisBlock num="弐拾弐" card={MONEY_PSYCHOLOGY} />
-      <SynthesisBlock num="弐拾参" card={HEALTH_CORE} />
-      <SynthesisBlock num="弐拾肆" card={BODY_CONSTITUTION} />
-      <SynthesisBlock num="弐拾伍" card={MENTAL_PATTERNS} />
+      <SectionDivider title="統合占断・財・健康・心 ／ Wealth, Health, Mind" />
 
-      <SectionDivider title="統合占断・人生と魂" />
+      <SynthesisBlock id="wealth" num="弐拾壱" card={WEALTH_CORE} />
+      <SynthesisBlock id="money" num="弐拾弐" card={MONEY_PSYCHOLOGY} />
+      <SynthesisBlock id="health" num="弐拾参" card={HEALTH_CORE} />
+      <SynthesisBlock id="body" num="弐拾肆" card={BODY_CONSTITUTION} />
+      <SynthesisBlock id="mental" num="弐拾伍" card={MENTAL_PATTERNS} />
 
-      <SynthesisBlock num="弐拾陸" card={lifeArc(basis.currentAge)} />
-      <SynthesisBlock num="弐拾漆" card={midlifeTransition(basis.currentAge)} />
-      <SynthesisBlock num="弐拾捌" card={FENGSHUI_HOME} />
-      <SynthesisBlock num="弐拾玖" card={SPIRITUAL_THEME} />
-      <SynthesisBlock num="参拾" card={SPIRITUAL_PRACTICE} />
-      <SynthesisBlock num="参拾壱" card={legacyQuestion(basis.currentAge)} />
+      <SectionDivider title="統合占断・人生と魂 ／ Life & Soul" />
+
+      <SynthesisBlock id="lifearc" num="弐拾陸" card={lifeArc(basis.currentAge)} />
+      <SynthesisBlock id="midlife" num="弐拾漆" card={midlifeTransition(basis.currentAge)} />
+      <SynthesisBlock id="fengshui-home" num="弐拾捌" card={FENGSHUI_HOME} />
+      <SynthesisBlock id="spiritual" num="弐拾玖" card={SPIRITUAL_THEME} />
+      <SynthesisBlock id="practice" num="参拾" card={SPIRITUAL_PRACTICE} />
+      <SynthesisBlock id="legacy" num="参拾壱" card={legacyQuestion(basis.currentAge)} />
+
+      {/* エージェント 5 (新規統合カード) */}
+      <DeepCardSlot id="shadow" num="参拾之壱" label="Synthesis Deep" title={SHADOW_INTEGRATION.title} card={SHADOW_INTEGRATION} />
+      <DeepCardSlot id="role-society" num="参拾之弐" label="Synthesis Deep" title={ROLE_FOR_SOCIETY.title} card={ROLE_FOR_SOCIETY} />
+      <DeepCardSlot id="infj-historical" num="参拾之参" label="Synthesis Deep" title={INFJ_HISTORICAL_FIGURES.title} card={INFJ_HISTORICAL_FIGURES} />
+      <DeepCardSlot id="annual-2026" num="参拾之肆" label="Synthesis Deep" title={ANNUAL_2026_DEEP.title} card={ANNUAL_2026_DEEP} />
 
       {/* ━━ ビジネス相性チェッカー ━━ */}
-      <SectionDivider title="ビジネス相性チェック" />
-      <NumberedSection num="参拾弐" label="Business Compatibility" title="任意の人物とのビジネス相性">
+      <SectionDivider title="ツール ／ Tools" />
+      <NumberedSection id="business-compat" num="参拾弐" label="Business Compatibility" title="任意の人物とのビジネス相性">
         <BusinessCompatChecker />
       </NumberedSection>
 
       {/* ━━ 最終メッセージ ━━ */}
-      <FinalMessage age={basis.currentAge} />
+      <div id="final" className="scroll-mt-20"><FinalMessage age={basis.currentAge} /></div>
     </div>
   );
 }
@@ -1351,9 +1550,9 @@ function SynthesisHero() {
   );
 }
 
-function SynthesisBlock({ num, card }: { num: string; card: SynthesisCard }) {
+function SynthesisBlock({ num, card, id, label = "Synthesis" }: { num: string; card: SynthesisCard; id?: string; label?: string }) {
   return (
-    <NumberedSection num={num} label="Synthesis" title={card.title}>
+    <NumberedSection num={num} label={label} title={card.title} id={id}>
       <article className="rounded-2xl bg-midnight-700/60 backdrop-blur-sm border border-copper-500/30 p-6 sm:p-8">
         <p className="text-sm sm:text-[15px] leading-loose text-sand-100">{card.body}</p>
         {card.insights && card.insights.length > 0 && (
@@ -1403,6 +1602,35 @@ function SectionDivider({ title }: { title: string }) {
     <div className="divider-decorative my-8">
       <span>{title}</span>
     </div>
+  );
+}
+
+// 深掘りカードのプレースホルダー or 実カード表示
+// card が渡されたら SynthesisBlock として表示、なければ「準備中」表示
+function DeepCardSlot({
+  id,
+  num,
+  label,
+  title,
+  card,
+}: {
+  id: string;
+  num: string;
+  label: string;
+  title: string;
+  card?: SynthesisCard;
+}) {
+  if (card) {
+    return <SynthesisBlock id={id} num={num} card={card} label={label} />;
+  }
+  return (
+    <NumberedSection id={id} num={num} label={label} title={title}>
+      <article className="border border-current p-6 sm:p-8 opacity-60" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <p className="text-sm leading-loose italic">
+          ── このカードはサブエージェントが現在リサーチ中です。完了後ここに 800-1500 字の本文 + 10-16 個の insights が表示されます。
+        </p>
+      </article>
+    </NumberedSection>
   );
 }
 
@@ -1470,15 +1698,17 @@ function NumberedSection({
   title,
   children,
   action,
+  id,
 }: {
   num: string;
   label: string;
   title: string;
   children: React.ReactNode;
   action?: React.ReactNode;
+  id?: string;
 }) {
   return (
-    <section>
+    <section id={id} className="scroll-mt-20">
       <header className="flex items-end justify-between gap-4 mb-5">
         <div className="flex items-center gap-4">
           <div className="font-display text-2xl text-copper-300 w-10 text-center">
@@ -1497,6 +1727,56 @@ function NumberedSection({
       </header>
       {children}
     </section>
+  );
+}
+
+// 基礎タブ目次 (TOC) — 折り畳み式
+type TocSection = { id: string; label: string; items: { id: string; num: string; title: string }[] };
+
+function BasisTOC({ sections }: { sections: TocSection[] }) {
+  const [open, setOpen] = useState(false);
+  const total = sections.reduce((a, s) => a + s.items.length, 0);
+  return (
+    <div className="border border-current" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <span className="editorial-chip text-[10px] sm:text-xs">Index ／ 目次</span>
+          <span className="editorial-mono text-[10px] opacity-60">{sections.length} sections · {total} items</span>
+        </div>
+        <span className="editorial-mono text-xs">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="border-t border-current px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
+          {sections.map((s) => (
+            <div key={s.id}>
+              <div className="editorial-mono text-[10px] opacity-70 mb-1.5 border-b border-current/30 pb-1">
+                {s.label}
+              </div>
+              <ul className="space-y-1">
+                {s.items.map((it) => (
+                  <li key={it.id}>
+                    <a
+                      href={`#${it.id}`}
+                      onClick={() => setOpen(false)}
+                      className="flex gap-2 sm:gap-3 text-sm hover:opacity-100 opacity-80 py-0.5"
+                    >
+                      <span className="editorial-mono text-[10px] opacity-50 tabular-nums w-8 sm:w-10 flex-shrink-0 text-right">
+                        {it.num}
+                      </span>
+                      <span className="editorial-display-jp leading-snug">{it.title}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
