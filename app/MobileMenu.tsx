@@ -13,6 +13,8 @@ const LINKS = [
   { href: "/shichu", label: "四柱", sub: "SHICHU" },
   { href: "/fengshui", label: "風水", sub: "FENGSHUI" },
   { href: "/mbti", label: "MBTI", sub: "16 TYPES" },
+  { href: "/sukuyo", label: "宿曜", sub: "27 MANSIONS" },
+  { href: "/maya", label: "マヤ", sub: "TZOLKIN" },
   { href: "/compat", label: "相性", sub: "COMPATIBILITY", dark: true },
 ];
 

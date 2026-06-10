@@ -138,7 +138,13 @@ export const STAR_TRAIT: Record<StarNumber, string> = {
 };
 
 export function honmeiStar(year: number, month: number, day: number): StarNumber {
-  const eff = month < 2 || (month === 2 && day < 4) ? year - 1 : year;
+  // 立春境界は年により 2/3〜2/5 に変動。Meeus 算出の実日付を優先 (フォールバック 2/4)
+  let risshunDay = 4;
+  try {
+    const risshun = solarTermsOfYear(year).find((t) => t.longitude === 315);
+    if (risshun) risshunDay = risshun.date.getUTCDate();
+  } catch { /* fallback */ }
+  const eff = month < 2 || (month === 2 && day < risshunDay) ? year - 1 : year;
   let s = 0;
   let y = eff;
   while (y > 0) {

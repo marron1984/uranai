@@ -263,6 +263,52 @@ export function tongbianStar(dayStem: string, otherStem: string): TongbianStar {
   return "比肩";
 }
 
+// ============================================================
+// 蔵干 (支に内蔵される天干) — 本気・中気・余気
+// ============================================================
+// 標準的な月律分野蔵干表 (本気を最後に置く: [余気, 中気, 本気])
+export type HiddenStems = {
+  branch: string;
+  main: string;          // 本気 (最も強い)
+  middle: string | null; // 中気
+  residual: string | null; // 余気
+  all: string[];         // [余気, 中気, 本気] のうち存在するもの
+};
+
+const HIDDEN_STEMS_TABLE: Record<string, { residual: string | null; middle: string | null; main: string }> = {
+  子: { residual: "壬", middle: null, main: "癸" },
+  丑: { residual: "癸", middle: "辛", main: "己" },
+  寅: { residual: "戊", middle: "丙", main: "甲" },
+  卯: { residual: "甲", middle: null, main: "乙" },
+  辰: { residual: "乙", middle: "癸", main: "戊" },
+  巳: { residual: "戊", middle: "庚", main: "丙" },
+  午: { residual: "丙", middle: "己", main: "丁" },
+  未: { residual: "丁", middle: "乙", main: "己" },
+  申: { residual: "戊", middle: "壬", main: "庚" },
+  酉: { residual: "庚", middle: null, main: "辛" },
+  戌: { residual: "辛", middle: "丁", main: "戊" },
+  亥: { residual: "甲", middle: null, main: "壬" },
+};
+
+export function hiddenStems(branch: string): HiddenStems {
+  const entry = HIDDEN_STEMS_TABLE[branch];
+  if (!entry) {
+    return { branch, main: "", middle: null, residual: null, all: [] };
+  }
+  const all = [entry.residual, entry.middle, entry.main].filter((s): s is string => s !== null);
+  return { branch, main: entry.main, middle: entry.middle, residual: entry.residual, all };
+}
+
+// 蔵干の通変星 (日干から見た各蔵干の通変星)
+export function hiddenStemTongbian(dayStem: string, branch: string): { stem: string; star: TongbianStar; strength: "本気" | "中気" | "余気" }[] {
+  const hs = hiddenStems(branch);
+  const out: { stem: string; star: TongbianStar; strength: "本気" | "中気" | "余気" }[] = [];
+  if (hs.main) out.push({ stem: hs.main, star: tongbianStar(dayStem, hs.main), strength: "本気" });
+  if (hs.middle) out.push({ stem: hs.middle, star: tongbianStar(dayStem, hs.middle), strength: "中気" });
+  if (hs.residual) out.push({ stem: hs.residual, star: tongbianStar(dayStem, hs.residual), strength: "余気" });
+  return out;
+}
+
 export const TONGBIAN_VARIANTS: Record<TongbianStar, string[]> = {
   比肩: [
     "独立心と自我の星。自分の足で立ち、自分の道を貫く力を表す。仲間意識・同志愛が強い反面、対立や独走になりやすい。経営者・職人・スポーツ選手に多い配置で、命式に強く出ると我が道を行くタイプ。",

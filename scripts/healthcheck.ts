@@ -17,6 +17,9 @@ import { recommendPerfumes } from "@/lib/perfume";
 import { verifyYoshidaShensha } from "@/lib/kanshiInteractions";
 import { ANNUAL_2026_DEEP, KYUSEI_2026_ANNUAL, NUMEROLOGY_PERSONAL_CYCLE } from "@/lib/synthesisDeep";
 import { ASTRO_TRANSIT_2026 } from "@/lib/synthesis";
+import { birthMansion, todayMansion, dailyRelation, MANSIONS } from "@/lib/sukuyo";
+import { kinFromDate, SOLAR_SEALS, GALACTIC_TONES } from "@/lib/maya";
+import { hiddenStems, hiddenStemTongbian } from "@/lib/shichu";
 
 type TestResult = { name: string; ok: boolean; detail: string };
 const results: TestResult[] = [];
@@ -163,6 +166,26 @@ if (expired.length > 0) {
   console.log("\n⚠ 期限切れの流年カード (UI に要更新バッジが表示されています):");
   for (const { name, card } of expired) console.log(`  - ${name} (期限 ${card.validUntil})`);
 }
+
+// ---- 18. 宿曜占星術 ----
+test("宿曜 27 宿", () => MANSIONS.length, (v) => v === 27);
+const myMansion = birthMansion(OWNER.birth, OWNER.hour);
+test("宿曜 本命宿 (吉田)", () => myMansion.name, (v) => typeof v === "string" && (v as string).length > 0);
+const tMansion = todayMansion(today);
+test("宿曜 今日の宿", () => tMansion.name);
+test("宿曜 日々の関係", () => dailyRelation(myMansion, tMansion).name, (v) => ["命","栄","衰","安","危","成","壊","友","親"].includes(v as string));
+
+// ---- 19. マヤ暦 ----
+test("マヤ 20 紋章", () => SOLAR_SEALS.length, (v) => v === 20);
+test("マヤ 13 音", () => GALACTIC_TONES.length, (v) => v === 13);
+const myKin = kinFromDate(OWNER.birth);
+test("マヤ KIN (吉田)", () => myKin.kin, (v) => typeof v === "number" && (v as number) >= 1 && (v as number) <= 260);
+test("マヤ 基準検証 2012-12-21", () => kinFromDate("2012-12-21").kin, (v) => v === 207);
+
+// ---- 20. 蔵干 (shichu ブラッシュアップ) ----
+test("蔵干 申", () => hiddenStems("申").main, (v) => v === "庚");
+test("蔵干 辰", () => hiddenStems("辰").all.join(""), (v) => v === "乙癸戊");
+test("蔵干通変星 戊×申", () => hiddenStemTongbian("戊", "申").map(h => h.star).join(","), (v) => (v as string).includes("食神"));
 
 // ---- 出力 ----
 const passed = results.filter((r) => r.ok).length;

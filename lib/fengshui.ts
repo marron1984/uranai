@@ -10,6 +10,8 @@
 //   西四命 (吉方位 = 西/西北/西南/東北): 2, 6, 7, 8
 //  各本命卦に対する 8 方位の吉凶 (生気/天医/延年/伏位 / 禍害/六殺/五鬼/絶命)
 
+import { solarTermsOfYear } from "@/lib/astronomy";
+
 export type Gender = "male" | "female";
 
 const DIRS = ["北", "東北", "東", "東南", "南", "西南", "西", "西北"] as const;
@@ -56,7 +58,13 @@ const TABLE: Record<number, Record<Dir, DirRating>> = {
 };
 
 export function calcKua(year: number, month: number, day: number, gender: Gender): number {
-  const eff = month < 2 || (month === 2 && day < 4) ? year - 1 : year;
+  // 立春境界は年により 2/3〜2/5 に変動。Meeus 算出の実日付を優先 (フォールバック 2/4)
+  let risshunDay = 4;
+  try {
+    const risshun = solarTermsOfYear(year).find((t) => t.longitude === 315);
+    if (risshun) risshunDay = risshun.date.getUTCDate();
+  } catch { /* fallback */ }
+  const eff = month < 2 || (month === 2 && day < risshunDay) ? year - 1 : year;
   const yy = eff % 100;
   let k: number;
   if (gender === "male") {
