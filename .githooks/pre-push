@@ -1,0 +1,69 @@
+#!/usr/bin/env sh
+# Pre-push hook — push 前にヘルスチェックを実行
+# 失敗したら push をブロックする。緊急時は --no-verify でバイパス可能。
+#
+# 有効化: scripts/install-hooks.js が postinstall で git config core.hooksPath
+#   .githooks を設定する。手動で有効化するなら:
+#     git config core.hooksPath .githooks
+
+set -e
+
+# 色付き出力
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo ""
+echo "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo "${YELLOW}  pre-push hook: ヘルスチェックを実行${NC}"
+echo "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+START=$(date +%s)
+
+# 1. ヘルスチェック (70+ 項目の占断エンジン検証)
+echo ""
+echo "▶ scripts/healthcheck.ts (70+ 項目)"
+if ! npx --yes tsx scripts/healthcheck.ts > /tmp/healthcheck.log 2>&1; then
+  echo ""
+  echo "${RED}✗ ヘルスチェック失敗${NC}"
+  echo ""
+  echo "失敗詳細:"
+  tail -20 /tmp/healthcheck.log
+  echo ""
+  echo "${RED}  push を中止します。テストを修正してから再 push してください。${NC}"
+  echo "  緊急時のバイパス: git push --no-verify"
+  echo ""
+  exit 1
+fi
+PASS_LINE=$(grep "合計:" /tmp/healthcheck.log | tail -1)
+echo "${GREEN}  ✓ $PASS_LINE${NC}"
+
+# 2. 期限切れ流年カード警告 (失敗扱いではないが目立つ)
+EXPIRED=$(grep -A 10 "期限切れの流年" /tmp/healthcheck.log 2>/dev/null || true)
+if [ -n "$EXPIRED" ]; then
+  echo ""
+  echo "${YELLOW}⚠ 期限切れの流年カードあり (push は続行・要更新):${NC}"
+  echo "$EXPIRED"
+fi
+
+# 3. 型チェック (高速・ビルドはせず tsc --noEmit)
+echo ""
+echo "▶ TypeScript 型チェック"
+if ! npx --yes tsc --noEmit > /tmp/tsc.log 2>&1; then
+  echo "${RED}✗ 型エラー検出${NC}"
+  head -30 /tmp/tsc.log
+  echo "${RED}  push を中止します。${NC}"
+  echo "  緊急時のバイパス: git push --no-verify"
+  exit 1
+fi
+echo "${GREEN}  ✓ 型エラーなし${NC}"
+
+END=$(date +%s)
+ELAPSED=$((END - START))
+
+echo ""
+echo "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo "${GREEN}  ✓ 全チェック通過 (${ELAPSED}秒)。push を実行します${NC}"
+echo "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""

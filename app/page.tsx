@@ -163,6 +163,7 @@ import {
 import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
 import Link from "next/link";
 import { MBTI_PROFILES, MBTI_DIVINATION_INTEGRATION } from "@/lib/mbti";
+import { ESSENTIAL_CARDS } from "@/lib/essentialDigest";
 // 値 (todayQuote 等) は QuoteBlock 内で dynamic import するためここでは型のみ
 import type { Quote, QuoteCategory } from "@/lib/quotes";
 import dynamic from "next/dynamic";
@@ -714,6 +715,44 @@ function OneLinerBlock() {
   );
 }
 
+// 今日タブの末尾用 — 必読カードへの軽量導線
+// (BasisTab の EssentialDigest が full データを使うのに対し、こちらは
+//  メタデータのみで synthesisDeep を読み込まずに表示できる)
+function EssentialDigestLight({ onNavigateBasis }: { onNavigateBasis?: (anchorId: string) => void }) {
+  return (
+    <section className="mt-12 border border-current p-5 sm:p-7" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="editorial-chip editorial-chip-dark text-[10px] sm:text-xs">★ 必読 ／ Essential</span>
+          <span className="editorial-mono text-[10px] opacity-60">今月読み返すべき {ESSENTIAL_CARDS.length} 枚</span>
+        </div>
+        <span className="editorial-mono text-[9px] opacity-50">基礎タブで全文を読む →</span>
+      </div>
+      <ul className="space-y-3">
+        {ESSENTIAL_CARDS.map((c) => (
+          <li key={c.id}>
+            <button
+              type="button"
+              onClick={() => onNavigateBasis?.(c.id)}
+              className="block w-full text-left group"
+            >
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="editorial-mono text-[9px] opacity-50 tabular-nums">{c.category}</span>
+                <div className="editorial-display-jp text-base sm:text-lg leading-snug group-hover:underline flex-1 min-w-0">
+                  {c.title}
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm opacity-70 mt-1 leading-relaxed pl-4 border-l-2 border-current/40">
+                {c.summary}
+              </p>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function QuoteBlock() {
   const [data, setData] = useState<Quote | null>(null);
   const [category, setCategory] = useState<QuoteCategory | "all">("all");
@@ -1204,6 +1243,9 @@ function TodayTab({
           )}
         </div>
       </NumberedSection>
+
+      {/* ━━ 末尾: 必読カードへの導線 (今日タブ → 基礎タブ) ━━ */}
+      <EssentialDigestLight onNavigateBasis={onNavigateBasis} />
     </div>
   );
 }

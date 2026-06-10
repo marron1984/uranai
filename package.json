@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "healthcheck": "tsx scripts/healthcheck.ts",
+    "prepare": "node scripts/install-hooks.js"
   },
   "dependencies": {
     "next": "^16.2.4",
