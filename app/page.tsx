@@ -1551,9 +1551,25 @@ function SynthesisHero() {
 }
 
 function SynthesisBlock({ num, card, id, label = "Synthesis" }: { num: string; card: SynthesisCard; id?: string; label?: string }) {
+  const isExpired = card.validUntil ? new Date() > new Date(card.validUntil + "T23:59:59+09:00") : false;
   return (
     <NumberedSection num={num} label={label} title={card.title} id={id}>
       <article className="rounded-2xl bg-midnight-700/60 backdrop-blur-sm border border-copper-500/30 p-6 sm:p-8">
+        {(card.priority === "essential" || card.validUntil) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {card.priority === "essential" && (
+              <span className="editorial-chip editorial-chip-dark text-[10px]">★ 必読</span>
+            )}
+            {card.validUntil && !isExpired && (
+              <span className="editorial-chip text-[10px]">流年情報 ／ {card.validUntil} まで有効</span>
+            )}
+            {isExpired && (
+              <span className="text-[11px] px-3 py-1 rounded-full border border-red-500/60 text-red-400 bg-red-500/10 font-bold">
+                ⚠ 要更新 — この流年情報は {card.validUntil} で期限切れ。最新の年運に更新が必要です
+              </span>
+            )}
+          </div>
+        )}
         <p className="text-sm sm:text-[15px] leading-loose text-sand-100">{card.body}</p>
         {card.insights && card.insights.length > 0 && (
           <div className="mt-6 border-t border-copper-500/30 pt-5">
