@@ -22,15 +22,30 @@
     },
     "natal": {
       "sun": "taurus",
-      "fourPillars": { "year": "甲子", "month": "戊辰", "day": "戊申", "hour": "己未" },
-      "kyusei": { "honmei": 7, "getsumei": 3 },
-      "fengshui": { "kua": 6 },
-      "numerology": { "lifePath": 11, "birthday": 2 },
+      "fourPillars": {
+        "year": "甲子",
+        "month": "戊辰",
+        "day": "戊申",
+        "hour": "己未"
+      },
+      "kyusei": {
+        "honmei": 7,
+        "getsumei": 3
+      },
+      "fengshui": {
+        "kua": 6
+      },
+      "numerology": {
+        "lifePath": 11,
+        "birthday": 2
+      },
       "mbti": "INFJ",
-      "birthCard": { "personality": 11, "soul": 2 }
+      "birthCard": {
+        "personality": 11,
+        "soul": 2
+      }
     }
   },
-
   "engines": [
     {
       "id": "astrology.sun",
@@ -38,7 +53,10 @@
       "file": "lib/astrology.ts",
       "function": "getSunSign(month, day)",
       "algorithm": "MVP は日付範囲によるルックアップ。誤差 ±1日。",
-      "input": ["month: 1-12", "day: 1-31"],
+      "input": [
+        "month: 1-12",
+        "day: 1-31"
+      ],
       "output": "Zodiac"
     },
     {
@@ -72,14 +90,38 @@
       "function": "moonPhase(date)",
       "algorithm": "diff = (λmoon - λsun) mod 360; phase = diff/360; age = phase*29.530589",
       "phaseBuckets": [
-        { "range": "[0.964, 0.036)", "name": "新月" },
-        { "range": "[0.036, 0.214)", "name": "三日月" },
-        { "range": "[0.214, 0.286)", "name": "上弦の月" },
-        { "range": "[0.286, 0.464)", "name": "十三夜（満ちゆく月）" },
-        { "range": "[0.464, 0.536)", "name": "満月" },
-        { "range": "[0.536, 0.714)", "name": "十六夜（欠けゆく月）" },
-        { "range": "[0.714, 0.786)", "name": "下弦の月" },
-        { "range": "[0.786, 0.964)", "name": "晦月" }
+        {
+          "range": "[0.964, 0.036)",
+          "name": "新月"
+        },
+        {
+          "range": "[0.036, 0.214)",
+          "name": "三日月"
+        },
+        {
+          "range": "[0.214, 0.286)",
+          "name": "上弦の月"
+        },
+        {
+          "range": "[0.286, 0.464)",
+          "name": "十三夜（満ちゆく月）"
+        },
+        {
+          "range": "[0.464, 0.536)",
+          "name": "満月"
+        },
+        {
+          "range": "[0.536, 0.714)",
+          "name": "十六夜（欠けゆく月）"
+        },
+        {
+          "range": "[0.714, 0.786)",
+          "name": "下弦の月"
+        },
+        {
+          "range": "[0.786, 0.964)",
+          "name": "晦月"
+        }
       ]
     },
     {
@@ -88,43 +130,175 @@
       "file": "lib/astronomy.ts",
       "function": "solarTermsOfYear(year) / findSolarTermDate(year, lon)",
       "algorithm": "24個の目標黄経 (15°刻み: 315,330,345,0,15,...300) について太陽黄経関数を二分法 40 反復で探索",
-      "mainLongitudes": [315, 345, 15, 45, 75, 105, 135, 165, 195, 225, 255, 285],
+      "mainLongitudes": [
+        315,
+        345,
+        15,
+        45,
+        75,
+        105,
+        135,
+        165,
+        195,
+        225,
+        255,
+        285
+      ],
       "terms24": [
-        { "lon": 315, "name": "立春", "main": true },
-        { "lon": 330, "name": "雨水", "main": false },
-        { "lon": 345, "name": "啓蟄", "main": true },
-        { "lon": 0,   "name": "春分", "main": false },
-        { "lon": 15,  "name": "清明", "main": true },
-        { "lon": 30,  "name": "穀雨", "main": false },
-        { "lon": 45,  "name": "立夏", "main": true },
-        { "lon": 60,  "name": "小満", "main": false },
-        { "lon": 75,  "name": "芒種", "main": true },
-        { "lon": 90,  "name": "夏至", "main": false },
-        { "lon": 105, "name": "小暑", "main": true },
-        { "lon": 120, "name": "大暑", "main": false },
-        { "lon": 135, "name": "立秋", "main": true },
-        { "lon": 150, "name": "処暑", "main": false },
-        { "lon": 165, "name": "白露", "main": true },
-        { "lon": 180, "name": "秋分", "main": false },
-        { "lon": 195, "name": "寒露", "main": true },
-        { "lon": 210, "name": "霜降", "main": false },
-        { "lon": 225, "name": "立冬", "main": true },
-        { "lon": 240, "name": "小雪", "main": false },
-        { "lon": 255, "name": "大雪", "main": true },
-        { "lon": 270, "name": "冬至", "main": false },
-        { "lon": 285, "name": "小寒", "main": true },
-        { "lon": 300, "name": "大寒", "main": false }
+        {
+          "lon": 315,
+          "name": "立春",
+          "main": true
+        },
+        {
+          "lon": 330,
+          "name": "雨水",
+          "main": false
+        },
+        {
+          "lon": 345,
+          "name": "啓蟄",
+          "main": true
+        },
+        {
+          "lon": 0,
+          "name": "春分",
+          "main": false
+        },
+        {
+          "lon": 15,
+          "name": "清明",
+          "main": true
+        },
+        {
+          "lon": 30,
+          "name": "穀雨",
+          "main": false
+        },
+        {
+          "lon": 45,
+          "name": "立夏",
+          "main": true
+        },
+        {
+          "lon": 60,
+          "name": "小満",
+          "main": false
+        },
+        {
+          "lon": 75,
+          "name": "芒種",
+          "main": true
+        },
+        {
+          "lon": 90,
+          "name": "夏至",
+          "main": false
+        },
+        {
+          "lon": 105,
+          "name": "小暑",
+          "main": true
+        },
+        {
+          "lon": 120,
+          "name": "大暑",
+          "main": false
+        },
+        {
+          "lon": 135,
+          "name": "立秋",
+          "main": true
+        },
+        {
+          "lon": 150,
+          "name": "処暑",
+          "main": false
+        },
+        {
+          "lon": 165,
+          "name": "白露",
+          "main": true
+        },
+        {
+          "lon": 180,
+          "name": "秋分",
+          "main": false
+        },
+        {
+          "lon": 195,
+          "name": "寒露",
+          "main": true
+        },
+        {
+          "lon": 210,
+          "name": "霜降",
+          "main": false
+        },
+        {
+          "lon": 225,
+          "name": "立冬",
+          "main": true
+        },
+        {
+          "lon": 240,
+          "name": "小雪",
+          "main": false
+        },
+        {
+          "lon": 255,
+          "name": "大雪",
+          "main": true
+        },
+        {
+          "lon": 270,
+          "name": "冬至",
+          "main": false
+        },
+        {
+          "lon": 285,
+          "name": "小寒",
+          "main": true
+        },
+        {
+          "lon": 300,
+          "name": "大寒",
+          "main": false
+        }
       ]
     },
-
     {
       "id": "shichu.yearPillar",
       "name": "年柱",
       "file": "lib/shichu.ts",
       "function": "yearPillar(year, month, day)",
       "algorithm": "立春前(2/4簡易)は前年扱い。stem=(eff-4)%10, branch=(eff-4)%12",
-      "stems": ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"],
-      "branches": ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+      "stems": [
+        "甲",
+        "乙",
+        "丙",
+        "丁",
+        "戊",
+        "己",
+        "庚",
+        "辛",
+        "壬",
+        "癸"
+      ],
+      "branches": [
+        "子",
+        "丑",
+        "寅",
+        "卯",
+        "辰",
+        "巳",
+        "午",
+        "未",
+        "申",
+        "酉",
+        "戌",
+        "亥"
+      ]
     },
     {
       "id": "shichu.monthPillar",
@@ -146,7 +320,12 @@
       "file": "lib/shichu.ts / lib/today.ts",
       "function": "dayPillar(year, month, day) / todayDayPillar(date)",
       "algorithm": "基準日からの通日差で60干支を引く",
-      "base": { "date": "1900-01-01", "ganzhi": "丙戌", "stemIdx": 2, "branchIdx": 10 },
+      "base": {
+        "date": "1900-01-01",
+        "ganzhi": "丙戌",
+        "stemIdx": 2,
+        "branchIdx": 10
+      },
       "formula": "stemIdx = (2 + days) mod 10; branchIdx = (10 + days) mod 12"
     },
     {
@@ -163,9 +342,54 @@
         "戊癸": "壬子"
       },
       "hourBranches": {
-        "子": [23, 1], "丑": [1, 3], "寅": [3, 5], "卯": [5, 7],
-        "辰": [7, 9], "巳": [9, 11], "午": [11, 13], "未": [13, 15],
-        "申": [15, 17], "酉": [17, 19], "戌": [19, 21], "亥": [21, 23]
+        "子": [
+          23,
+          1
+        ],
+        "丑": [
+          1,
+          3
+        ],
+        "寅": [
+          3,
+          5
+        ],
+        "卯": [
+          5,
+          7
+        ],
+        "辰": [
+          7,
+          9
+        ],
+        "巳": [
+          9,
+          11
+        ],
+        "午": [
+          11,
+          13
+        ],
+        "未": [
+          13,
+          15
+        ],
+        "申": [
+          15,
+          17
+        ],
+        "酉": [
+          17,
+          19
+        ],
+        "戌": [
+          19,
+          21
+        ],
+        "亥": [
+          21,
+          23
+        ]
       }
     },
     {
@@ -192,18 +416,61 @@
       "name": "十二運",
       "file": "lib/shichu.ts",
       "function": "twelveStage(dayStem, branch)",
-      "stages": ["長生","沐浴","冠帯","建禄","帝旺","衰","病","死","墓","絶","胎","養"],
+      "stages": [
+        "長生",
+        "沐浴",
+        "冠帯",
+        "建禄",
+        "帝旺",
+        "衰",
+        "病",
+        "死",
+        "墓",
+        "絶",
+        "胎",
+        "養"
+      ],
       "longLifeStart": {
-        "甲": { "branch": "亥", "forward": true },
-        "乙": { "branch": "午", "forward": false },
-        "丙": { "branch": "寅", "forward": true },
-        "丁": { "branch": "酉", "forward": false },
-        "戊": { "branch": "寅", "forward": true },
-        "己": { "branch": "酉", "forward": false },
-        "庚": { "branch": "巳", "forward": true },
-        "辛": { "branch": "子", "forward": false },
-        "壬": { "branch": "申", "forward": true },
-        "癸": { "branch": "卯", "forward": false }
+        "甲": {
+          "branch": "亥",
+          "forward": true
+        },
+        "乙": {
+          "branch": "午",
+          "forward": false
+        },
+        "丙": {
+          "branch": "寅",
+          "forward": true
+        },
+        "丁": {
+          "branch": "酉",
+          "forward": false
+        },
+        "戊": {
+          "branch": "寅",
+          "forward": true
+        },
+        "己": {
+          "branch": "酉",
+          "forward": false
+        },
+        "庚": {
+          "branch": "巳",
+          "forward": true
+        },
+        "辛": {
+          "branch": "子",
+          "forward": false
+        },
+        "壬": {
+          "branch": "申",
+          "forward": true
+        },
+        "癸": {
+          "branch": "卯",
+          "forward": false
+        }
       },
       "ownerDayStage": "病"
     },
@@ -218,16 +485,44 @@
         "逆行": "男+陰干 / 女+陽干"
       },
       "ownerDaiun": [
-        { "age": "1-10",  "ganzhi": "己巳", "tongbian": "劫財" },
-        { "age": "11-20", "ganzhi": "庚午", "tongbian": "食神" },
-        { "age": "21-30", "ganzhi": "辛未", "tongbian": "傷官" },
-        { "age": "31-40", "ganzhi": "壬申", "tongbian": "偏財" },
-        { "age": "41-50", "ganzhi": "癸酉", "tongbian": "正財", "current": true },
-        { "age": "51-60", "ganzhi": "甲戌", "tongbian": "偏官" },
-        { "age": "61-70", "ganzhi": "乙亥", "tongbian": "正官" }
+        {
+          "age": "1-10",
+          "ganzhi": "己巳",
+          "tongbian": "劫財"
+        },
+        {
+          "age": "11-20",
+          "ganzhi": "庚午",
+          "tongbian": "食神"
+        },
+        {
+          "age": "21-30",
+          "ganzhi": "辛未",
+          "tongbian": "傷官"
+        },
+        {
+          "age": "31-40",
+          "ganzhi": "壬申",
+          "tongbian": "偏財"
+        },
+        {
+          "age": "41-50",
+          "ganzhi": "癸酉",
+          "tongbian": "正財",
+          "current": true
+        },
+        {
+          "age": "51-60",
+          "ganzhi": "甲戌",
+          "tongbian": "偏官"
+        },
+        {
+          "age": "61-70",
+          "ganzhi": "乙亥",
+          "tongbian": "正官"
+        }
       ]
     },
-
     {
       "id": "kyusei.honmei",
       "name": "本命星",
@@ -235,8 +530,15 @@
       "function": "honmeiStar(year, month, day)",
       "algorithm": "立春前は前年扱い。sum=西暦の各桁を1桁まで足す; h = 11 - sum; 範囲外なら ±9 補正",
       "elements": {
-        "1": "水", "2": "土", "3": "木", "4": "木", "5": "土",
-        "6": "金", "7": "金", "8": "土", "9": "火"
+        "1": "水",
+        "2": "土",
+        "3": "木",
+        "4": "木",
+        "5": "土",
+        "6": "金",
+        "7": "金",
+        "8": "土",
+        "9": "火"
       },
       "ownerHonmei": 7
     },
@@ -246,14 +548,28 @@
       "file": "lib/kyusei.ts",
       "function": "starRelation(a, b)",
       "relations": {
-        "比和(調和)": { "score": 4, "rule": "同五行" },
-        "相生(発展)": { "score": 5, "rule": "相手が自分を生む" },
-        "洩気(消耗)": { "score": 3, "rule": "自分が相手を生む" },
-        "相剋(摩擦)": { "score": 2, "rule": "自分が相手を剋す" },
-        "受剋(被害)": { "score": 1, "rule": "相手から剋される" }
+        "比和(調和)": {
+          "score": 4,
+          "rule": "同五行"
+        },
+        "相生(発展)": {
+          "score": 5,
+          "rule": "相手が自分を生む"
+        },
+        "洩気(消耗)": {
+          "score": 3,
+          "rule": "自分が相手を生む"
+        },
+        "相剋(摩擦)": {
+          "score": 2,
+          "rule": "自分が相手を剋す"
+        },
+        "受剋(被害)": {
+          "score": 1,
+          "rule": "相手から剋される"
+        }
       }
     },
-
     {
       "id": "numerology.lifePath",
       "name": "ライフパス",
@@ -268,7 +584,14 @@
       "name": "ソウルナンバー",
       "file": "lib/numerology.ts",
       "function": "soulNumber(name)",
-      "vowelMap": { "A": 1, "E": 5, "I": 9, "O": 6, "U": 3, "Y": 7 }
+      "vowelMap": {
+        "A": 1,
+        "E": 5,
+        "I": 9,
+        "O": 6,
+        "U": 3,
+        "Y": 7
+      }
     },
     {
       "id": "numerology.personality",
@@ -291,7 +614,6 @@
       "function": "personalDay(birth, year, month, day)",
       "formula": "PersonalMonth = reduce1to9(PersonalYear + month); PersonalDay = reduce1to9(PersonalMonth + day)"
     },
-
     {
       "id": "birthcard",
       "name": "バースカード (11/2システム)",
@@ -306,7 +628,6 @@
         "soulCard": "女教皇"
       }
     },
-
     {
       "id": "seimei.kakusu",
       "name": "姓名判断・五格",
@@ -320,8 +641,14 @@
         "外格": "総格 - 人格"
       },
       "ownerCalc": {
-        "sei": [6, 5],
-        "mei": [17, 7],
+        "sei": [
+          6,
+          5
+        ],
+        "mei": [
+          17,
+          7
+        ],
         "ten": 11,
         "jin": 22,
         "chi": 24,
@@ -340,10 +667,9 @@
         "jin 22": "凶 (秋草逢霜・意志薄弱)",
         "chi 24": "大吉 (金銭豊潤・大富運)",
         "gai 13": "大吉 (頭領運)",
-        "so 35":  "吉 (温和平静)"
+        "so 35": "吉 (温和平静)"
       }
     },
-
     {
       "id": "fengshui.kua",
       "name": "本命卦",
@@ -357,8 +683,18 @@
         "k==5": "男なら 2, 女なら 8"
       },
       "groups": {
-        "東四命": [1, 3, 4, 9],
-        "西四命": [2, 6, 7, 8]
+        "東四命": [
+          1,
+          3,
+          4,
+          9
+        ],
+        "西四命": [
+          2,
+          6,
+          7,
+          8
+        ]
       },
       "ownerKua": 6,
       "ownerGroup": "西四命"
@@ -389,7 +725,6 @@
         "西北": "伏位"
       }
     },
-
     {
       "id": "iching.cast",
       "name": "易経・コイン3枚法",
@@ -397,10 +732,30 @@
       "function": "castYao() / castHexagram()",
       "algorithm": "3枚のコインを6回。表=3裏=2 で合計値→6/7/8/9",
       "yaoMeaning": {
-        "6": { "name": "老陰", "yang": false, "changing": true,  "next": "陽" },
-        "7": { "name": "少陽", "yang": true,  "changing": false, "next": "陽" },
-        "8": { "name": "少陰", "yang": false, "changing": false, "next": "陰" },
-        "9": { "name": "老陽", "yang": true,  "changing": true,  "next": "陰" }
+        "6": {
+          "name": "老陰",
+          "yang": false,
+          "changing": true,
+          "next": "陽"
+        },
+        "7": {
+          "name": "少陽",
+          "yang": true,
+          "changing": false,
+          "next": "陽"
+        },
+        "8": {
+          "name": "少陰",
+          "yang": false,
+          "changing": false,
+          "next": "陰"
+        },
+        "9": {
+          "name": "老陽",
+          "yang": true,
+          "changing": true,
+          "next": "陰"
+        }
       }
     },
     {
@@ -435,7 +790,6 @@
       "algorithm": "birthSeed = 生年月日 hash; dateSeed = YYYY*10000+MM*100+DD; seed = birthSeed XOR (dateSeed * 2654435761); LCG乱数で6爻を立てる",
       "deterministic": true
     },
-
     {
       "id": "tarot.deck",
       "name": "タロットデッキ",
@@ -464,27 +818,53 @@
       "file": "lib/tarot.ts",
       "function": "mkMinor + SUIT_CONTEXT",
       "suits": {
-        "ワンド":   { "element": "火", "domain": "情熱・行動・創造" },
-        "カップ":   { "element": "水", "domain": "感情・関係・霊性" },
-        "ソード":   { "element": "風", "domain": "知性・思考・葛藤" },
-        "ペンタクル": { "element": "地", "domain": "物質・お金・実務" }
+        "ワンド": {
+          "element": "火",
+          "domain": "情熱・行動・創造"
+        },
+        "カップ": {
+          "element": "水",
+          "domain": "感情・関係・霊性"
+        },
+        "ソード": {
+          "element": "風",
+          "domain": "知性・思考・葛藤"
+        },
+        "ペンタクル": {
+          "element": "地",
+          "domain": "物質・お金・実務"
+        }
       }
     },
-
     {
       "id": "mbti.profiles",
       "name": "MBTI 16タイプ",
       "file": "lib/mbti.ts",
       "stack": "Ni/Ne/Si/Se/Ti/Te/Fi/Fe の dominant-auxiliary-tertiary-inferior",
       "ownerType": "INFJ",
-      "ownerStack": ["Ni", "Fe", "Ti", "Se"],
+      "ownerStack": [
+        "Ni",
+        "Fe",
+        "Ti",
+        "Se"
+      ],
       "compatibility": {
-        "best": ["ENFP", "ENTP"],
-        "good": ["INFJ", "INTJ", "INFP", "ENFJ"],
-        "challenging": ["ESTP", "ESTJ"]
+        "best": [
+          "ENFP",
+          "ENTP"
+        ],
+        "good": [
+          "INFJ",
+          "INTJ",
+          "INFP",
+          "ENFJ"
+        ],
+        "challenging": [
+          "ESTP",
+          "ESTJ"
+        ]
       }
     },
-
     {
       "id": "today.pickByDate",
       "name": "日付シードピッカー",
@@ -506,19 +886,48 @@
       "file": "lib/today.ts",
       "function": "todayHourlyChart(date)",
       "ratings": {
-        "印綬": { "rank": "大吉", "desc": "学び・人徳・名誉" },
-        "正官": { "rank": "大吉", "desc": "規律と評価" },
-        "正財": { "rank": "吉",   "desc": "堅実な収入" },
-        "食神": { "rank": "吉",   "desc": "創造性と楽しみ" },
-        "比肩": { "rank": "中吉", "desc": "自分のペース" },
-        "偏官": { "rank": "中吉", "desc": "決断と挑戦" },
-        "偏財": { "rank": "中吉", "desc": "流動的利益" },
-        "偏印": { "rank": "中吉", "desc": "独自アイデア" },
-        "劫財": { "rank": "注意", "desc": "出費・競合" },
-        "傷官": { "rank": "注意", "desc": "言葉と対人衝突" }
+        "印綬": {
+          "rank": "大吉",
+          "desc": "学び・人徳・名誉"
+        },
+        "正官": {
+          "rank": "大吉",
+          "desc": "規律と評価"
+        },
+        "正財": {
+          "rank": "吉",
+          "desc": "堅実な収入"
+        },
+        "食神": {
+          "rank": "吉",
+          "desc": "創造性と楽しみ"
+        },
+        "比肩": {
+          "rank": "中吉",
+          "desc": "自分のペース"
+        },
+        "偏官": {
+          "rank": "中吉",
+          "desc": "決断と挑戦"
+        },
+        "偏財": {
+          "rank": "中吉",
+          "desc": "流動的利益"
+        },
+        "偏印": {
+          "rank": "中吉",
+          "desc": "独自アイデア"
+        },
+        "劫財": {
+          "rank": "注意",
+          "desc": "出費・競合"
+        },
+        "傷官": {
+          "rank": "注意",
+          "desc": "言葉と対人衝突"
+        }
       }
     },
-
     {
       "id": "perfume.scoring",
       "name": "香水推薦",
@@ -526,24 +935,56 @@
       "function": "recommendPerfumes(now, personalDay, weather)",
       "algorithm": "117本の所有香水の tags (energyDays/weather/time/season) と現状況をマッチング→高スコア順に1-2本",
       "tags": {
-        "weather": ["sunny", "cloudy", "rainy", "snow", "fog", "thunder", "hot", "cold"],
-        "time":    ["morning", "afternoon", "evening", "night"],
-        "season":  ["spring", "summer", "autumn", "winter"]
+        "weather": [
+          "sunny",
+          "cloudy",
+          "rainy",
+          "snow",
+          "fog",
+          "thunder",
+          "hot",
+          "cold"
+        ],
+        "time": [
+          "morning",
+          "afternoon",
+          "evening",
+          "night"
+        ],
+        "season": [
+          "spring",
+          "summer",
+          "autumn",
+          "winter"
+        ]
       }
     },
-
     {
       "id": "businessCompat",
       "name": "ビジネス相性",
       "file": "lib/businessCompat.ts",
       "function": "calcBusinessCompat(input)",
       "scoring": {
-        "正官": 95, "正財": 90, "印綬": 88, "偏財": 82, "食神": 80,
-        "比肩": 75, "偏官": 70, "偏印": 65, "傷官": 55, "劫財": 50
+        "正官": 95,
+        "正財": 90,
+        "印綬": 88,
+        "偏財": 82,
+        "食神": 80,
+        "比肩": 75,
+        "偏官": 70,
+        "偏印": 65,
+        "傷官": 55,
+        "劫財": 50
       },
-      "branchInteractions": ["沖", "刑", "破", "合", "三合", "六合"]
+      "branchInteractions": [
+        "沖",
+        "刑",
+        "破",
+        "合",
+        "三合",
+        "六合"
+      ]
     },
-
     {
       "id": "synthesis",
       "name": "統合占断 22 カード",
@@ -577,16 +1018,18 @@
         "finalMessage(age)"
       ]
     },
-
     {
       "id": "oracle",
       "name": "Oracle (Claude API)",
       "file": "lib/oracle.ts",
-      "models": ["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
+      "models": [
+        "claude-opus-4-7",
+        "claude-sonnet-4-6",
+        "claude-haiku-4-5-20251001"
+      ],
       "auth": "BYOK (localStorage に APIキーを保存)",
       "deterministic": false
     },
-
     {
       "id": "compatCheck",
       "name": "相性鑑定 (7軸スコアリング)",
@@ -594,13 +1037,43 @@
       "ui": "app/compat/page.tsx",
       "function": "calcCompat(input: { name, birth, gender, mbti? })",
       "axes": [
-        { "id": "tongbian",  "weight": 1.0, "src": "shichu.tongbianStar(戊, partner.dayStem)", "scoreMap": "{ 印綬:5, 正官:5, 正財:4, 食神:4, 偏官:4, 偏財:4, 偏印:3, 比肩:3, 傷官:3, 劫財:2 }" },
-        { "id": "branch",    "weight": 1.0, "src": "businessCompat.branchInteraction(子, partner.yearBranch)" },
-        { "id": "kyusei",    "weight": 0.8, "src": "kyusei.starRelation(7, partner.honmei)" },
-        { "id": "zodiac",    "weight": 0.6, "src": "compat.zodiacCompat(taurus, partner.sunSign)" },
-        { "id": "lifepath",  "weight": 0.7, "src": "LP_SCORE_TABLE[partner.lifePath]" },
-        { "id": "kua",       "weight": 0.5, "src": "KUA_COMPAT_TABLE[partner.kua] (西四命=6基準)" },
-        { "id": "mbti",      "weight": 0.8, "src": "mbti.compatibility(INFJ, partner.mbti)", "optional": true }
+        {
+          "id": "tongbian",
+          "weight": 1,
+          "src": "shichu.tongbianStar(戊, partner.dayStem)",
+          "scoreMap": "{ 印綬:5, 正官:5, 正財:4, 食神:4, 偏官:4, 偏財:4, 偏印:3, 比肩:3, 傷官:3, 劫財:2 }"
+        },
+        {
+          "id": "branch",
+          "weight": 1,
+          "src": "businessCompat.branchInteraction(子, partner.yearBranch)"
+        },
+        {
+          "id": "kyusei",
+          "weight": 0.8,
+          "src": "kyusei.starRelation(7, partner.honmei)"
+        },
+        {
+          "id": "zodiac",
+          "weight": 0.6,
+          "src": "compat.zodiacCompat(taurus, partner.sunSign)"
+        },
+        {
+          "id": "lifepath",
+          "weight": 0.7,
+          "src": "LP_SCORE_TABLE[partner.lifePath]"
+        },
+        {
+          "id": "kua",
+          "weight": 0.5,
+          "src": "KUA_COMPAT_TABLE[partner.kua] (西四命=6基準)"
+        },
+        {
+          "id": "mbti",
+          "weight": 0.8,
+          "src": "mbti.compatibility(INFJ, partner.mbti)",
+          "optional": true
+        }
       ],
       "formula": "weightedScore = Σ(score × weight) / Σ(weight); overall = round(weightedScore)",
       "guessMbti": {
@@ -614,7 +1087,6 @@
       },
       "deterministic": true
     },
-
     {
       "id": "today.oneLiner",
       "name": "今日の一言",
@@ -637,28 +1109,60 @@
         "reading": "PD {n} × {通変星} ({干支})"
       }
     },
-
     {
       "id": "ui.theme",
       "name": "テーマシステム",
       "file": "app/globals.css + app/ThemeSwitcher.tsx",
       "default": "editorial",
       "themes": [
-        { "id": "editorial", "background": "#fafaf7", "foreground": "#0a0a0a", "desc": "純白×漆黒の編集デザイン (既定)" },
-        { "id": "midnight",  "background": "#0a0a0f", "foreground": "#efe8d4", "desc": "深い闇と銅金" },
-        { "id": "twilight",  "background": "#1a2334", "foreground": "#e5e8f0", "desc": "夕闇の青藍" },
-        { "id": "forest",    "background": "#131e18", "foreground": "#e8e4cf", "desc": "深緑と苔金" },
-        { "id": "paper",     "background": "#f3ecdc", "foreground": "#2a261c", "desc": "明るい羊皮紙" },
-        { "id": "cream",     "background": "#fbf6e8", "foreground": "#2e2818", "desc": "最も明るい" }
+        {
+          "id": "editorial",
+          "background": "#fafaf7",
+          "foreground": "#0a0a0a",
+          "desc": "純白×漆黒の編集デザイン (既定)"
+        },
+        {
+          "id": "midnight",
+          "background": "#0a0a0f",
+          "foreground": "#efe8d4",
+          "desc": "深い闇と銅金"
+        },
+        {
+          "id": "twilight",
+          "background": "#1a2334",
+          "foreground": "#e5e8f0",
+          "desc": "夕闇の青藍"
+        },
+        {
+          "id": "forest",
+          "background": "#131e18",
+          "foreground": "#e8e4cf",
+          "desc": "深緑と苔金"
+        },
+        {
+          "id": "paper",
+          "background": "#f3ecdc",
+          "foreground": "#2a261c",
+          "desc": "明るい羊皮紙"
+        },
+        {
+          "id": "cream",
+          "background": "#fbf6e8",
+          "foreground": "#2e2818",
+          "desc": "最も明るい"
+        }
       ],
       "persistence": "localStorage key=uranai-theme",
       "bootstrap": "<head> 内の inline script で hydration 前に data-theme をセット (FOUC 防止)"
     },
-
     {
       "id": "ui.mobile",
       "name": "モバイル対応",
-      "files": ["app/MobileMenu.tsx", "app/globals.css", "app/layout.tsx"],
+      "files": [
+        "app/MobileMenu.tsx",
+        "app/globals.css",
+        "app/layout.tsx"
+      ],
       "components": {
         "MobileMenu": "ハンバーガー → 全画面オーバーレイ。ESC で閉じる、body scroll lock",
         "viewport": "width=device-width, initial-scale=1, maximum-scale=5, theme-color=#fafaf7"
@@ -669,37 +1173,128 @@
         "横スクロール禁止": "html, body { overflow-x: hidden }",
         "タッチターゲット": "全ボタンに min-h-[44px] (Apple HIG)"
       }
+    },
+    {
+      "id": "kanshiInteractions",
+      "name": "干支相互作用 + 神殺判定",
+      "file": "lib/kanshiInteractions.ts",
+      "functions": [
+        "stemCombination (干合 5 組)",
+        "branchSixCombination (六合)",
+        "branchClash (冲)",
+        "branchHarm (害)",
+        "branchPunishment (刑)",
+        "branchHalfCombination (半合)",
+        "branchTripleCombination (三合)",
+        "hasTenotsuKijin (天乙貴人)",
+        "hasShosei (将星)",
+        "hasKasai (華蓋)",
+        "hasToka (桃花)",
+        "hasYojin (羊刃)",
+        "kuubou (空亡)",
+        "verifyYoshidaShensha (テキスト突合)"
+      ],
+      "purpose": "サブエージェント産の命理テキストの主張をアルゴリズムで検証可能にする",
+      "deterministic": true
     }
   ],
-
   "determinism": [
-    { "engine": "astrology", "deterministic": true },
-    { "engine": "shichu", "deterministic": true },
-    { "engine": "kyusei", "deterministic": true },
-    { "engine": "numerology", "deterministic": true },
-    { "engine": "seimei", "deterministic": true },
-    { "engine": "fengshui", "deterministic": true },
-    { "engine": "birthcard", "deterministic": true },
-    { "engine": "mbti", "deterministic": true, "note": "owner.ts に固定" },
-    { "engine": "today.personalDay", "deterministic": true },
-    { "engine": "astronomy.moonPhase", "deterministic": true },
-    { "engine": "astronomy.solarTerms", "deterministic": true },
-    { "engine": "iching.personalDaily", "deterministic": true },
-    { "engine": "today.pickByDate", "deterministic": true },
-    { "engine": "iching.cast (interactive)", "deterministic": false, "note": "Math.random" },
-    { "engine": "tarot.draw (interactive)", "deterministic": false, "note": "Math.random" },
-    { "engine": "tarot.drawSeeded", "deterministic": true },
-    { "engine": "oracle", "deterministic": false, "note": "Claude API" },
-    { "engine": "perfume", "deterministic": false, "note": "weather API + ランダム" },
-    { "engine": "compatCheck", "deterministic": true },
-    { "engine": "today.oneLiner", "deterministic": true }
+    {
+      "engine": "astrology",
+      "deterministic": true
+    },
+    {
+      "engine": "shichu",
+      "deterministic": true
+    },
+    {
+      "engine": "kyusei",
+      "deterministic": true
+    },
+    {
+      "engine": "numerology",
+      "deterministic": true
+    },
+    {
+      "engine": "seimei",
+      "deterministic": true
+    },
+    {
+      "engine": "fengshui",
+      "deterministic": true
+    },
+    {
+      "engine": "birthcard",
+      "deterministic": true
+    },
+    {
+      "engine": "mbti",
+      "deterministic": true,
+      "note": "owner.ts に固定"
+    },
+    {
+      "engine": "today.personalDay",
+      "deterministic": true
+    },
+    {
+      "engine": "astronomy.moonPhase",
+      "deterministic": true
+    },
+    {
+      "engine": "astronomy.solarTerms",
+      "deterministic": true
+    },
+    {
+      "engine": "iching.personalDaily",
+      "deterministic": true
+    },
+    {
+      "engine": "today.pickByDate",
+      "deterministic": true
+    },
+    {
+      "engine": "iching.cast (interactive)",
+      "deterministic": false,
+      "note": "Math.random"
+    },
+    {
+      "engine": "tarot.draw (interactive)",
+      "deterministic": false,
+      "note": "Math.random"
+    },
+    {
+      "engine": "tarot.drawSeeded",
+      "deterministic": true
+    },
+    {
+      "engine": "oracle",
+      "deterministic": false,
+      "note": "Claude API"
+    },
+    {
+      "engine": "perfume",
+      "deterministic": false,
+      "note": "weather API + ランダム"
+    },
+    {
+      "engine": "compatCheck",
+      "deterministic": true
+    },
+    {
+      "engine": "today.oneLiner",
+      "deterministic": true
+    }
   ],
-
   "healthcheck": {
     "script": "scripts/healthcheck.ts",
-    "lastRun": "2026-05-27",
-    "totalChecks": 56,
-    "passed": 56,
-    "command": "npx tsx scripts/healthcheck.ts"
+    "lastRun": "2026-06-08",
+    "totalChecks": 70,
+    "passed": 70,
+    "command": "npx tsx scripts/healthcheck.ts",
+    "includes": [
+      "全占断エンジン 56 項目",
+      "命理主張の突合 10 項目 (kanshiInteractions)",
+      "流年カード鮮度 4 項目"
+    ]
   }
 }

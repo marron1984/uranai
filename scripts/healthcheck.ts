@@ -14,6 +14,9 @@ import { todayDayPillar, todayTongbianForOwner, todayHourlyChart, todayLuckyHour
 import { calcCompat, buildPartnerProfile, YOSHIDA_KEYS } from "@/lib/compatCheck";
 import { calcBusinessCompat } from "@/lib/businessCompat";
 import { recommendPerfumes } from "@/lib/perfume";
+import { verifyYoshidaShensha } from "@/lib/kanshiInteractions";
+import { ANNUAL_2026_DEEP, KYUSEI_2026_ANNUAL, NUMEROLOGY_PERSONAL_CYCLE } from "@/lib/synthesisDeep";
+import { ASTRO_TRANSIT_2026 } from "@/lib/synthesis";
 
 type TestResult = { name: string; ok: boolean; detail: string };
 const results: TestResult[] = [];
@@ -133,6 +136,33 @@ test("ビジネス相性 overall", () => bizCompat.scores.overall, (v) => typeof
 // ---- 15. perfume ----
 const perfs = recommendPerfumes(4, ["sunny", "hot"], "afternoon", "summer");
 test("香水推薦", () => perfs.length, (v) => typeof v === "number" && (v as number) >= 1);
+
+// ---- 16. 命理主張の突合 (kanshiInteractions) ----
+// サブエージェント産テキスト (SHICHU_DEEP_SHENSHA / ANNUAL_2026_DEEP 等) の
+// 命理主張をアルゴリズムで検証する
+const shenshaResults = verifyYoshidaShensha();
+for (const r of shenshaResults) {
+  test(`命理: ${r.claim.slice(0, 22)}`, () => r.detail, () => r.verified);
+}
+
+// ---- 17. 流年カードの鮮度 ----
+const annualCards: { name: string; card: { validUntil?: string } }[] = [
+  { name: "ANNUAL_2026_DEEP", card: ANNUAL_2026_DEEP },
+  { name: "KYUSEI_2026_ANNUAL", card: KYUSEI_2026_ANNUAL },
+  { name: "ASTRO_TRANSIT_2026", card: ASTRO_TRANSIT_2026 },
+  { name: "NUMEROLOGY_PERSONAL_CYCLE", card: NUMEROLOGY_PERSONAL_CYCLE },
+];
+for (const { name, card } of annualCards) {
+  test(`流年メタ: ${name}`, () => card.validUntil, (v) => typeof v === "string");
+}
+// 期限切れの警告 (テスト失敗にはしないが表示)
+const expired = annualCards.filter(
+  ({ card }) => card.validUntil && new Date() > new Date(card.validUntil + "T23:59:59+09:00")
+);
+if (expired.length > 0) {
+  console.log("\n⚠ 期限切れの流年カード (UI に要更新バッジが表示されています):");
+  for (const { name, card } of expired) console.log(`  - ${name} (期限 ${card.validUntil})`);
+}
 
 // ---- 出力 ----
 const passed = results.filter((r) => r.ok).length;
