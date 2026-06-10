@@ -163,30 +163,21 @@ import {
 import { dailyKyuseiStar, hourlyKyuseiStar } from "@/lib/kyusei";
 import Link from "next/link";
 import { MBTI_PROFILES, MBTI_DIVINATION_INTEGRATION } from "@/lib/mbti";
-import { todayQuote, todayQuoteByCategory, type Quote, type QuoteCategory } from "@/lib/quotes";
-import { OracleTab } from "@/app/OracleTab";
-import {
-  SHICHU_DEEP_TONGBIAN,
-  SHICHU_DEEP_TWELVE_STAGES,
-  SHICHU_DEEP_FIVE_BALANCE,
-  SHICHU_DEEP_DAIUN_TRANSITION,
-  SHICHU_DEEP_SHENSHA,
-  NUMEROLOGY_DEEP_LIFEPATH11,
-  NUMEROLOGY_DEEP_BIRTHDAY2,
-  NUMEROLOGY_PERSONAL_CYCLE,
-  BIRTHCARD_DEEP_JUSTICE_PRIESTESS,
-  NUMEROLOGY_NAME,
-  FENGSHUI_KUA6_DEEP,
-  FENGSHUI_ROOM_BY_ROOM,
-  KYUSEI_7RED_DEEP,
-  KYUSEI_2026_ANNUAL,
-  FAMILY_FENGSHUI,
-  ANNUAL_2026_DEEP,
-  INFJ_HISTORICAL_FIGURES,
-  ROLE_FOR_SOCIETY,
-  FAMILY_LINEAGE,
-  SHADOW_INTEGRATION,
-} from "@/lib/synthesisDeep";
+// 値 (todayQuote 等) は QuoteBlock 内で dynamic import するためここでは型のみ
+import type { Quote, QuoteCategory } from "@/lib/quotes";
+import dynamic from "next/dynamic";
+// OracleTab は Claude API 連携で 749 行と重い。Oracle タブ選択時のみロード
+const OracleTab = dynamic(() => import("@/app/OracleTab").then((m) => ({ default: m.OracleTab })), {
+  loading: () => (
+    <div className="border border-current p-8 text-center opacity-60">
+      <div className="editorial-mono text-xs">Loading Oracle ...</div>
+    </div>
+  ),
+  ssr: false,
+});
+// synthesisDeep の 14 カード本文 + insights は数万字の重量データ。
+// 基礎タブで実際に表示する瞬間まで dynamic import で遅延ロードする。
+type SynthesisDeepModule = typeof import("@/lib/synthesisDeep");
 import {
   type JournalEntry,
   type Hit,
@@ -726,18 +717,26 @@ function OneLinerBlock() {
 function QuoteBlock() {
   const [data, setData] = useState<Quote | null>(null);
   const [category, setCategory] = useState<QuoteCategory | "all">("all");
+  // 256 件の格言ライブラリは初期バンドルから除外して、マウント後に dynamic import
+  const quotesLib = useRef<typeof import("@/lib/quotes") | null>(null);
 
   useEffect(() => {
-    // 初期値は全カテゴリから日替わり
-    setData(todayQuote(new Date()));
+    let cancelled = false;
+    import("@/lib/quotes").then((mod) => {
+      if (cancelled) return;
+      quotesLib.current = mod;
+      setData(mod.todayQuote(new Date()));
+    });
+    return () => { cancelled = true; };
   }, []);
 
   const onCategoryChange = (c: QuoteCategory | "all") => {
+    if (!quotesLib.current) return;
     setCategory(c);
     if (c === "all") {
-      setData(todayQuote(new Date()));
+      setData(quotesLib.current.todayQuote(new Date()));
     } else {
-      const q = todayQuoteByCategory(c, new Date());
+      const q = quotesLib.current.todayQuoteByCategory(c, new Date());
       if (q) setData(q);
     }
   };
@@ -1214,6 +1213,14 @@ function TodayTab({
 // ==========================================================================
 
 function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
+  // synthesisDeep の 14 カードを mount 後に dynamic import
+  const [deep, setDeep] = useState<SynthesisDeepModule | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    import("@/lib/synthesisDeep").then((mod) => { if (!cancelled) setDeep(mod); });
+    return () => { cancelled = true; };
+  }, []);
+
   // 目次 (TOC) データ — セクションと項目の構造
   const tocSections: TocSection[] = [
     {
@@ -1353,10 +1360,10 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       {/* ━━ ★必読カード一覧 (1 行サマリー) ━━ */}
       <EssentialDigest
         items={[
-          { id: "annual-2026", card: ANNUAL_2026_DEEP },
-          { id: "shichu-daiun-transition", card: SHICHU_DEEP_DAIUN_TRANSITION },
-          { id: "shichu-balance", card: SHICHU_DEEP_FIVE_BALANCE },
-          { id: "shadow", card: SHADOW_INTEGRATION },
+          { id: "annual-2026", card: deep?.ANNUAL_2026_DEEP },
+          { id: "shichu-daiun-transition", card: deep?.SHICHU_DEEP_DAIUN_TRANSITION },
+          { id: "shichu-balance", card: deep?.SHICHU_DEEP_FIVE_BALANCE },
+          { id: "shadow", card: deep?.SHADOW_INTEGRATION },
         ]}
       />
 
@@ -1418,20 +1425,20 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       <SectionDivider title="四柱推命の深掘り ／ Shichu Deep Dive" />
 
       {/* エージェント 1 (四柱推命) */}
-      <DeepCardSlot id="shichu-tongbian" num="玖之壱" label="Shichu Deep" title={SHICHU_DEEP_TONGBIAN.title} card={SHICHU_DEEP_TONGBIAN} />
-      <DeepCardSlot id="shichu-twelve" num="玖之弐" label="Shichu Deep" title={SHICHU_DEEP_TWELVE_STAGES.title} card={SHICHU_DEEP_TWELVE_STAGES} />
-      <DeepCardSlot id="shichu-balance" num="玖之参" label="Shichu Deep" title={SHICHU_DEEP_FIVE_BALANCE.title} card={SHICHU_DEEP_FIVE_BALANCE} />
-      <DeepCardSlot id="shichu-daiun-transition" num="玖之肆" label="Shichu Deep" title={SHICHU_DEEP_DAIUN_TRANSITION.title} card={SHICHU_DEEP_DAIUN_TRANSITION} />
-      <DeepCardSlot id="shichu-shensha" num="玖之伍" label="Shichu Deep" title={SHICHU_DEEP_SHENSHA.title} card={SHICHU_DEEP_SHENSHA} />
+      <DeepCardSlot id="shichu-tongbian" num="玖之壱" label="Shichu Deep" title={deep?.SHICHU_DEEP_TONGBIAN?.title ?? ""} card={deep?.SHICHU_DEEP_TONGBIAN} />
+      <DeepCardSlot id="shichu-twelve" num="玖之弐" label="Shichu Deep" title={deep?.SHICHU_DEEP_TWELVE_STAGES?.title ?? ""} card={deep?.SHICHU_DEEP_TWELVE_STAGES} />
+      <DeepCardSlot id="shichu-balance" num="玖之参" label="Shichu Deep" title={deep?.SHICHU_DEEP_FIVE_BALANCE?.title ?? ""} card={deep?.SHICHU_DEEP_FIVE_BALANCE} />
+      <DeepCardSlot id="shichu-daiun-transition" num="玖之肆" label="Shichu Deep" title={deep?.SHICHU_DEEP_DAIUN_TRANSITION?.title ?? ""} card={deep?.SHICHU_DEEP_DAIUN_TRANSITION} />
+      <DeepCardSlot id="shichu-shensha" num="玖之伍" label="Shichu Deep" title={deep?.SHICHU_DEEP_SHENSHA?.title ?? ""} card={deep?.SHICHU_DEEP_SHENSHA} />
 
       <SectionDivider title="数秘・バースカードの深掘り ／ Numerology Deep" />
 
       {/* エージェント 2 (数秘・バースカード) */}
-      <DeepCardSlot id="num-lp11" num="伍之壱" label="Numerology Deep" title={NUMEROLOGY_DEEP_LIFEPATH11.title} card={NUMEROLOGY_DEEP_LIFEPATH11} />
-      <DeepCardSlot id="num-birthday2" num="伍之弐" label="Numerology Deep" title={NUMEROLOGY_DEEP_BIRTHDAY2.title} card={NUMEROLOGY_DEEP_BIRTHDAY2} />
-      <DeepCardSlot id="num-personal-cycle" num="伍之参" label="Numerology Deep" title={NUMEROLOGY_PERSONAL_CYCLE.title} card={NUMEROLOGY_PERSONAL_CYCLE} />
-      <DeepCardSlot id="num-birthcard-deep" num="漆之壱" label="Birthcard Deep" title={BIRTHCARD_DEEP_JUSTICE_PRIESTESS.title} card={BIRTHCARD_DEEP_JUSTICE_PRIESTESS} />
-      <DeepCardSlot id="num-name" num="陸之壱" label="Numerology Deep" title={NUMEROLOGY_NAME.title} card={NUMEROLOGY_NAME} />
+      <DeepCardSlot id="num-lp11" num="伍之壱" label="Numerology Deep" title={deep?.NUMEROLOGY_DEEP_LIFEPATH11?.title ?? ""} card={deep?.NUMEROLOGY_DEEP_LIFEPATH11} />
+      <DeepCardSlot id="num-birthday2" num="伍之弐" label="Numerology Deep" title={deep?.NUMEROLOGY_DEEP_BIRTHDAY2?.title ?? ""} card={deep?.NUMEROLOGY_DEEP_BIRTHDAY2} />
+      <DeepCardSlot id="num-personal-cycle" num="伍之参" label="Numerology Deep" title={deep?.NUMEROLOGY_PERSONAL_CYCLE?.title ?? ""} card={deep?.NUMEROLOGY_PERSONAL_CYCLE} />
+      <DeepCardSlot id="num-birthcard-deep" num="漆之壱" label="Birthcard Deep" title={deep?.BIRTHCARD_DEEP_JUSTICE_PRIESTESS?.title ?? ""} card={deep?.BIRTHCARD_DEEP_JUSTICE_PRIESTESS} />
+      <DeepCardSlot id="num-name" num="陸之壱" label="Numerology Deep" title={deep?.NUMEROLOGY_NAME?.title ?? ""} card={deep?.NUMEROLOGY_NAME} />
 
       <SectionDivider title="西洋占星術の深掘り ／ Astrology Deep" />
 
@@ -1445,11 +1452,11 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       <SectionDivider title="風水・九星気学の深掘り ／ Feng Shui Deep" />
 
       {/* エージェント 4 (風水・九星) */}
-      <DeepCardSlot id="fs-kua6" num="捌之壱" label="Fengshui Deep" title={FENGSHUI_KUA6_DEEP.title} card={FENGSHUI_KUA6_DEEP} />
-      <DeepCardSlot id="fs-room-by-room" num="捌之弐" label="Fengshui Deep" title={FENGSHUI_ROOM_BY_ROOM.title} card={FENGSHUI_ROOM_BY_ROOM} />
-      <DeepCardSlot id="ks-7red" num="肆之壱" label="Kyusei Deep" title={KYUSEI_7RED_DEEP.title} card={KYUSEI_7RED_DEEP} />
-      <DeepCardSlot id="ks-2026" num="肆之弐" label="Kyusei Deep" title={KYUSEI_2026_ANNUAL.title} card={KYUSEI_2026_ANNUAL} />
-      <DeepCardSlot id="fs-family" num="捌之参" label="Fengshui Deep" title={FAMILY_FENGSHUI.title} card={FAMILY_FENGSHUI} />
+      <DeepCardSlot id="fs-kua6" num="捌之壱" label="Fengshui Deep" title={deep?.FENGSHUI_KUA6_DEEP?.title ?? ""} card={deep?.FENGSHUI_KUA6_DEEP} />
+      <DeepCardSlot id="fs-room-by-room" num="捌之弐" label="Fengshui Deep" title={deep?.FENGSHUI_ROOM_BY_ROOM?.title ?? ""} card={deep?.FENGSHUI_ROOM_BY_ROOM} />
+      <DeepCardSlot id="ks-7red" num="肆之壱" label="Kyusei Deep" title={deep?.KYUSEI_7RED_DEEP?.title ?? ""} card={deep?.KYUSEI_7RED_DEEP} />
+      <DeepCardSlot id="ks-2026" num="肆之弐" label="Kyusei Deep" title={deep?.KYUSEI_2026_ANNUAL?.title ?? ""} card={deep?.KYUSEI_2026_ANNUAL} />
+      <DeepCardSlot id="fs-family" num="捌之参" label="Fengshui Deep" title={deep?.FAMILY_FENGSHUI?.title ?? ""} card={deep?.FAMILY_FENGSHUI} />
 
       <SectionDivider title="統合占断・性格と行動 ／ Character & Action" />
 
@@ -1476,7 +1483,7 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       </NumberedSection>
 
       {/* エージェント 5 (家系) */}
-      <DeepCardSlot id="family-lineage" num="弐拾之壱" label="Synthesis Deep" title={FAMILY_LINEAGE.title} card={FAMILY_LINEAGE} />
+      <DeepCardSlot id="family-lineage" num="弐拾之壱" label="Synthesis Deep" title={deep?.FAMILY_LINEAGE?.title ?? ""} card={deep?.FAMILY_LINEAGE} />
 
       <SectionDivider title="統合占断・財・健康・心 ／ Wealth, Health, Mind" />
 
@@ -1496,10 +1503,10 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       <SynthesisBlock id="legacy" num="参拾壱" card={legacyQuestion(basis.currentAge)} />
 
       {/* エージェント 5 (新規統合カード) */}
-      <DeepCardSlot id="shadow" num="参拾之壱" label="Synthesis Deep" title={SHADOW_INTEGRATION.title} card={SHADOW_INTEGRATION} />
-      <DeepCardSlot id="role-society" num="参拾之弐" label="Synthesis Deep" title={ROLE_FOR_SOCIETY.title} card={ROLE_FOR_SOCIETY} />
-      <DeepCardSlot id="infj-historical" num="参拾之参" label="Synthesis Deep" title={INFJ_HISTORICAL_FIGURES.title} card={INFJ_HISTORICAL_FIGURES} />
-      <DeepCardSlot id="annual-2026" num="参拾之肆" label="Synthesis Deep" title={ANNUAL_2026_DEEP.title} card={ANNUAL_2026_DEEP} />
+      <DeepCardSlot id="shadow" num="参拾之壱" label="Synthesis Deep" title={deep?.SHADOW_INTEGRATION?.title ?? ""} card={deep?.SHADOW_INTEGRATION} />
+      <DeepCardSlot id="role-society" num="参拾之弐" label="Synthesis Deep" title={deep?.ROLE_FOR_SOCIETY?.title ?? ""} card={deep?.ROLE_FOR_SOCIETY} />
+      <DeepCardSlot id="infj-historical" num="参拾之参" label="Synthesis Deep" title={deep?.INFJ_HISTORICAL_FIGURES?.title ?? ""} card={deep?.INFJ_HISTORICAL_FIGURES} />
+      <DeepCardSlot id="annual-2026" num="参拾之肆" label="Synthesis Deep" title={deep?.ANNUAL_2026_DEEP?.title ?? ""} card={deep?.ANNUAL_2026_DEEP} />
 
       {/* ━━ ビジネス相性チェッカー ━━ */}
       <SectionDivider title="ツール ／ Tools" />
@@ -1620,15 +1627,24 @@ function SectionDivider({ title }: { title: string }) {
 }
 
 // ★必読カードの 1 行サマリー一覧 — 10 万字の基礎タブの「入口」
-function EssentialDigest({ items }: { items: { id: string; card: SynthesisCard }[] }) {
+function EssentialDigest({ items }: { items: { id: string; card: SynthesisCard | undefined }[] }) {
+  // synthesisDeep が dynamic import 中の間、card は undefined
+  const ready = items.filter((it): it is { id: string; card: SynthesisCard } => Boolean(it.card));
+  if (ready.length === 0) {
+    return (
+      <section className="border border-current p-5 sm:p-7 opacity-50" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <div className="editorial-mono text-xs">Loading essential cards ...</div>
+      </section>
+    );
+  }
   return (
     <section className="border border-current p-5 sm:p-7" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <span className="editorial-chip editorial-chip-dark text-[10px] sm:text-xs">★ 必読 ／ Essential</span>
-        <span className="editorial-mono text-[10px] opacity-60">毎月読み返す価値のある {items.length} 枚</span>
+        <span className="editorial-mono text-[10px] opacity-60">毎月読み返す価値のある {ready.length} 枚</span>
       </div>
       <ul className="space-y-3">
-        {items.map(({ id, card }) => (
+        {ready.map(({ id, card }) => (
           <li key={id}>
             <a href={`#${id}`} className="block group">
               <div className="editorial-display-jp text-base sm:text-lg leading-snug group-hover:underline">
