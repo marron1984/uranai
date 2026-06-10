@@ -436,6 +436,13 @@ export default function Home() {
                 weather={weather}
                 weatherErr={weatherErr}
                 onReshuffle={() => setReshuffleSeed((s) => s + 1)}
+                onNavigateBasis={(anchorId: string) => {
+                  setTab("basis");
+                  // タブ切替後の描画を待ってからスクロール
+                  setTimeout(() => {
+                    document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth" });
+                  }, 150);
+                }}
               />
             </div>
           </>
@@ -851,6 +858,7 @@ function TodayTab({
   weather,
   weatherErr,
   onReshuffle,
+  onNavigateBasis,
 }: {
   sun: Zodiac;
   today: TodayResults;
@@ -863,6 +871,7 @@ function TodayTab({
   weather: WeatherData | null;
   weatherErr: boolean;
   onReshuffle: () => void;
+  onNavigateBasis?: (anchorId: string) => void;
 }) {
   const lucky = LUCKY[sun.key];
   const py = PERSONAL_YEAR_TEXT[personalYear];
@@ -917,6 +926,7 @@ function TodayTab({
         synthesis={synthesis}
         dayPillar={todayDP}
         tongbian={todayTB}
+        onNavigateBasis={onNavigateBasis}
       />
 
       {/* ━━ 0.6 ジャーナル（日々の記録） ━━ */}
@@ -1340,6 +1350,16 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       {/* ━━ 目次 ━━ */}
       <BasisTOC sections={tocSections} />
 
+      {/* ━━ ★必読カード一覧 (1 行サマリー) ━━ */}
+      <EssentialDigest
+        items={[
+          { id: "annual-2026", card: ANNUAL_2026_DEEP },
+          { id: "shichu-daiun-transition", card: SHICHU_DEEP_DAIUN_TRANSITION },
+          { id: "shichu-balance", card: SHICHU_DEEP_FIVE_BALANCE },
+          { id: "shadow", card: SHADOW_INTEGRATION },
+        ]}
+      />
+
       {/* ━━ パターン分析（蓄積データから） ━━ */}
       <div id="patterns" className="scroll-mt-20"><PatternsSection /></div>
 
@@ -1596,6 +1616,34 @@ function SectionDivider({ title }: { title: string }) {
     <div className="divider-decorative my-8">
       <span>{title}</span>
     </div>
+  );
+}
+
+// ★必読カードの 1 行サマリー一覧 — 10 万字の基礎タブの「入口」
+function EssentialDigest({ items }: { items: { id: string; card: SynthesisCard }[] }) {
+  return (
+    <section className="border border-current p-5 sm:p-7" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <span className="editorial-chip editorial-chip-dark text-[10px] sm:text-xs">★ 必読 ／ Essential</span>
+        <span className="editorial-mono text-[10px] opacity-60">毎月読み返す価値のある {items.length} 枚</span>
+      </div>
+      <ul className="space-y-3">
+        {items.map(({ id, card }) => (
+          <li key={id}>
+            <a href={`#${id}`} className="block group">
+              <div className="editorial-display-jp text-base sm:text-lg leading-snug group-hover:underline">
+                {card.title}
+              </div>
+              {card.summary && (
+                <p className="text-xs sm:text-sm opacity-70 mt-1 leading-relaxed pl-4 border-l-2 border-current/40">
+                  {card.summary}
+                </p>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -2967,14 +3015,30 @@ function ScoreCell({ label, value }: { label: string; value: number }) {
 // 本日の統合シンセシス ヒーロー
 // ==========================================================================
 
+// 今日の状態 → 基礎タブの関連深掘りカードへの文脈リンク表
+const TONGBIAN_BASIS_LINKS: Record<string, { anchor: string; label: string }[]> = {
+  比肩: [{ anchor: "shichu-tongbian", label: "命式の比肩 (月柱) を深く知る" }],
+  劫財: [{ anchor: "shichu-tongbian", label: "命式の劫財 (時柱) を深く知る" }],
+  食神: [{ anchor: "shichu-balance", label: "土から金へ — 表現の五行を知る" }],
+  傷官: [{ anchor: "shichu-balance", label: "傷官の鋭さと偏土命の関係" }],
+  偏財: [{ anchor: "wealth", label: "金運・財運の核を読み返す" }],
+  正財: [{ anchor: "shichu-daiun-transition", label: "現在の正財大運 (癸酉) の全体像" }],
+  偏官: [{ anchor: "shichu-daiun-transition", label: "51 歳から始まる偏官大運の予習" }],
+  正官: [{ anchor: "role-society", label: "公の役割 — 社会的使命を読み返す" }],
+  偏印: [{ anchor: "num-lp11", label: "マスター 11 の直感の使い方" }],
+  印綬: [{ anchor: "parents", label: "印 = 母性と学び。両親との縁を読む" }],
+};
+
 function TodaySynthesisHero({
   synthesis,
   dayPillar,
   tongbian,
+  onNavigateBasis,
 }: {
   synthesis: TodaySynthesis;
   dayPillar: { stem: string; branch: string; ganzhi: string };
   tongbian: { star: string; text: string };
+  onNavigateBasis?: (anchorId: string) => void;
 }) {
   return (
     <section className="rounded-2xl bg-midnight-fade text-sand-50 p-8 sm:p-12 relative overflow-hidden shadow-copper-glow ring-1 ring-copper-500/20">
@@ -3040,6 +3104,25 @@ function TodaySynthesisHero({
             「{synthesis.affirmation}」
           </div>
         </div>
+
+        {/* 今日の通変星 → 基礎タブの関連カードへ */}
+        {onNavigateBasis && (TONGBIAN_BASIS_LINKS[tongbian.star] ?? []).length > 0 && (
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            <span className="text-[10px] tracking-[0.3em] uppercase text-copper-300">
+              深く知る ／ Deep Dive
+            </span>
+            {(TONGBIAN_BASIS_LINKS[tongbian.star] ?? []).map((link) => (
+              <button
+                key={link.anchor}
+                type="button"
+                onClick={() => onNavigateBasis(link.anchor)}
+                className="text-xs px-3 py-1.5 rounded-full border border-copper-500/40 text-gold-200 hover:bg-copper-500/15 transition-colors"
+              >
+                → {link.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
