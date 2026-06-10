@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 
-export type ThemeId = "editorial" | "midnight" | "twilight" | "paper" | "cream" | "forest";
+export type ThemeId = "neobrutal" | "editorial" | "midnight" | "twilight" | "paper" | "cream" | "forest";
 
 export const THEMES: { id: ThemeId; label: string; swatch: string; description: string }[] = [
-  { id: "editorial", label: "エディトリアル", swatch: "#fafaf7", description: "純白×漆黒の編集デザイン (既定)" },
+  { id: "neobrutal", label: "ネオブルータル", swatch: "#fef9e7", description: "クリーム×漆黒×ビビッド (既定)" },
+  { id: "editorial", label: "エディトリアル", swatch: "#fafaf7", description: "純白×漆黒の編集デザイン" },
   { id: "midnight",  label: "ミッドナイト",   swatch: "#0a0a0f", description: "深い闇と銅金" },
   { id: "twilight",  label: "トワイライト",   swatch: "#1f2a3a", description: "夕闇の青藍" },
   { id: "forest",    label: "フォレスト",     swatch: "#1a2620", description: "深緑と苔金" },
@@ -14,7 +15,7 @@ export const THEMES: { id: ThemeId; label: string; swatch: string; description: 
 ];
 
 export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState<ThemeId>("editorial");
+  const [theme, setTheme] = useState<ThemeId>("neobrutal");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

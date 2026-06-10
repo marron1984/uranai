@@ -94,6 +94,32 @@
   --glow-overlay-opacity: 0;
 }
 
+/* === テーマ: ネオブルータリズム (クリーム×漆黒×ビビッド) === */
+:root[data-theme="neobrutal"] {
+  --background: #fef9e7;
+  --foreground: #000000;
+  --copper: #000000;
+  --copper-bright: #000000;
+  --menu-bg: #fff8e7;
+  --card-bg: #ffffff;
+  --card-bg-elevated: #ffffff;
+  --star-opacity: 0;
+  --glow-overlay-opacity: 0;
+  /* ビビッドアクセント */
+  --nb-pink: #ff5cb1;
+  --nb-yellow: #ffe600;
+  --nb-cyan: #00d4d4;
+  --nb-coral: #ff6b35;
+  --nb-lime: #b6ff5c;
+  --nb-purple: #b888ff;
+  /* ブルータリズムの核 */
+  --nb-border: 3px solid #000000;
+  --nb-border-thick: 4px solid #000000;
+  --nb-shadow: 6px 6px 0 0 #000000;
+  --nb-shadow-lg: 10px 10px 0 0 #000000;
+  --nb-shadow-sm: 4px 4px 0 0 #000000;
+}
+
 html {
   background: var(--background);
   -webkit-text-size-adjust: 100%;
@@ -655,4 +681,296 @@ main, header, footer {
 .tab-btn-active .editorial-display-jp {
   color: var(--background) !important;
 }
+
+/* =====================================================================
+ * NEOBRUTAL テーマ — クリーム × 漆黒 × ビビッドアクセント
+ * 極太ボーダー・ハードシャドウ・大胆な配色
+ * ===================================================================== */
+
+[data-theme="neobrutal"] body {
+  background: #fef9e7 !important;
+  color: #000 !important;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255, 92, 177, 0.04) 0%, transparent 25%),
+    radial-gradient(circle at 90% 80%, rgba(0, 212, 212, 0.04) 0%, transparent 25%),
+    radial-gradient(circle at 50% 50%, rgba(255, 230, 0, 0.03) 0%, transparent 40%);
+}
+
+/* 背景クラスを白に */
+[data-theme="neobrutal"] .bg-midnight-900,
+[data-theme="neobrutal"] .bg-midnight-800,
+[data-theme="neobrutal"] .bg-midnight-800\/50,
+[data-theme="neobrutal"] .bg-midnight-700\/60,
+[data-theme="neobrutal"] .bg-midnight-900\/60,
+[data-theme="neobrutal"] .bg-midnight-900\/50,
+[data-theme="neobrutal"] .bg-midnight-900\/40,
+[data-theme="neobrutal"] .bg-midnight-900\/30,
+[data-theme="neobrutal"] .bg-midnight-fade {
+  background: #ffffff !important;
+}
+
+/* テキスト色 */
+[data-theme="neobrutal"] .text-sand-50,
+[data-theme="neobrutal"] .text-sand-100,
+[data-theme="neobrutal"] .text-sand-200,
+[data-theme="neobrutal"] .text-sand-300,
+[data-theme="neobrutal"] .text-copper-200,
+[data-theme="neobrutal"] .text-copper-300,
+[data-theme="neobrutal"] .text-copper-400,
+[data-theme="neobrutal"] .text-copper-400\/80,
+[data-theme="neobrutal"] .text-gold-200 {
+  color: #000 !important;
+}
+[data-theme="neobrutal"] .text-sand-400,
+[data-theme="neobrutal"] .text-sand-400\/80,
+[data-theme="neobrutal"] .text-sand-500 {
+  color: #444 !important;
+}
+
+/* 銅色グロー削除 */
+[data-theme="neobrutal"] .glow-copper,
+[data-theme="neobrutal"] .glow-soft,
+[data-theme="neobrutal"] .shadow-copper-glow {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+/* 角丸を完全に消す */
+[data-theme="neobrutal"] .rounded-2xl,
+[data-theme="neobrutal"] .rounded-xl,
+[data-theme="neobrutal"] .rounded-lg,
+[data-theme="neobrutal"] .rounded-md,
+[data-theme="neobrutal"] .rounded-sm {
+  border-radius: 0 !important;
+}
+/* chip だけは丸を残す */
+[data-theme="neobrutal"] .rounded-full,
+[data-theme="neobrutal"] .editorial-chip {
+  border-radius: 999px !important;
+}
+
+/* border-copper を極太黒に */
+[data-theme="neobrutal"] [class*="border-copper-500"],
+[data-theme="neobrutal"] [class*="border-copper-400"] {
+  border-color: #000 !important;
+  border-width: 3px !important;
+}
+[data-theme="neobrutal"] [class*="ring-copper-500"] {
+  --tw-ring-color: #000 !important;
+}
+
+/* ハードシャドウを各種カードに付与 */
+[data-theme="neobrutal"] section.relative,
+[data-theme="neobrutal"] article.rounded-2xl,
+[data-theme="neobrutal"] article.border {
+  box-shadow: 6px 6px 0 0 #000 !important;
+}
+
+/* チップ — ボーダー太く、ハードシャドウ */
+[data-theme="neobrutal"] .editorial-chip {
+  border-width: 2.5px !important;
+  border-color: #000 !important;
+  background: #ffffff !important;
+  color: #000 !important;
+  box-shadow: 3px 3px 0 0 #000 !important;
+  font-weight: 700 !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+}
+[data-theme="neobrutal"] .editorial-chip:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 #000 !important;
+  background: var(--nb-yellow) !important;
+}
+[data-theme="neobrutal"] .editorial-chip:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 #000 !important;
+}
+[data-theme="neobrutal"] .editorial-chip-dark {
+  background: #000 !important;
+  color: #fff !important;
+}
+[data-theme="neobrutal"] .editorial-chip-dark:hover {
+  background: var(--nb-pink) !important;
+  color: #000 !important;
+}
+
+/* タブボタン active — ピンクで反転 */
+[data-theme="neobrutal"] .tab-btn-active {
+  background: var(--nb-pink) !important;
+  color: #000 !important;
+  box-shadow: 4px 4px 0 0 #000 !important;
+}
+
+/* ヘッダー */
+[data-theme="neobrutal"] header {
+  background: var(--nb-yellow) !important;
+  border-bottom: 4px solid #000 !important;
+}
+[data-theme="neobrutal"] header .border-copper-500\/20 {
+  border-color: #000 !important;
+}
+
+/* フッター */
+[data-theme="neobrutal"] footer {
+  border-top: 4px solid #000 !important;
+  background: var(--nb-cyan);
+}
+
+/* divider */
+[data-theme="neobrutal"] .divider-decorative::before,
+[data-theme="neobrutal"] .divider-decorative::after {
+  background: #000 !important;
+  height: 3px !important;
+}
+[data-theme="neobrutal"] .divider-decorative > span {
+  background: var(--nb-yellow) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  border: 2.5px solid #000;
+  padding: 4px 12px !important;
+  box-shadow: 3px 3px 0 0 #000;
+}
+
+/* セクション番号バッジ */
+[data-theme="neobrutal"] .section-num {
+  border-color: #000 !important;
+  border-width: 3px !important;
+  color: #000 !important;
+  background: var(--nb-lime);
+  box-shadow: 3px 3px 0 0 #000;
+  font-weight: 900;
+}
+
+/* キーワードハイライト */
+[data-theme="neobrutal"] .kw {
+  background: linear-gradient(180deg, transparent 55%, var(--nb-yellow) 55%) !important;
+  font-weight: 700;
+}
+
+/* selection */
+[data-theme="neobrutal"] ::selection {
+  background: var(--nb-pink) !important;
+  color: #000 !important;
+}
+
+/* スクロールバー */
+[data-theme="neobrutal"] ::-webkit-scrollbar-track {
+  background: var(--nb-yellow);
+  border-left: 2px solid #000;
+}
+[data-theme="neobrutal"] ::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 2px solid var(--nb-yellow);
+}
+
+/* テーマボタン */
+[data-theme="neobrutal"] .theme-btn {
+  background: var(--nb-cyan) !important;
+  color: #000 !important;
+  border: 2.5px solid #000 !important;
+  box-shadow: 3px 3px 0 0 #000;
+  font-weight: 700;
+}
+
+/* 入力フィールド */
+[data-theme="neobrutal"] input,
+[data-theme="neobrutal"] select,
+[data-theme="neobrutal"] textarea {
+  border-width: 2.5px !important;
+  border-color: #000 !important;
+  background: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 3px 3px 0 0 #000;
+}
+[data-theme="neobrutal"] input:focus,
+[data-theme="neobrutal"] select:focus,
+[data-theme="neobrutal"] textarea:focus {
+  background: var(--nb-yellow) !important;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 0 #000;
+  outline: none !important;
+}
+
+/* ボタン全般 (chip 以外) */
+[data-theme="neobrutal"] button:not(.editorial-chip):not(.theme-btn):not(.tab-btn):not([aria-label*="メニュー"]):not([aria-label*="閉じる"]) {
+  font-weight: 700;
+}
+
+/* タブボタンに極太ボーダー */
+[data-theme="neobrutal"] .tab-btn {
+  border-width: 2.5px !important;
+  border-color: #000 !important;
+  background: #ffffff;
+  box-shadow: 3px 3px 0 0 #000;
+  font-weight: 700;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+[data-theme="neobrutal"] .tab-btn:hover:not(.tab-btn-active) {
+  background: var(--nb-lime);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 #000;
+}
+
+/* SynthesisCard 内の Key Insights バー */
+[data-theme="neobrutal"] li[class*="border-l-2"] {
+  border-left-color: var(--nb-pink) !important;
+  border-left-width: 4px !important;
+}
+
+/* Hero / Synthesis 内の巨大カード */
+[data-theme="neobrutal"] .editorial-display {
+  letter-spacing: -0.05em !important;
+}
+
+/* 装飾: 上下に走る帯 */
+[data-theme="neobrutal"] .editorial-display-jp {
+  font-weight: 900 !important;
+}
+
+/* 「★必読」バッジを特別にビビッドに */
+[data-theme="neobrutal"] .editorial-chip-dark span:first-child {
+  color: inherit !important;
+}
+
+/* 回転 EXPLORE バッジを大胆な色に */
+[data-theme="neobrutal"] .editorial-spinner {
+  filter: drop-shadow(2px 2px 0 #000);
+}
+
+/* リンク */
+[data-theme="neobrutal"] a:not(.editorial-chip):not([class*="rounded-full"]):not([class*="block"]) {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+[data-theme="neobrutal"] a:hover:not(.editorial-chip) {
+  background: var(--nb-yellow);
+}
+
+/* テーマ切替メニュー */
+[data-theme="neobrutal"] [class*="absolute right-0 mt-2"] {
+  border-width: 3px !important;
+  border-color: #000 !important;
+  box-shadow: 6px 6px 0 0 #000 !important;
+}
+
+/* ステッカー風の装飾 (新規) — class="nb-sticker" 用 */
+.nb-sticker {
+  display: inline-block;
+  background: var(--nb-yellow, #ffe600);
+  color: #000;
+  border: 3px solid #000;
+  padding: 6px 14px;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 0 #000;
+  transform: rotate(-2deg);
+}
+.nb-sticker.nb-sticker-pink { background: var(--nb-pink, #ff5cb1); }
+.nb-sticker.nb-sticker-cyan { background: var(--nb-cyan, #00d4d4); }
+.nb-sticker.nb-sticker-lime { background: var(--nb-lime, #b6ff5c); }
+.nb-sticker.nb-sticker-coral { background: var(--nb-coral, #ff6b35); }
+.nb-sticker.nb-sticker-purple { background: var(--nb-purple, #b888ff); }
 

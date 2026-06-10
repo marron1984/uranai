@@ -57,10 +57,11 @@ export default function Gate({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--background)", color: "var(--foreground)" }}>
         <div className="w-full max-w-md">
-          {/* 巨大ロゴ */}
-          <div className="text-center mb-12">
+          {/* 巨大ロゴ + ステッカー */}
+          <div className="text-center mb-12 relative">
             <div className="editorial-display text-6xl sm:text-7xl tracking-tight">URANAI</div>
             <div className="editorial-mono text-[10px] opacity-60 mt-2">私的占断 ／ Private</div>
+            <span className="nb-sticker nb-sticker-pink absolute -top-2 -right-4 sm:right-0">VIP ONLY</span>
           </div>
 
           {/* 鍵アイコン */}

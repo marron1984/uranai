@@ -629,6 +629,14 @@ function Hero({
 
       {/* メガ・ディスプレイ・ヒーロー */}
       <div className="relative">
+        {/* ネオブルータル装飾ステッカー (テーマが neobrutal の時のみ装飾効果が出る) */}
+        <span className="nb-sticker nb-sticker-yellow hidden sm:inline-block absolute -top-2 right-32 z-10" style={{ transform: "rotate(8deg)" }}>
+          DAILY READING
+        </span>
+        <span className="nb-sticker nb-sticker-cyan hidden lg:inline-block absolute top-16 right-2 z-10" style={{ transform: "rotate(-5deg)" }}>
+          N° 143
+        </span>
+
         <h1 className="editorial-display text-[15vw] sm:text-[12vw] lg:text-[140px] uppercase break-words">
           OFF TRACK,
           <br />
