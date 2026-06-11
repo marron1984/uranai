@@ -53,21 +53,21 @@ export default function RootLayout({
             <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
               <Link href="/" className="flex items-baseline gap-2 sm:gap-3 min-w-0">
                 <span className="editorial-display text-xl sm:text-2xl tracking-tight">URANAI</span>
-                <span className="editorial-mono text-[10px] opacity-70 hidden md:inline">私的占断 ／ N°143</span>
+                <span className="editorial-mono text-[10px] opacity-70 hidden xl:inline whitespace-nowrap">私的占断 ／ N°143</span>
               </Link>
               <div className="flex items-center gap-2 sm:gap-3">
-                <nav className="hidden sm:flex gap-1.5 items-center flex-wrap">
-                  <Link href="/astrology" className="editorial-chip text-[10px]"><span>星占</span></Link>
-                  <Link href="/tarot" className="editorial-chip text-[10px]"><span>塔羅</span></Link>
-                  <Link href="/numerology" className="editorial-chip text-[10px]"><span>数秘</span></Link>
-                  <Link href="/iching" className="editorial-chip text-[10px]"><span>易経</span></Link>
-                  <Link href="/shichu" className="editorial-chip text-[10px]"><span>四柱</span></Link>
-                  <Link href="/fengshui" className="editorial-chip text-[10px]"><span>風水</span></Link>
-                  <Link href="/mbti" className="editorial-chip text-[10px]"><span>MBTI</span></Link>
-                  <Link href="/sukuyo" className="editorial-chip text-[10px]"><span>宿曜</span></Link>
-                  <Link href="/maya" className="editorial-chip text-[10px]"><span>マヤ</span></Link>
-                  <Link href="/biorhythm" className="editorial-chip text-[10px]"><span>波</span></Link>
-                  <Link href="/compat" className="editorial-chip editorial-chip-dark text-[10px]"><span>相性</span></Link>
+                <nav className="hidden lg:flex gap-1.5 items-center flex-nowrap">
+                  <Link href="/astrology" className="editorial-chip text-[10px] !px-2.5"><span>星占</span></Link>
+                  <Link href="/tarot" className="editorial-chip text-[10px] !px-2.5"><span>塔羅</span></Link>
+                  <Link href="/numerology" className="editorial-chip text-[10px] !px-2.5"><span>数秘</span></Link>
+                  <Link href="/iching" className="editorial-chip text-[10px] !px-2.5"><span>易経</span></Link>
+                  <Link href="/shichu" className="editorial-chip text-[10px] !px-2.5"><span>四柱</span></Link>
+                  <Link href="/fengshui" className="editorial-chip text-[10px] !px-2.5"><span>風水</span></Link>
+                  <Link href="/mbti" className="editorial-chip text-[10px] !px-2.5"><span>MBTI</span></Link>
+                  <Link href="/sukuyo" className="editorial-chip text-[10px] !px-2.5"><span>宿曜</span></Link>
+                  <Link href="/maya" className="editorial-chip text-[10px] !px-2.5"><span>マヤ</span></Link>
+                  <Link href="/biorhythm" className="editorial-chip text-[10px] !px-2.5"><span>波</span></Link>
+                  <Link href="/compat" className="editorial-chip editorial-chip-dark text-[10px] !px-2.5"><span>相性</span></Link>
                 </nav>
                 <ThemeSwitcher />
                 <MobileMenu />

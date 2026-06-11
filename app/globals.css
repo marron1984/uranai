@@ -601,7 +601,8 @@ main, header, footer {
   font-family: "Noto Serif JP", serif;
   font-weight: 900;
   letter-spacing: -0.02em;
-  line-height: 0.95;
+  /* 0.95 だと複数行に折り返した時に行が重なる (利用側の leading-* はこの定義に負ける) */
+  line-height: 1.18;
 }
 .editorial-mono {
   font-family: "Inter", system-ui, sans-serif;

@@ -56,14 +56,14 @@ export default function ThemeSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-full border border-copper-500/30 px-3 py-1.5 text-[11px] tracking-wider hover:border-copper-400/60 transition-colors theme-btn"
+        className="flex items-center gap-2 rounded-full border border-copper-500/30 px-3 py-1.5 text-[11px] tracking-wider hover:border-copper-400/60 transition-colors theme-btn whitespace-nowrap"
         aria-label="テーマを変更"
       >
         <span
-          className="inline-block h-3.5 w-3.5 rounded-full ring-1 ring-copper-500/40"
+          className="inline-block h-3.5 w-3.5 rounded-full ring-1 ring-copper-500/40 flex-shrink-0"
           style={{ background: current.swatch }}
         />
-        <span className="hidden sm:inline">{current.label}</span>
+        <span className="hidden xl:inline whitespace-nowrap">{current.label}</span>
         <span className="text-[9px] opacity-60">▼</span>
       </button>
       {open && (

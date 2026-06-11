@@ -61,7 +61,7 @@ export default function MobileMenu() {
         aria-label="メニューを開く"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="sm:hidden flex flex-col items-center justify-center gap-[5px] w-11 h-11 border-2 border-current bg-[var(--background)]"
+        className="lg:hidden flex flex-col items-center justify-center gap-[5px] w-11 h-11 border-2 border-current bg-[var(--background)]"
         style={{ boxShadow: "3px 3px 0 0 currentColor" }}
       >
         <span className="block w-5 h-[2.5px] bg-current" />
@@ -72,7 +72,7 @@ export default function MobileMenu() {
       {/* オーバーレイ — z-index 強化 */}
       {open && (
         <div
-          className="sm:hidden fixed inset-0 z-[100] flex flex-col"
+          className="lg:hidden fixed inset-0 z-[100] flex flex-col"
           style={{ background: "var(--background)", color: "var(--foreground)" }}
         >
           <div className="flex items-center justify-between p-4 border-b-[3px] border-current">

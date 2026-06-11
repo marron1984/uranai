@@ -630,14 +630,14 @@ function Hero({
       {/* メガ・ディスプレイ・ヒーロー */}
       <div className="relative">
         {/* ネオブルータル装飾ステッカー (テーマが neobrutal の時のみ装飾効果が出る) */}
-        <span className="nb-sticker nb-sticker-yellow hidden sm:inline-block absolute -top-2 right-32 z-10" style={{ transform: "rotate(8deg)" }}>
+        <span className="nb-sticker nb-sticker-yellow hidden sm:inline-block absolute -top-2 right-32 z-0" style={{ transform: "rotate(8deg)" }}>
           DAILY READING
         </span>
-        <span className="nb-sticker nb-sticker-cyan hidden lg:inline-block absolute top-16 right-2 z-10" style={{ transform: "rotate(-5deg)" }}>
+        <span className="nb-sticker nb-sticker-cyan hidden lg:inline-block absolute top-16 right-2 z-0" style={{ transform: "rotate(-5deg)" }}>
           N° 143
         </span>
 
-        <h1 className="editorial-display text-[15vw] sm:text-[12vw] lg:text-[140px] uppercase break-words">
+        <h1 className="relative z-[1] editorial-display text-[15vw] sm:text-[12vw] lg:text-[140px] uppercase break-words">
           OFF TRACK,
           <br />
           ON PURPOSE,
@@ -660,8 +660,8 @@ function Hero({
           </div>
         </div>
 
-        {/* 回転 EXPLORE バッジ (装飾・モバイルは小さく) */}
-        <div className="absolute top-0 right-0 sm:right-4 lg:right-12 w-14 h-14 sm:w-28 sm:h-28 pointer-events-none">
+        {/* 回転 EXPLORE バッジ (装飾・モバイルは小さく・見出しの背面) */}
+        <div className="absolute top-0 right-0 sm:right-4 lg:right-12 w-14 h-14 sm:w-28 sm:h-28 pointer-events-none z-0">
           <svg viewBox="0 0 100 100" className="w-full h-full editorial-spinner">
             <defs>
               <path id="circle-path" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
@@ -711,7 +711,7 @@ function OneLinerBlock() {
         <span className="editorial-chip text-[10px] sm:text-xs">Today's One-Liner ／ 今日の一言</span>
         <span className="editorial-mono text-[9px] sm:text-[10px] opacity-60">{data.reading}</span>
       </div>
-      <p className="editorial-display-jp text-xl sm:text-4xl lg:text-5xl leading-[1.2] sm:leading-[1.15]">
+      <p className="editorial-display-jp text-xl sm:text-4xl lg:text-5xl" style={{ lineHeight: 1.35 }}>
         {data.line}
       </p>
       {data.flavor && (
@@ -1013,8 +1013,8 @@ function TodayTab({
             <ListBox title="今日やるべき" items={pdText.do} variant="positive" />
             <ListBox title="今日避けるべき" items={pdText.avoid} variant="negative" />
           </div>
-          <div className="mt-6 rounded-lg bg-ink-900 text-sand-50 p-4 text-center">
-            <div className="text-[10px] tracking-[0.4em] uppercase text-copper-300">
+          <div className="mt-6 rounded-lg p-4 text-center" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+            <div className="text-[10px] tracking-[0.4em] uppercase opacity-70">
               Today's Mantra
             </div>
             <div className="font-display text-xl mt-2 italic">「{pdText.mantra}」</div>
@@ -1198,7 +1198,7 @@ function TodayTab({
       <NumberedSection num="拾弐" label="Tarot" title="今日のタロット（過去・現在・未来）" action={
         <button
           onClick={onReshuffle}
-          className="text-xs px-4 py-2 rounded-md border border-copper-500/30 hover:border-ink-900"
+          className="text-xs px-4 py-2 rounded-md border border-copper-500/30 hover:border-current"
         >
           再シャッフル
         </button>
@@ -1987,9 +1987,9 @@ function ShichuFullSection({
             return (
               <div key={e} className="flex items-center gap-3 text-sm">
                 <div className="w-8 font-display text-lg text-sand-200">{e}</div>
-                <div className="flex-1 h-3 bg-midnight-700 rounded">
+                <div className="flex-1 h-3 border border-current rounded">
                   <div
-                    className={`h-3 rounded ${isHigh ? "bg-copper-500" : "bg-ink-700"}`}
+                    className={`h-full rounded bg-current ${isHigh ? "" : "opacity-40"}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -2315,7 +2315,7 @@ function Stars({ value, large }: { value: number; large?: boolean }) {
   return (
     <span className={`tracking-widest ${large ? "text-lg" : ""}`}>
       <span className="text-copper-500">{"★".repeat(value)}</span>
-      <span className="text-ink-200">{"★".repeat(5 - value)}</span>
+      <span className="opacity-25">{"★".repeat(5 - value)}</span>
     </span>
   );
 }
