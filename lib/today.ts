@@ -598,7 +598,7 @@ export function todayDayPillar(date: Date = new Date()): {
 }
 
 // ==================================================================
-// 今日の日干 vs Yoshida の日主（戊）の通変星
+// 今日の日干 vs Yoshida の日主（丙）の通変星
 // ==================================================================
 
 export function todayTongbianForOwner(date: Date = new Date()): {
@@ -606,12 +606,12 @@ export function todayTongbianForOwner(date: Date = new Date()): {
   text: string;
 } {
   const dp = todayDayPillar(date);
-  const star = tongbianStar("戊", dp.stem);
+  const star = tongbianStar("丙", dp.stem);
   return { star, text: TONGBIAN_TEXT[star] };
 }
 
 // ==================================================================
-// 12時辰盤: 今日の日干から各時辰の天干を導き、戊から見た通変星で吉凶を判定
+// 12時辰盤: 今日の日干から各時辰の天干を導き、丙から見た通変星で吉凶を判定
 // ==================================================================
 
 const HOUR_STEM_START: Record<string, number> = {
@@ -663,7 +663,7 @@ export function todayHourlyChart(date: Date = new Date()): HourSlot[] {
   return BRANCHES.map((br, i) => {
     const stemIdx = (start + i) % 10;
     const stem = STEMS[stemIdx];
-    const star = tongbianStar("戊", stem);
+    const star = tongbianStar("丙", stem);
     const r = rateTongbian(star);
     return {
       branch: br,
@@ -773,10 +773,10 @@ export function todaySynthesis(
   const cautionHourLabel = caution.map((h) => `${h.range}時(${h.branch})`).join(" / ");
 
   const headline = theme.headline;
-  const subline = `今日の日柱「${dp.ganzhi}」が、あなたの日主『戊』に対して『${tb.star}』の関係を結びます。`;
+  const subline = `今日の日柱「${dp.ganzhi}」が、あなたの日主『丙』に対して『${tb.star}』の関係を結びます。`;
 
   const paragraphs: string[] = [
-    `本日の日柱は ${dp.ganzhi}。あなたの日主『戊（陽土・山）』から見ると ${tb.star}（${theme.sub}）にあたり、${tb.text} 通変星のテーマが今日一日に色濃く現れる流れです。`,
+    `本日の日柱は ${dp.ganzhi}。あなたの日主『丙（陽火・太陽）』から見ると ${tb.star}（${theme.sub}）にあたり、${tb.text} 通変星のテーマが今日一日に色濃く現れる流れです。`,
     `パーソナルデイ${personalDay}と通変星${tb.star}の組合せは、${combineThemes(personalDay, tb.star)} 内側のエネルギーと外側の流れが共鳴する、密度の高い24時間です。`,
     `12時辰盤を見ると、本日の最も追い風となる時間帯は ${luckyHourLabel}。逆に注意が必要なのは ${cautionHourLabel} です。重要な意思決定・連絡・移動はラッキータイムに合わせ、注意時間帯は内省・休息・確認作業にあてると吉。`,
     `今日のあなた専用の易卦は『${hex.hex.num}. ${hex.hex.name}』(${hex.hex.reading})。${hex.hex.meaning} ${hex.changed ? `さらに変爻があり『${hex.changed.hex.num}. ${hex.changed.hex.name}』へと変化する流れが示されています。${hex.changed.hex.meaning}` : "今日は爻の変化なく、卦の意味を素直に受け止める日です。"}`,

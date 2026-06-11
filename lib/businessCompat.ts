@@ -21,7 +21,7 @@ const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申",
 // 吉田さんの日柱基準で相手の日干を算出
 export function partnerDayStem(birth: string): string {
   const [y, m, d] = birth.split("-").map(Number);
-  const baseUTC = Date.UTC(1984, 4, 2); // 戊申
+  const baseUTC = Date.UTC(1984, 4, 2); // 丙申 (吉田の日柱)
   const targetUTC = Date.UTC(y, m - 1, d);
   const days = Math.floor((targetUTC - baseUTC) / 86400000);
   const stemIdx = ((4 + days) % 10 + 10) % 10;
@@ -81,13 +81,13 @@ export function branchInteraction(yourBranch: string, theirBranch: string): {
   return { type: "なし", text: "干支間の特殊な関係はなし。中立的な相性", score: 3 };
 }
 
-// 相手の日干に応じたビジネス役割（戊土のYoshidaから見た補完）
+// 相手の日干に応じたビジネス役割（丙火のYoshidaから見た補完）
 const ROLE_BY_DAY_MASTER: Record<string, { role: string; complement: string }> = {
   甲: { role: "ビジョン提示・新規開拓のパイオニア", complement: "あなたの土壌に伸びる大樹。ビジネスの種を最初に植える役" },
   乙: { role: "渉外・調整・ソフト営業", complement: "柔らかな蔓のように人と人を繋ぐ役。摩擦を吸収する潤滑油" },
-  丙: { role: "ブランド構築・広告・PR・対外発信", complement: "太陽のように事業を照らす。組織の顔・スポークスパーソン" },
+  丙: { role: "ブランド構築・広告・PR・対外発信", complement: "同じ太陽どうし・看板を分け合う盟友。役割が重なるので住み分けが鍵 (日主と同質)" },
   丁: { role: "職人・技術専門家・ナイト型実装者", complement: "灯火のような深い専門性で、内側で本質を磨く役" },
-  戊: { role: "ナンバー2・地ならし・基盤構築", complement: "同じ山として相互補完。大組織の二頭体制に向く" },
+  戊: { role: "ナンバー2・地ならし・基盤構築", complement: "あなたの光を受けて実りを生む食神の協力者。表現と運用を任せられる" },
   己: { role: "サポート・運用・カスタマーサクセス・人事", complement: "田畑のように丁寧に育てる役。長期メンテナンスに強い" },
   庚: { role: "改革・切り込み・営業先鋒・難局突破", complement: "鉄のような決断力。あなたの慎重さを補う斬り込み隊長" },
   辛: { role: "プロデュース・ブランド・美意識・品質管理", complement: "宝石のような繊細な品格。差別化と高級化の鍵" },
@@ -95,7 +95,7 @@ const ROLE_BY_DAY_MASTER: Record<string, { role: string; complement: string }> =
   癸: { role: "リサーチ・分析・経理・知識集約", complement: "雨のように細やかな知性で潤す。データと洞察の番人" },
 };
 
-// 通変星別スコア（戊から相手の日干へ）
+// 通変星別スコア（丙から相手の日干へ）
 const DECISION_SCORE: Record<TongbianStar, number> = {
   比肩: 3, 劫財: 2, 食神: 4, 傷官: 3, 偏財: 4, 正財: 5, 偏官: 4, 正官: 5, 偏印: 3, 印綬: 5,
 };
@@ -175,10 +175,10 @@ export function calcBusinessCompat(input: BusinessCompatInput): BusinessCompatRe
     己: "土", 庚: "金", 辛: "金", 壬: "水", 癸: "水",
   };
 
-  // Yoshida = 戊申, 牡牛座, 七赤, ライフパス11, 子年
+  // Yoshida = 丙申, 牡牛座, 七赤, ライフパス11, 子年
   const zc = zodiacCompat("taurus", sun.key);
   const sc = starRelation(7, star);
-  const tb = tongbianStar("戊", dayStem);
+  const tb = tongbianStar("丙", dayStem);
   const bi = branchInteraction("子", yearBranch);
 
   // Communication = star compat + zodiac compat
@@ -211,7 +211,7 @@ export function calcBusinessCompat(input: BusinessCompatInput): BusinessCompatRe
 
   // 役割分担
   const partnerRole = ROLE_BY_DAY_MASTER[dayStem];
-  const yourRole = "リーダー・経営判断・基盤構築・最終決裁（戊土の山）";
+  const yourRole = "ビジョン提示・ブランドの顔・人を照らし導く・最終決裁（丙火の太陽）";
 
   // 推奨
   let recommendation = "";
@@ -294,7 +294,7 @@ function generateDetailedAnalysis(
   return [
     `${name}さん（${sun.name}・${STAR_NAME[star]}・日干${dayStem}・ライフパス${lifePath}・${yearBranch}年生まれ・${ageDiffText}）との相性を、ビジネス視点で多軸分析しました。`,
     "",
-    `【五行相性の核】あなたの日主『戊（陽土）』に対して、${name}さんの日干『${dayStem}』は通変星『${tb}』の関係を結びます。これはビジネスにおいて『${tb}的な役割の相手』として機能することを意味します。`,
+    `【五行相性の核】あなたの日主『丙（陽火）』に対して、${name}さんの日干『${dayStem}』は通変星『${tb}』の関係を結びます。これはビジネスにおいて『${tb}的な役割の相手』として機能することを意味します。`,
     "",
     `【九星の流れ】あなたの七赤金 × ${name}さんの${STAR_NAME[star]}は『${sc.relation}』。${sc.text} 五行レベルで、${
       sc.score >= 4 ? "互いを高め合う" : sc.score >= 3 ? "中立的に共存する" : "摩擦を生みやすい"

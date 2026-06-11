@@ -3,7 +3,7 @@
 // 別の人々との相互相性をこの JSON 1 つで計算できる「自己完結プロファイル」。
 
 import { OWNER, calcAge } from "@/lib/owner";
-import { calcFourPillars, tongbianStar, twelveStage, generateDaiun, calcRuiun, STEM_ELEMENT, BRANCH_ELEMENT } from "@/lib/shichu";
+import { calcFourPillars, tongbianStar, twelveStage, generateDaiun, calcRuiun, fiveElementBalance, STEM_ELEMENT, BRANCH_ELEMENT } from "@/lib/shichu";
 import { honmeiStar, STAR_NAME, STAR_ELEMENT, STAR_DIRECTION } from "@/lib/kyusei";
 import { calcKua, KUA_NAMES, dirRatings } from "@/lib/fengshui";
 import { lifePathNumber, soulNumber, personalityNumber, expressionNumber, birthdayNumber, personalYear } from "@/lib/numerology";
@@ -40,14 +40,8 @@ const twelveByPillar = {
   hour: fp.hour ? twelveStage(dayMaster, fp.hour.branch) : null,
 };
 
-// 五行カウント
-const fiveCount: Record<string, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
-[fp.year.stem, fp.month.stem, fp.day.stem, fp.hour?.stem].filter(Boolean).forEach((s) => {
-  fiveCount[STEM_ELEMENT[s as string]]++;
-});
-[fp.year.branch, fp.month.branch, fp.day.branch, fp.hour?.branch].filter(Boolean).forEach((b) => {
-  fiveCount[BRANCH_ELEMENT[b as string]]++;
-});
+// 五行カウント (fiveElementBalance は陰陽を除いた純五行で集計)
+const fiveCount: Record<string, number> = fiveElementBalance(fp);
 
 // 大運
 const ruiun = calcRuiun(o.birth, fp.year.stem, o.gender);
@@ -112,7 +106,7 @@ function familyProfile(person: { birth: string; gender?: string | null }, defaul
       personality: birthCards(person.birth).personality.num,
       soul: birthCards(person.birth).soul.num,
     },
-    // 戊から見た相手の通変星
+    // 日主 (丙) から見た相手の通変星
     tongbianVsYoshida: tongbianStar(dayMaster, pfp.day.stem),
   };
 }
@@ -162,7 +156,14 @@ const profile = {
     tongbianByPillar,
     twelveByPillar,
     fiveElementCount: fiveCount,
-    isOverbalanced: { element: "土", description: "偏土命 (土が三柱以上)" },
+    isOverbalanced: (() => {
+      const max = Math.max(...Object.values(fiveCount));
+      const dom = (Object.entries(fiveCount).find(([, n]) => n === max) ?? ["土", 0])[0];
+      // 1 つの五行が 4 以上を占めるなら偏りとみなす (丙火命では土3が最多だが偏りには至らない)
+      return max >= 4
+        ? { element: dom, description: `偏${dom}命 (${dom}が${max}/8で突出)` }
+        : { element: dom, description: `${dom}がやや多いが比較的均衡した配分 (最多${dom}=${max}/8)` };
+    })(),
     ruiun: {
       startingAge: ruiun.startingAge,
       forward: ruiun.forward,

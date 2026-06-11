@@ -269,9 +269,9 @@ function basisData() {
     OWNER.family.child.sunSign,
     OWNER.family.child.kyusei as StarNumber
   );
-  // 大運（10年周期）— 1984/05/02 = 戊申, 男+陽干甲 → 順行, 立運1歳
+  // 大運（10年周期）— 1984/05/02 = 丙申, 男+陽干甲 → 順行, 立運1歳
   const currentAge = ownerAge();
-  const daiun = generateDaiun("戊辰", 1, true, 8, currentAge, "戊");
+  const daiun = generateDaiun("戊辰", 1, true, 8, currentAge, "丙");
 
   return { sun, fp, fpExtras, kakusu, bc, numero, ratings, annual, spouseCompat, childCompat, daiun, currentAge };
 }
@@ -1303,7 +1303,7 @@ function BasisTab({ basis }: { basis: ReturnType<typeof basisData> }) {
       items: [
         { id: "shichu-tongbian", num: "玖之壱", title: "命式の通変星の組合せ" },
         { id: "shichu-twelve", num: "玖之弐", title: "四柱十二運のリズム" },
-        { id: "shichu-balance", num: "玖之参", title: "偏土命の五行バランス" },
+        { id: "shichu-balance", num: "玖之参", title: "丙火の五行バランスと燃料管理" },
         { id: "shichu-daiun-transition", num: "玖之肆", title: "大運切替期 (41→51)" },
         { id: "shichu-shensha", num: "玖之伍", title: "神殺 (魁罡・天乙貴人 等)" },
       ],
@@ -3086,7 +3086,7 @@ const TONGBIAN_BASIS_LINKS: Record<string, { anchor: string; label: string }[]> 
   比肩: [{ anchor: "shichu-tongbian", label: "命式の比肩 (月柱) を深く知る" }],
   劫財: [{ anchor: "shichu-tongbian", label: "命式の劫財 (時柱) を深く知る" }],
   食神: [{ anchor: "shichu-balance", label: "土から金へ — 表現の五行を知る" }],
-  傷官: [{ anchor: "shichu-balance", label: "傷官の鋭さと偏土命の関係" }],
+  傷官: [{ anchor: "shichu-balance", label: "傷官の鋭さと丙火の五行バランス" }],
   偏財: [{ anchor: "wealth", label: "金運・財運の核を読み返す" }],
   正財: [{ anchor: "shichu-daiun-transition", label: "現在の正財大運 (癸酉) の全体像" }],
   偏官: [{ anchor: "shichu-daiun-transition", label: "51 歳から始まる偏官大運の予習" }],
@@ -3207,7 +3207,7 @@ function TwelveHoursChart({
 }) {
   const luckyBranches = new Set(luckyHours.map((h) => h.branch));
   return (
-    <NumberedSection num="零・八" label="12 Hour Chart" title="本日の十二時辰盤（日主戊から見た吉凶）">
+    <NumberedSection num="零・八" label="12 Hour Chart" title="本日の十二時辰盤（日主丙から見た吉凶）">
       <div className="rounded-2xl border border-copper-500/20 bg-midnight-800/50 backdrop-blur-sm p-5 sm:p-6">
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
           {chart.map((h) => {

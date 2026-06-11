@@ -205,7 +205,7 @@ export function buildOwnerProfile(): string {
     OWNER.natal.fourPillars.hour
   );
   const fpExtras = calcShichuExtras(fp);
-  const daiun = generateDaiun("戊辰", 1, true, 8, ageNow, "戊");
+  const daiun = generateDaiun("戊辰", 1, true, 8, ageNow, "丙");
   const currentDaiun = daiun.find((d) => d.isCurrent);
   const kakusu = calcKakusu([...OWNER.nameSeiKakusu], [...OWNER.nameMeiKakusu]);
   const ratings = dirRatings(OWNER.natal.fengshui.kua);
@@ -271,7 +271,7 @@ export function buildOwnerProfile(): string {
 - 月柱: ${fp.month.ganzhi}（${fpExtras.tongbian.month}・${fpExtras.twelve.month}）
 - 日柱: ${fp.day.ganzhi} ← 日主『${fp.dayMaster.stem}』（${fp.dayMaster.element}）・十二運『${fpExtras.twelve.day}』
 - 時柱: ${fp.hour?.ganzhi}（${fpExtras.tongbian.hour}・${fpExtras.twelve.hour}）
-- 五行バランス: 木${five.木}・火${five.火}・土${five.土}・金${five.金}・水${five.水} ／合計${totalFive}（土が突出する偏土命）
+- 五行バランス: 木${five.木}・火${five.火}・土${five.土}・金${five.金}・水${five.水} ／合計${totalFive}（土3が最多だが木が火を支える比較的均衡した配分・丙火日主）
 
 ## 大運（10年周期）
 ${daiun.map((d) => `- ${d.startAge}-${d.endAge}歳: ${d.ganzhi}・${d.stemTongbian}${d.isCurrent ? " ★現在★" : ""}`).join("\n")}
@@ -308,7 +308,7 @@ ${daiun.map((d) => `- ${d.startAge}-${d.endAge}歳: ${d.ganzhi}・${d.stemTongbi
 - 義母: 認知症進行中、デイ・ショート利用
 
 ## 当日のコズミック（${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}）
-- 日柱: ${dayPillarToday.ganzhi}（日主戊から見て『${tbToday.star}』）
+- 日柱: ${dayPillarToday.ganzhi}（日主丙から見て『${tbToday.star}』）
 - 太陽位置: ${transitChart.sun.sign} ${transitChart.sun.degree.toFixed(1)}°
 - 月位置: ${transitChart.moon.sign} ${transitChart.moon.degree.toFixed(1)}°
 - 水星: ${transitChart.mercury.sign} ${transitChart.mercury.degreeInSign.toFixed(1)}°${transitChart.mercury.retrograde ? " 逆行" : ""}
@@ -340,7 +340,7 @@ function buildPartnerProfile(partner: CompatPerson, category: OracleCategory): s
 
   const zc = zodiacCompat("taurus", sun.key);
   const sc = starRelation(7, star);
-  const tb = tongbianStar("戊", dayStem);
+  const tb = tongbianStar("丙", dayStem);
   const bi = branchInteraction("子", yearBranch);
 
   return `# 相性鑑定対象（${CATEGORY_LABELS[category].label}）
@@ -361,7 +361,7 @@ function buildPartnerProfile(partner: CompatPerson, category: OracleCategory): s
 ## 関係指標（しゅんすけ視点）
 - 星座相性: 牡牛座×${sun.name} → ${zc.text}（スコア${zc.score}/5）
 - 九星五行: 七赤金×${STAR_NAME[star]} → ${sc.relation}（${sc.text}）
-- 通変星: 戊→${dayStem} = 『${tb}』
+- 通変星: 丙→${dayStem} = 『${tb}』
 - 年支の縁: 子年×${yearBranch}年 = ${bi.type}（${bi.text}）
 
 ## このカテゴリの観点
@@ -370,7 +370,7 @@ ${CATEGORY_GUIDANCE[category]}`;
 
 export function buildSystemPrompt(category: OracleCategory, partner?: CompatPerson): string {
   const ageNow = ownerAge();
-  const daiun = generateDaiun("戊辰", 1, true, 8, ageNow, "戊");
+  const daiun = generateDaiun("戊辰", 1, true, 8, ageNow, "丙");
   const currentDaiun = daiun.find((d) => d.isCurrent);
   const daiunDesc = currentDaiun
     ? `${currentDaiun.startAge}-${currentDaiun.endAge}歳 ${currentDaiun.ganzhi}大運（${currentDaiun.stemTongbian}）`
@@ -388,7 +388,7 @@ ${profile}${partnerSection}${guidance}
 
 # 回答スタイル
 
-1. 命式・五格・九星・大運の **固有の値を必ず引用** して根拠を示す（例:「日主戊申の重さが」「外格13大吉が」「現在の${daiunExample}大運が」）
+1. 命式・五格・九星・大運の **固有の値を必ず引用** して根拠を示す（例:「日主丙申（陽火・太陽）の輝きが」「外格13大吉が」「現在の${daiunExample}大運が」）
 2. 抽象的な励ましではなく、**具体的な行動指針** を示す
 3. 必要に応じて複数の占術を統合（西洋＋東洋＋数秘）
 4. 質問の文脈に応じて、3〜7段落程度に整理
@@ -499,7 +499,7 @@ const EXPORT_SYSTEM_INSTRUCTIONS = `# 占術相談における回答スタイル
 ## 重要な原則
 
 1. **命式・五格・九星・大運の固有値を必ず引用**して根拠を示す
-   - 例:「日主戊申の重さが」「外格13大吉が」「現在の癸酉大運（正財）が」
+   - 例:「日主丙申（陽火・太陽）の輝きが」「外格13大吉が」「現在の癸酉大運（正官）が」
 2. 抽象的な励ましではなく、**具体的な行動指針**を示す
 3. 必要に応じて複数の占術を統合（西洋＋東洋＋数秘）
 4. 質問の文脈に応じて、3〜7段落程度に整理

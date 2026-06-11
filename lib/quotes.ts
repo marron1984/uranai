@@ -1,6 +1,6 @@
 // 有名人の格言コーナー
 // 経営者・思想家・投資家・芸術家・霊性の指導者を中心に厳選。
-// INFJ × 戊土 × マスター 11 × 偏土命 (養い育てる) と響き合う人選を優先。
+// INFJ × 丙火 (太陽) × マスター 11 × 印星 (受信→発光→表現) と響き合う人選を優先。
 
 import { pickByDate } from "@/lib/today";
 
@@ -88,7 +88,7 @@ export const QUOTES: Quote[] = [
   {
     text: "やってみせ、言って聞かせて、させてみせ、ほめてやらねば、人は動かじ。",
     author: "山本五十六",
-    context: "海軍大将。リーダーシップの根本原則。戊土の人にとっての教科書的言葉。",
+    context: "海軍大将。リーダーシップの根本原則。人を照らし導く丙火の人にとっての教科書的言葉。",
     category: "戦略家",
     era: "20世紀",
   },
@@ -178,7 +178,7 @@ export const QUOTES: Quote[] = [
     text: "強みの上に強みを築け。弱みを直そうとするな。",
     author: "ピーター・ドラッカー",
     authorEn: "Peter Drucker",
-    context: "INFJ × 戊土 のキャリア戦略の核心。",
+    context: "INFJ × 丙火 のキャリア戦略の核心。",
     category: "思想家",
   },
 
@@ -228,7 +228,7 @@ export const QUOTES: Quote[] = [
     text: "上善は水の如し。水は万物を利して争わず、衆人の悪む所に処る。",
     author: "老子",
     authorEn: "Lao Tzu",
-    context: "最高の善は水のようである。低きを厭わず、すべてを潤す。戊土と水のバランス。",
+    context: "最高の善は水のようである。低きを厭わず、すべてを潤す。燃える丙火に潤いを与える水のバランス。",
     category: "思想家",
     era: "BC6世紀",
   },
@@ -265,7 +265,7 @@ export const QUOTES: Quote[] = [
     text: "三十にして立ち、四十にして惑わず、五十にして天命を知る。",
     author: "孔子",
     authorEn: "Confucius",
-    context: "人生のステージ。INFJ × 戊土 の人生軌道に重なる。",
+    context: "人生のステージ。INFJ × 丙火 の人生軌道に重なる。",
     category: "思想家",
   },
   {
@@ -350,7 +350,7 @@ export const QUOTES: Quote[] = [
     text: "百戦百勝は、善の善なる者に非ず。戦わずして人の兵を屈するは、善の善なる者なり。",
     author: "孫子",
     authorEn: "Sun Tzu",
-    context: "最高の勝利は、戦わずに勝つこと。戊土の人の理想形。",
+    context: "最高の勝利は、戦わずに勝つこと。燃え上がりやすい丙火の人が学ぶべき理想形。",
     category: "戦略家",
   },
   {
@@ -370,7 +370,7 @@ export const QUOTES: Quote[] = [
   {
     text: "千日の稽古を鍛とし、万日の稽古を錬とす。",
     author: "宮本武蔵",
-    context: "鍛錬の漢字の語源。INFJ × 戊土 のコツコツ哲学そのもの。",
+    context: "鍛錬の漢字の語源。INFJ × 丙火 が燃え尽きずに火を保つコツコツ哲学そのもの。",
     category: "戦略家",
   },
   {
@@ -551,7 +551,7 @@ export const QUOTES: Quote[] = [
   {
     text: "雨にも負けず、風にも負けず。",
     author: "宮沢賢治",
-    context: "農芸化学者・詩人。INFJ × 戊土 系の精神性。",
+    context: "農芸化学者・詩人。INFJ × 丙火 系の精神性。",
     category: "霊性",
     era: "19-20世紀",
     mbtiHint: "INFJ",
@@ -602,7 +602,7 @@ export const QUOTES: Quote[] = [
     text: "明日の重要な決断は、今日決断しない。72 時間後の自分に判断を任せる。",
     author: "ジェフ・ベゾス",
     authorEn: "Jeff Bezos",
-    context: "急がない判断の質。INFJ × 戊土 の意思決定スタイルに共鳴。",
+    context: "急がない判断の質。勢いで燃えやすい丙火が身につけたい意思決定スタイルに共鳴。",
     category: "経営者",
   },
 
@@ -623,7 +623,7 @@ export const QUOTES: Quote[] = [
   {
     text: "四十、五十は鼻たれ小僧。六十、七十は働き盛り。九十になって迎えがきたら百歳まで待てと追い返せ。",
     author: "渋沢栄一",
-    context: "大器晩成の励まし。戊土の人生軌道に響く。",
+    context: "大器晩成の励まし。官→印と段階を登る丙火の人生軌道に響く。",
     category: "経営者",
   },
   {
@@ -710,7 +710,7 @@ export const QUOTES: Quote[] = [
   {
     text: "山静かにして人意自ずから静かなり。",
     author: "禅の格言",
-    context: "戊土の人にとっての理想の境地。",
+    context: "燃え尽きやすい丙火の人にとっての理想の境地。",
     category: "霊性",
   },
   {

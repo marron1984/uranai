@@ -16,8 +16,8 @@
       "name": "日干同士の通変星",
       "weight": 1.0,
       "lookup": "tables.tongbianScore",
-      "compute": "tongbianStar(yoshida.dayStem='戊', partner.dayStem) → score",
-      "description": "ビジネス・恋愛・人間関係すべての基礎。戊から見て相手がどの通変星に当たるかで関係性の質が決まる"
+      "compute": "tongbianStar(yoshida.dayStem='丙', partner.dayStem) → score",
+      "description": "ビジネス・恋愛・人間関係すべての基礎。丙 (日主) から見て相手がどの通変星に当たるかで関係性の質が決まる"
     },
     {
       "id": "shichu.yearBranch",
@@ -85,22 +85,22 @@
         "生 (相生)": { "木": "火", "火": "土", "土": "金", "金": "水", "水": "木" },
         "剋 (相剋)": { "木": "土", "土": "水", "水": "火", "火": "金", "金": "木" }
       },
-      "tableForYoshida戊": {
-        "甲": "偏官",
-        "乙": "正官",
-        "丙": "偏印",
-        "丁": "印綬",
-        "戊": "比肩",
-        "己": "劫財",
-        "庚": "食神",
-        "辛": "傷官",
-        "壬": "偏財",
-        "癸": "正財"
+      "tableForYoshida丙": {
+        "甲": "偏印",
+        "乙": "印綬",
+        "丙": "比肩",
+        "丁": "劫財",
+        "戊": "食神",
+        "己": "傷官",
+        "庚": "偏財",
+        "辛": "正財",
+        "壬": "偏官",
+        "癸": "正官"
       }
     },
 
     "tongbianScore": {
-      "description": "戊土から見た通変星別の関係性スコア (1-5)",
+      "description": "丙火 (日主) から見た通変星別の関係性スコア (1-5)",
       "general": {
         "印綬": { "score": 5, "kind": "守護者", "desc": "学び・人徳・名誉を授ける師" },
         "正官": { "score": 5, "kind": "規律", "desc": "公正な伴侶・組織のパートナー" },
@@ -121,9 +121,9 @@
       "businessRoles": {
         "甲": { "role": "ビジョン・新規開拓のパイオニア", "complement": "あなたの土壌に伸びる大樹" },
         "乙": { "role": "渉外・調整・ソフト営業", "complement": "柔らかな蔓のように人と人を繋ぐ役" },
-        "丙": { "role": "ブランド・PR・対外発信", "complement": "太陽のように事業を照らす顔役" },
+        "丙": { "role": "ブランド・PR・対外発信", "complement": "同じ太陽どうし・看板を分け合う盟友 (日主と同質)" },
         "丁": { "role": "職人・専門家", "complement": "灯火のような深い専門性" },
-        "戊": { "role": "ナンバー 2・地ならし", "complement": "同じ山として相互補完" },
+        "戊": { "role": "ナンバー 2・地ならし", "complement": "丙火を支える大地・あなたの光を受けて実りを生む食神の協力者" },
         "己": { "role": "サポート・運用", "complement": "丁寧に育てる長期メンテ役" },
         "庚": { "role": "改革・営業先鋒", "complement": "鉄のような決断力" },
         "辛": { "role": "プロデュース・品質管理", "complement": "宝石のような繊細な品格" },
@@ -308,19 +308,19 @@
       "partner": {
         "birth": "1969-12-21",
         "yearBranch": "酉",
-        "dayStem": "戊 (実際の妻の日干は別計算が必要)",
+        "dayStem": "庚 (妻の日柱 = 庚午)",
         "honmei": 4,
         "sunSign": "sagittarius",
         "lifePath": 4
       },
       "scores": {
-        "tongbianScore (戊×戊=比肩)": { "score": 3 },
+        "tongbianScore (丙×庚=偏財)": { "score": 4 },
         "branchInteraction (子×酉)": { "score": 3, "type": "なし" },
         "kyuseiRelation (7×4)": { "score": 2, "type": "相剋・金剋木" },
         "zodiacCompat (taurus×sagittarius)": { "score": 3, "type": "クインカンクス" },
         "lifePathCompat (11×4)": { "score": 4, "type": "理想×実務" }
       },
-      "overall": "3.0 / 5.0 (中庸)。違いを受け入れる柔らかさで深い関係に育つ典型"
+      "overall": "3.2 / 5.0 (中庸)。丙火の光を妻の庚金 (偏財) が形にする・違いを活かす実務的伴侶"
     }
   ]
 }

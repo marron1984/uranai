@@ -1,6 +1,6 @@
 {
   "$schema": "uranai-yoshida-profile-v1",
-  "generatedAt": "2026-05-27T08:20:16.358Z",
+  "generatedAt": "2026-06-11T20:40:58.729Z",
   "identity": {
     "displayName": "しゅんすけ",
     "nameSei": "吉田",
@@ -32,10 +32,10 @@
       "name": "牡牛座",
       "degree": 12.3084385048193
     },
-    "approx": {
-      "moon": "射手座〜山羊座圏",
-      "asc": "獅子座圏",
-      "mc": "牡牛座圏"
+    "natalPoints": {
+      "moon": "taurus 23.5°",
+      "asc": "virgo 1.5° (獅子座/乙女座の境界 +1.5°。出生 12:54 以前なら獅子座 ASC。)",
+      "mc": "taurus 28.1°"
     }
   },
   "shichu": {
@@ -55,29 +55,29 @@
         "branchElement": "陽土"
       },
       "day": {
-        "ganzhi": "戊申",
-        "stem": "戊",
+        "ganzhi": "丙申",
+        "stem": "丙",
         "branch": "申",
-        "element": "陽土",
+        "element": "陽火",
         "branchElement": "陽金"
       },
       "hour": {
-        "ganzhi": "己未",
-        "stem": "己",
+        "ganzhi": "乙未",
+        "stem": "乙",
         "branch": "未",
-        "element": "陰土",
+        "element": "陰木",
         "branchElement": "陰土"
       }
     },
     "dayMaster": {
-      "stem": "戊",
-      "element": "陽土"
+      "stem": "丙",
+      "element": "陽火"
     },
     "tongbianByPillar": {
-      "year": "偏官",
-      "month": "比肩",
+      "year": "偏印",
+      "month": "食神",
       "day": "日主",
-      "hour": "劫財"
+      "hour": "印綬"
     },
     "twelveByPillar": {
       "year": "胎",
@@ -86,20 +86,15 @@
       "hour": "衰"
     },
     "fiveElementCount": {
-      "木": 0,
-      "火": 0,
-      "土": 0,
-      "金": 0,
-      "水": 0,
-      "陽木": null,
-      "陽土": null,
-      "陰土": null,
-      "陽水": null,
-      "陽金": null
+      "木": 2,
+      "火": 1,
+      "土": 3,
+      "金": 1,
+      "水": 1
     },
     "isOverbalanced": {
       "element": "土",
-      "description": "偏土命 (土が三柱以上)"
+      "description": "土がやや多いが比較的均衡した配分 (最多土=3/8)"
     },
     "ruiun": {
       "startingAge": 1,
@@ -116,11 +111,11 @@
         "ganzhi": "己巳",
         "stem": "己",
         "branch": "巳",
-        "tongbian": "劫財",
+        "tongbian": "傷官",
         "stemElement": "陰土",
         "branchElement": "陰火",
         "isCurrent": false,
-        "theme": "出費と試練のフェーズ。仲間・兄弟・友人との関わりが運命を動かす波乱期。"
+        "theme": "才能と批評のフェーズ。鋭さで頭角を現すが衝突も多い、内省と挑戦の10年。"
       },
       {
         "index": 2,
@@ -131,11 +126,11 @@
         "ganzhi": "庚午",
         "stem": "庚",
         "branch": "午",
-        "tongbian": "食神",
+        "tongbian": "偏財",
         "stemElement": "陽金",
         "branchElement": "陽火",
         "isCurrent": false,
-        "theme": "創造と楽しみのフェーズ。表現力と才能が花開き、衣食住も豊かになる黄金期。"
+        "theme": "流動する財のフェーズ。ビジネス・社交・副業で大きく稼ぐチャンス期。"
       },
       {
         "index": 3,
@@ -146,11 +141,11 @@
         "ganzhi": "辛未",
         "stem": "辛",
         "branch": "未",
-        "tongbian": "傷官",
+        "tongbian": "正財",
         "stemElement": "陰金",
         "branchElement": "陰土",
         "isCurrent": false,
-        "theme": "才能と批評のフェーズ。鋭さで頭角を現すが衝突も多い、内省と挑戦の10年。"
+        "theme": "堅実な財のフェーズ。コツコツ蓄積し、家庭と仕事の安定を築く充実期。"
       },
       {
         "index": 4,
@@ -161,11 +156,11 @@
         "ganzhi": "壬申",
         "stem": "壬",
         "branch": "申",
-        "tongbian": "偏財",
+        "tongbian": "偏官",
         "stemElement": "陽水",
         "branchElement": "陽金",
         "isCurrent": false,
-        "theme": "流動する財のフェーズ。ビジネス・社交・副業で大きく稼ぐチャンス期。"
+        "theme": "胆力と挑戦のフェーズ。改革者・経営者として頂点を目指す試練と栄光の10年。"
       },
       {
         "index": 5,
@@ -176,11 +171,11 @@
         "ganzhi": "癸酉",
         "stem": "癸",
         "branch": "酉",
-        "tongbian": "正財",
+        "tongbian": "正官",
         "stemElement": "陰水",
         "branchElement": "陰金",
         "isCurrent": true,
-        "theme": "堅実な財のフェーズ。コツコツ蓄積し、家庭と仕事の安定を築く充実期。"
+        "theme": "規律と名誉のフェーズ。社会的地位・公的評価が頂点に達する充実期。"
       },
       {
         "index": 6,
@@ -191,11 +186,11 @@
         "ganzhi": "甲戌",
         "stem": "甲",
         "branch": "戌",
-        "tongbian": "偏官",
+        "tongbian": "偏印",
         "stemElement": "陽木",
         "branchElement": "陽土",
         "isCurrent": false,
-        "theme": "胆力と挑戦のフェーズ。改革者・経営者として頂点を目指す試練と栄光の10年。"
+        "theme": "独自の知性のフェーズ。副業・専門性・霊性が深まる、内向きで静かな実りの期。"
       },
       {
         "index": 7,
@@ -206,11 +201,11 @@
         "ganzhi": "乙亥",
         "stem": "乙",
         "branch": "亥",
-        "tongbian": "正官",
+        "tongbian": "印綬",
         "stemElement": "陰木",
         "branchElement": "陰水",
         "isCurrent": false,
-        "theme": "規律と名誉のフェーズ。社会的地位・公的評価が頂点に達する充実期。"
+        "theme": "学問と人徳のフェーズ。教養・名誉・年長者の庇護が満ちる、人格完成の10年。"
       },
       {
         "index": 8,
@@ -221,11 +216,11 @@
         "ganzhi": "丙子",
         "stem": "丙",
         "branch": "子",
-        "tongbian": "偏印",
+        "tongbian": "比肩",
         "stemElement": "陽火",
         "branchElement": "陽水",
         "isCurrent": false,
-        "theme": "独自の知性のフェーズ。副業・専門性・霊性が深まる、内向きで静かな実りの期。"
+        "theme": "独立心と競争のフェーズ。自分軸が確立され、仲間と切磋琢磨する10年。"
       },
       {
         "index": 9,
@@ -236,11 +231,11 @@
         "ganzhi": "丁丑",
         "stem": "丁",
         "branch": "丑",
-        "tongbian": "印綬",
+        "tongbian": "劫財",
         "stemElement": "陰火",
         "branchElement": "陰土",
         "isCurrent": false,
-        "theme": "学問と人徳のフェーズ。教養・名誉・年長者の庇護が満ちる、人格完成の10年。"
+        "theme": "出費と試練のフェーズ。仲間・兄弟・友人との関わりが運命を動かす波乱期。"
       }
     ]
   },
@@ -415,10 +410,10 @@
       "fourPillars": {
         "year": "己酉",
         "month": "丙子",
-        "day": "壬午",
+        "day": "庚午",
         "hour": null
       },
-      "dayStem": "壬",
+      "dayStem": "庚",
       "yearBranch": "酉",
       "honmei": 4,
       "kua": 2,
@@ -435,10 +430,10 @@
       "fourPillars": {
         "year": "辛卯",
         "month": "戊戌",
-        "day": "甲戌",
+        "day": "壬戌",
         "hour": null
       },
-      "dayStem": "甲",
+      "dayStem": "壬",
       "yearBranch": "卯",
       "honmei": 7,
       "kua": 8,
@@ -452,7 +447,7 @@
     }
   },
   "compatKeys": {
-    "dayStem": "戊",
+    "dayStem": "丙",
     "dayBranch": "申",
     "yearBranch": "子",
     "honmei": 7,
