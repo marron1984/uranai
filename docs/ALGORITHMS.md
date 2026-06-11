@@ -816,10 +816,19 @@ specificity ルールを globals.css 末尾に集約。
 - 神殺の引き直し: 天乙貴人 = 亥酉 (命式に不在・大運酉で巡来)、空亡 = **辰巳 (月支辰が空亡)**、
   羊刃 = 午 (不在)、干合 = 丙辛合水
 - 妻 1969-12-21 = 庚午日、子 2011-11-03 = 壬戌日
-- 「今日の通変星」は日干も同じ +2 ズレだったため相対関係は不変 (日替わりコンテンツの意味は保たれていた)
-- **要改訂 (未完)**: `lib/synthesis.ts` (戊言及 124箇所)・`lib/synthesisDeep.ts` (48)・
-  `lib/essentialDigest.ts` (1)・`docs/compat-rules.json`・`docs/yoshida-profile.json` の
-  長文解釈は戊日主前提のまま。丙火日主で書き直しが必要。
+- 「今日の通変星」は日柱修正後、参照を戊→丙へ是正 (todayTongbianForOwner/12時辰盤/oracle)。
+  例 2026-05-27 = 丙 vs 辛丑 = 正財 (日柱と参照の両方が +2 ズレていたため表示値は従来と一致)
+- **改訂完了 (2026-06)**: サブエージェント2体の並列改訂で全長文を丙火日主へ書き直し済み。
+  - `lib/synthesis.ts` (統合23カード)・`lib/synthesisDeep.ts` (深掘り14カード): 通変星・五行・
+    大運・神殺・2026流年・キャラクター語彙・用神 (木火) を丙火基準へ全面改稿
+  - `lib/essentialDigest.ts`・`lib/mbti.ts`・`lib/quotes.ts`・`lib/today.ts`・`lib/oracle.ts`・
+    `lib/businessCompat.ts`・`lib/owner.ts`(香水)・`app/page.tsx`: 戊→丙
+  - `docs/yoshida-profile.json`: export-profile.ts を再生成 (日主丙・通変偏印/食神/印綬・大運正官・
+    五行カウントと isOverbalanced を動的化)。`docs/compat-rules.json`: 通変表/スコア/妻例を丙基準へ
+  - **月星座も訂正**: 旧「射手座〜山羊座圏」(誤) → 牡牛座 23.5° (太陽と同座=新月生まれ)。
+    ASTRO_DEEP_MOON カードとトランジットカードを全面改稿
+- 丙火命の物語: 印 (年偏印+時印綬=木の受信) → 丙火 (発光) → 食神 (土の表現出力) の一気通貫で、
+  マスター11/INFJ/女教皇の「霊的翻訳者」テーマに戊土より深く合致するようになった
 
 ### 月星座・ASC・MC の正式値昇格 (`lib/astronomy.ts` 既存実装を検証)
 
