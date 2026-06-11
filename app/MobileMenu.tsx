@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -71,8 +72,11 @@ export default function MobileMenu() {
         <span className="block w-5 h-[2.5px] bg-current" />
       </button>
 
-      {/* オーバーレイ — z-index 強化 */}
-      {open && (
+      {/* オーバーレイ — document.body 直下に portal で出す。
+          ヘッダーの backdrop-filter (backdrop-blur) が position:fixed の包含ブロックを
+          生成してしまい、header 内に描画すると overlay が header の高さに潰れる
+          (fixed inset-0 が viewport ではなく header 基準になる) ため。 */}
+      {open && createPortal(
         <div
           className="lg:hidden fixed inset-0 z-[100] flex flex-col"
           style={{ background: "var(--background)", color: "var(--foreground)" }}
@@ -122,7 +126,8 @@ export default function MobileMenu() {
               私的占断 ／ N°143 ／ {OWNER_NAME}
             </span>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
