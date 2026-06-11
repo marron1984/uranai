@@ -167,10 +167,13 @@ function monthStemIndex(yearStem: string, monthBranchIdx: number): number {
 // （1984-05-02 = 戊申 を真として逆算した値。shichu/page.tsx での
 //  任意日付入力時にも正確な日柱が出るよう修正済み）
 function dayPillar(year: number, month: number, day: number): Pillar {
+  // アンカー: 1900-01-01 = 甲戌 (JDN+49 mod 60 公式および 2025-12-21=甲子・
+  // 2026-03-05=戊寅 (天赦日) 等の外部複数ソースと突合済み)。
+  // ※ 旧実装は丙戌 (天干+2) で全日柱がズレていた — 2026-06 リサーチで発見・修正。
   const base = Date.UTC(1900, 0, 1);
   const target = Date.UTC(year, month - 1, day);
   const days = Math.floor((target - base) / (1000 * 60 * 60 * 24));
-  const stemIdx = ((2 + days) % 10 + 10) % 10;
+  const stemIdx = ((0 + days) % 10 + 10) % 10;
   const branchIdx = ((10 + days) % 12 + 12) % 12;
   return pillar(stemIdx, branchIdx);
 }

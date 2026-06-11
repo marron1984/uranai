@@ -1925,9 +1925,9 @@ function NatalChartSection({ sun }: { sun: Zodiac }) {
           ネイタル要素
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-          <Kv k="月星座" v={OWNER.natal.moonApprox} />
-          <Kv k="アセンダント" v={OWNER.natal.ascApprox} />
-          <Kv k="MC" v={OWNER.natal.mcApprox} />
+          <Kv k="月星座" v={`牡牛座 ${OWNER.natal.moonDegree}°`} />
+          <Kv k="アセンダント" v={`乙女座 ${OWNER.natal.ascDegree}° (獅子座カスプ)`} />
+          <Kv k="MC" v={`牡牛座 ${OWNER.natal.mcDegree}°`} />
           <Kv k="出生地" v={OWNER.birthplace.city} />
         </div>
       </div>

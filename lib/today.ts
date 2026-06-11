@@ -576,10 +576,10 @@ export function todayShadowBlessing(personalDayNum: number, date: Date = new Dat
 
 // ==================================================================
 // 今日の日柱（干支）算出
-// 1984-05-02 = 戊申（しゅんすけさんの日柱）を基準に、UTC日数差で算出
+// 1984-05-02 = 丙申（しゅんすけさんの日柱・外部暦と突合済みの修正値）を基準に、UTC日数差で算出
 // ==================================================================
 
-const OWNER_DAY_STEM_IDX = 4;   // 戊
+const OWNER_DAY_STEM_IDX = 2;   // 丙
 const OWNER_DAY_BRANCH_IDX = 8; // 申
 
 export function todayDayPillar(date: Date = new Date()): {
@@ -622,7 +622,7 @@ const HOUR_STEM_START: Record<string, number> = {
   戊: 8, 癸: 8,
 };
 
-// 通変星 → 吉凶ランク（Yoshida 戊土から見た）
+// 通変星 → 吉凶ランク（日主から見た一般則・2026-06 に日主は丙火へ修正済み）
 function rateTongbian(star: TongbianStar): {
   rating: "大吉" | "吉" | "中吉" | "注意" | "凶";
   desc: string;
@@ -1089,7 +1089,7 @@ export function todayFamilyAdvice(personalDay: number, date: Date = new Date()):
 // ==================================================================
 // 今日の一言 (One-Liner)
 // パーソナルデイ × 通変星 × 日付シードで日替わりの一言を返す
-// 戊土 × マスター11 × INFJ × 「逸れても道はある」のテイストで統一
+// 丙火 (2026-06 修正) × マスター11 × INFJ × 「逸れても道はある」のテイストで統一
 // ==================================================================
 
 const ONE_LINER_VARIANTS: Record<number, string[]> = {

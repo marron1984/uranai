@@ -16,6 +16,8 @@ const LINKS = [
   { href: "/sukuyo", label: "宿曜", sub: "27 MANSIONS" },
   { href: "/maya", label: "マヤ", sub: "TZOLKIN" },
   { href: "/biorhythm", label: "波", sub: "BIORHYTHM" },
+  { href: "/koyomi", label: "暦", sub: "LUCKY DAYS" },
+  { href: "/animal", label: "動物", sub: "60 ANIMALS" },
   { href: "/compat", label: "相性", sub: "COMPATIBILITY", dark: true },
 ];
 

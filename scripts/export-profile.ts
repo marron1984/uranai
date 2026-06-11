@@ -142,11 +142,11 @@ const profile = {
       name: accurate.name,
       degree: accurate.degree,
     },
-    // 月星座・ASC は手動確定値 (出生時刻と緯度経度から計算可能)
-    approx: {
-      moon: o.natal.moonApprox,
-      asc: o.natal.ascApprox,
-      mc: o.natal.mcApprox,
+    // 月星座・ASC・MC は天文計算による正式値 (2026-06 昇格)
+    natalPoints: {
+      moon: `${o.natal.moon} ${o.natal.moonDegree}°`,
+      asc: `${o.natal.asc} ${o.natal.ascDegree}° (${o.natal.ascCuspNote})`,
+      mc: `${o.natal.mc} ${o.natal.mcDegree}°`,
     },
   },
 

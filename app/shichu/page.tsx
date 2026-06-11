@@ -1,6 +1,6 @@
 "use client";
 
-// 四柱推命 — 本人の命式 (甲子・戊辰・戊申・己未) を開いた瞬間に表示。
+// 四柱推命 — 本人の命式 (甲子・戊辰・丙申・乙未) を開いた瞬間に表示。
 // 任意の生年月日時での算出も併設。
 
 import { useMemo, useState } from "react";
@@ -118,7 +118,8 @@ export default function ShichuPage() {
           日主は{myFp.day.stem} ({STEM_ELEMENT[myFp.day.stem]}) ── 八字に刻まれた、あなたの設計図。
         </p>
         <p className="editorial-mono text-[10px] mt-3 opacity-70 max-w-xl leading-relaxed">
-          {OWNER.birth} {OWNER.hour}:00 生 → 甲子・戊辰・戊申・己未。
+          {OWNER.birth} {OWNER.hour}:00 生 → {myFp.year.ganzhi}・{myFp.month.ganzhi}・{myFp.day.ganzhi}・{myFp.hour?.ganzhi}。
+          日柱は 2026-06 に外部暦と突合して 戊申 → 丙申 へ修正済み。
           ※ 節気は簡易計算 (境界日±1日は誤差の可能性)。
         </p>
       </header>

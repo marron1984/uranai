@@ -99,6 +99,44 @@ export default function AstrologyPage() {
         </div>
       </section>
 
+      {/* ネイタル3点 (2026-06 天文計算で正式値に昇格) */}
+      <section className="border border-current p-5 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>
+        <div className="editorial-chip mb-4 text-[10px] sm:text-xs">出生図の3本柱 ／ Big Three</div>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <div className="border-2 border-current p-4">
+            <div className="editorial-mono text-[10px] opacity-60">太陽 ／ 人生の目的</div>
+            <div className="editorial-display-jp text-2xl mt-1">♉ 牡牛座</div>
+            <div className="editorial-mono text-[9px] opacity-60 mt-0.5">11.9°</div>
+            <p className="text-xs leading-relaxed mt-2 opacity-85">
+              核となる自我。じっくり育て、確かな実りを得る人生のテーマ。
+            </p>
+          </div>
+          <div className="border-2 border-current p-4">
+            <div className="editorial-mono text-[10px] opacity-60">月 ／ 素の感情</div>
+            <div className="editorial-display-jp text-2xl mt-1">♉ 牡牛座</div>
+            <div className="editorial-mono text-[9px] opacity-60 mt-0.5">{OWNER.natal.moonDegree}°</div>
+            <p className="text-xs leading-relaxed mt-2 opacity-85">
+              太陽と月が同座の「新月生まれ」。内と外が一致した純度の高い牡牛座気質。
+              心の安定は五感の心地よさ — 美食・音楽・肌触りから満ちる。
+            </p>
+          </div>
+          <div className="border-2 border-current p-4">
+            <div className="editorial-mono text-[10px] opacity-60">ASC ／ 外から見た印象</div>
+            <div className="editorial-display-jp text-2xl mt-1">♍ 乙女座</div>
+            <div className="editorial-mono text-[9px] opacity-60 mt-0.5">{OWNER.natal.ascDegree}° (獅子座カスプ)</div>
+            <p className="text-xs leading-relaxed mt-2 opacity-85">
+              丁寧で折り目正しい第一印象。獅子座の境界 +1.5° のため、
+              出生が 12:54 以前なら堂々とした獅子座 ASC に変わる。
+            </p>
+          </div>
+        </div>
+        <p className="editorial-mono text-[9px] opacity-50 mt-4 leading-relaxed">
+          MC (社会的到達点) = 牡牛座 {OWNER.natal.mcDegree}°。太陽が MC 近傍 — 13時生まれの「南中の太陽」で、
+          資質がそのまま職業の顔になる配置。月位置は外部天文データと 0.1° 以内で一致確認済み。
+          ※ 旧表記「月 = 射手座〜山羊座圏」は 2026-06 の検算で誤りと判明し訂正。
+        </p>
+      </section>
+
       {/* 今日の運勢 */}
       {myFortune && (
         <section className="border border-current p-5 sm:p-8" style={{ background: "var(--card-bg-elevated, var(--background))" }}>

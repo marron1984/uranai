@@ -53,7 +53,7 @@ export default function RootLayout({
             <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
               <Link href="/" className="flex items-baseline gap-2 sm:gap-3 min-w-0">
                 <span className="editorial-display text-xl sm:text-2xl tracking-tight">URANAI</span>
-                <span className="editorial-mono text-[10px] opacity-70 hidden xl:inline whitespace-nowrap">私的占断 ／ N°143</span>
+                {/* 副題は 13 チップでヘッダー幅が足りないため非表示 (モバイルメニュー/フッターに残存) */}
               </Link>
               <div className="flex items-center gap-2 sm:gap-3">
                 <nav className="hidden lg:flex gap-1.5 items-center flex-nowrap">
@@ -67,6 +67,8 @@ export default function RootLayout({
                   <Link href="/sukuyo" className="editorial-chip text-[10px] !px-2.5"><span>宿曜</span></Link>
                   <Link href="/maya" className="editorial-chip text-[10px] !px-2.5"><span>マヤ</span></Link>
                   <Link href="/biorhythm" className="editorial-chip text-[10px] !px-2.5"><span>波</span></Link>
+                  <Link href="/koyomi" className="editorial-chip text-[10px] !px-2.5"><span>暦</span></Link>
+                  <Link href="/animal" className="editorial-chip text-[10px] !px-2.5"><span>動物</span></Link>
                   <Link href="/compat" className="editorial-chip editorial-chip-dark text-[10px] !px-2.5"><span>相性</span></Link>
                 </nav>
                 <ThemeSwitcher />

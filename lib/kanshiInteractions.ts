@@ -194,20 +194,23 @@ export type ShenshaVerification = {
 };
 
 export function verifyYoshidaShensha(): ShenshaVerification[] {
-  const dayStem = "戊";
-  const dayGanzhi = "戊申";
+  // 2026-06 改訂: 日柱を外部暦突合で 戊申 → 丙申 に修正 (時柱 己未 → 乙未)。
+  // 地支 (子辰申未) は変わらないため支ベースの神殺は従来どおり、
+  // 天干ベース (貴人・羊刃・空亡・干合) は丙基準に引き直した。
+  const dayStem = "丙";
+  const dayGanzhi = "丙申";
   const branches = ["子", "辰", "申", "未"]; // 年・月・日・時
   const yearBranch = "子";
   const monthBranch = "辰";
 
   const results: ShenshaVerification[] = [];
 
-  // 1. 天乙貴人 (時支未)
+  // 1. 天乙貴人 (丙の貴人 = 亥酉 — 命式に不在、大運癸酉で巡来)
   const tk = hasTenotsuKijin(dayStem, branches);
   results.push({
-    claim: "天乙貴人が時支未に在住",
-    verified: tk.has && tk.at.includes("未"),
-    detail: `戊の貴人 = 丑未。命式の該当支: ${tk.at.join("・") || "なし"}`,
+    claim: "天乙貴人 (丙 → 亥酉) は命式になく、大運癸酉で巡ってくる",
+    verified: !tk.has,
+    detail: `丙の貴人 = 亥酉。命式の該当支: ${tk.at.join("・") || "なし"}・大運支 = 酉で巡来`,
   });
 
   // 2. 将星 (年支子 = 申子辰の中心)
@@ -234,27 +237,28 @@ export function verifyYoshidaShensha(): ShenshaVerification[] {
     detail: `子からの桃花 = ${th.star}。命式に${th.has ? "あり (主張と矛盾)" : "なし"}・大運支 = 酉で一致`,
   });
 
-  // 5. 羊刃なし (戊 → 午、命式に午なし)
+  // 5. 羊刃なし (丙 → 午、命式に午なし)
   const yj = hasYojin(dayStem, branches);
   results.push({
-    claim: "羊刃 (戊 → 午) は命式にない",
+    claim: "羊刃 (丙 → 午) は命式にない",
     verified: !yj.has && yj.star === "午",
-    detail: `戊の羊刃 = ${yj.star}。命式に${yj.has ? "あり (主張と矛盾)" : "なし"}`,
+    detail: `丙の羊刃 = ${yj.star}。命式に${yj.has ? "あり (主張と矛盾)" : "なし"}`,
   });
 
-  // 6. 空亡 (戊申 → 寅卯)
+  // 6. 空亡 (丙申 → 辰巳) — 月支辰が空亡に当たる (解釈上の重要変更点)
   const [k1, k2] = kuubou(dayGanzhi);
   results.push({
-    claim: "日柱戊申の空亡は寅卯 (命式に寅卯なし)",
-    verified: k1 === "寅" && k2 === "卯" && !branches.includes("寅") && !branches.includes("卯"),
-    detail: `戊申の旬空亡 = ${k1}${k2}`,
+    claim: "日柱丙申の空亡は辰巳 — 月支辰が空亡に在住",
+    verified: k1 === "辰" && k2 === "巳" && branches.includes("辰"),
+    detail: `丙申の旬空亡 = ${k1}${k2}。月支辰が該当 (仕事・両親宮の空亡)`,
   });
 
-  // 7. 戊癸干合 (日干戊 × 大運干癸 → 合化火)
-  const sc = stemCombination("戊", "癸");
+  // 7. 丙辛干合 (日干丙 × 辛 → 合化水)。辛未大運 (31-40歳) で経験済み・
+  //    今後は辛の流年 (辛丑 2021 等) で発動する縁。
+  const sc = stemCombination("丙", "辛");
   results.push({
-    claim: "日干戊と大運干癸は干合 (戊癸合火・無情の合)",
-    verified: sc.combines && sc.transformsTo === "火",
+    claim: "日干丙と辛は干合 (丙辛合水・威制の合) — 辛未大運/辛の流年で発動",
+    verified: sc.combines && sc.transformsTo === "水",
     detail: sc.name ?? "干合不成立",
   });
 

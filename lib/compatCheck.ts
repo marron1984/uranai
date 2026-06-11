@@ -13,7 +13,7 @@ import { compatibility as mbtiCompatFn, MBTI_PROFILES, type MbtiType } from "@/l
 
 // 吉田氏の確定キー
 export const YOSHIDA_KEYS = {
-  dayStem: "戊" as const,
+  dayStem: "丙" as const,
   dayBranch: "申" as const,
   yearBranch: "子" as const,
   honmei: 7 as StarNumber,

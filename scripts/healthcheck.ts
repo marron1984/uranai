@@ -21,6 +21,10 @@ import { birthMansion, todayMansion, dailyRelation, MANSIONS } from "@/lib/sukuy
 import { kinFromDate, SOLAR_SEALS, GALACTIC_TONES } from "@/lib/maya";
 import { hiddenStems, hiddenStemTongbian } from "@/lib/shichu";
 import { biorhythm, bioCompat } from "@/lib/biorhythm";
+import { dayGanzhi, dayTags, rokuyo, lunarDate } from "@/lib/koyomi";
+import { dayStar, monthStar, yearStar, luckyStarsFor } from "@/lib/kyuseiBoard";
+import { moonLongitude, accurateMoonSign, ascendant, midheaven } from "@/lib/astronomy";
+import { ANIMAL_CHARS, animalChar } from "@/lib/animal";
 
 type TestResult = { name: string; ok: boolean; detail: string };
 const results: TestResult[] = [];
@@ -48,8 +52,8 @@ test("calcAge", () => calcAge(OWNER.birth), (v) => typeof v === "number" && (v a
 const fp = calcFourPillars(y, m, d, OWNER.hour);
 test("四柱推命 年柱", () => fp.year.ganzhi, (v) => v === "甲子");
 test("四柱推命 月柱", () => fp.month.ganzhi, (v) => v === "戊辰");
-test("四柱推命 日柱", () => fp.day.ganzhi, (v) => v === "戊申");
-test("四柱推命 時柱", () => fp.hour?.ganzhi, (v) => v === "己未");
+test("四柱推命 日柱 (2026-06 外部暦突合で丙申に修正)", () => fp.day.ganzhi, (v) => v === "丙申");
+test("四柱推命 時柱 (丙日未時 = 乙未)", () => fp.hour?.ganzhi, (v) => v === "乙未");
 test("通変星 戊→甲", () => tongbianStar("戊", "甲"), (v) => v === "偏官");
 test("通変星 戊→癸", () => tongbianStar("戊", "癸"), (v) => v === "正財");
 test("十二運 戊×申", () => twelveStage("戊", "申"), (v) => v === "病");
@@ -114,7 +118,7 @@ test("MBTI INFJ プロファイル", () => MBTI_PROFILES.INFJ.name, (v) => v ===
 test("MBTI 相性 INFJ×ENFP", () => compatibility("INFJ", "ENFP").level, (v) => v === "best");
 
 // ---- 12. today.ts ----
-test("今日の日柱 2026-05-27", () => todayDayPillar(today).ganzhi);
+test("今日の日柱 2026-05-27", () => todayDayPillar(today).ganzhi, (v) => v === "辛丑");
 test("今日の通変星", () => todayTongbianForOwner(today).star);
 test("12 時辰盤", () => todayHourlyChart(today).length, (v) => v === 12);
 test("ラッキー時間 2", () => todayLuckyHours(today).length, (v) => v === 2);
@@ -187,6 +191,41 @@ test("マヤ 基準検証 2012-12-21", () => kinFromDate("2012-12-21").kin, (v) 
 test("蔵干 申", () => hiddenStems("申").main, (v) => v === "庚");
 test("蔵干 辰", () => hiddenStems("辰").all.join(""), (v) => v === "乙癸戊");
 test("蔵干通変星 戊×申", () => hiddenStemTongbian("戊", "申").map(h => h.star).join(","), (v) => (v as string).includes("食神"));
+
+// ---- 日干支の外部アンカー突合 (2026-06 リサーチで取得した外部暦の既知日) ----
+test("日干支アンカー 2025-12-21", () => dayGanzhi(new Date("2025-12-21T12:00:00+09:00")).ganzhi, (v) => v === "甲子");
+test("日干支アンカー 2026-03-05 (天赦日)", () => dayGanzhi(new Date("2026-03-05T12:00:00+09:00")).ganzhi, (v) => v === "戊寅");
+test("日干支アンカー 2026-12-16", () => dayGanzhi(new Date("2026-12-16T12:00:00+09:00")).ganzhi, (v) => v === "甲子");
+
+// ---- 暦 (koyomi) ----
+const tensha26 = ["2026-03-05", "2026-05-04", "2026-05-20", "2026-07-19", "2026-10-01", "2026-12-16"];
+test("天赦日 2026 全6回", () => tensha26.filter((s) => dayTags(new Date(s + "T12:00:00+09:00")).tags.some((t) => t.name === "天赦日")).length, (v) => v === 6);
+test("一粒万倍日 2026-06-12", () => dayTags(new Date("2026-06-12T12:00:00+09:00")).tags.some((t) => t.name === "一粒万倍日"), (v) => v === true);
+test("六曜 2026-06-11 = 大安", () => rokuyo(new Date("2026-06-11T12:00:00+09:00"))?.name, (v) => v === "大安");
+test("旧暦 2026-02-17 = 旧正月", () => JSON.stringify(lunarDate(new Date("2026-02-17T12:00:00+09:00"))), (v) => v === '{"month":1,"day":1,"isLeap":false}');
+test("旧暦 2026-06-15 = 旧5/1 (朔)", () => lunarDate(new Date("2026-06-15T12:00:00+09:00"))?.day, (v) => v === 1);
+
+// ---- 九星 日盤・月盤 ----
+test("日盤 2025-12-21 = 陽遁始め一白", () => dayStar(new Date("2025-12-21T12:00:00+09:00")).star, (v) => v === 1);
+test("日盤 2026-06-11 = 二黒", () => dayStar(new Date("2026-06-11T12:00:00+09:00")).star, (v) => v === 2);
+test("日盤 2026-06-19 = 陰遁始め九紫", () => { const r = dayStar(new Date("2026-06-19T12:00:00+09:00")); return r.star === 9 && r.ton === "陰遁"; }, (v) => v === true);
+test("月盤 2026-06 = 四緑", () => monthStar(new Date("2026-06-11T12:00:00+09:00")).star, (v) => v === 4);
+test("月盤 2026-05 = 五黄", () => monthStar(new Date("2026-05-10T12:00:00+09:00")).star, (v) => v === 5);
+test("年盤 2026 = 一白", () => yearStar(2026, 6, 11), (v) => v === 1);
+test("七赤の吉星 = 1,2,6,8", () => luckyStarsFor(7).join(","), (v) => v === "1,2,6,8");
+
+// ---- 月星座・ASC (天文計算) ----
+const natalDate = new Date("1984-05-02T13:00:00+09:00");
+test("月黄経 1984-05-02 (外部値 53.8°±0.5)", () => Math.round(moonLongitude(natalDate) * 10) / 10, (v) => Math.abs((v as number) - 53.8) < 0.5);
+test("月星座 = 牡牛座", () => accurateMoonSign(natalDate).key, (v) => v === "taurus");
+test("ASC 1984-05-02 13:00 大阪 (151.5°±1)", () => Math.round(ascendant(natalDate, 135.5447, 34.6913) * 10) / 10, (v) => Math.abs((v as number) - 151.5) < 1);
+test("MC = 牡牛座 28°前後", () => Math.round(midheaven(natalDate, 135.5447) * 10) / 10, (v) => Math.abs((v as number) - 58.0) < 1);
+
+// ---- 動物占い ----
+test("動物 60 キャラ", () => ANIMAL_CHARS.length, (v) => v === 60);
+test("動物 干支整合 (全60)", () => ANIMAL_CHARS.every((c, i) => c.num === i + 1), (v) => v === true);
+test("動物 本人 (丙申=33)", () => animalChar(OWNER.birth).name, (v) => v === "活動的な子守熊");
+test("動物 No.45 戊申", () => ANIMAL_CHARS[44].name, (v) => v === "サービス精神旺盛な子守熊");
 
 // ---- バイオリズム (2026-05-27 基準) ----
 const bio = biorhythm(OWNER.birth, today);
