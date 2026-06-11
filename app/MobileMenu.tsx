@@ -15,6 +15,7 @@ const LINKS = [
   { href: "/mbti", label: "MBTI", sub: "16 TYPES" },
   { href: "/sukuyo", label: "宿曜", sub: "27 MANSIONS" },
   { href: "/maya", label: "マヤ", sub: "TZOLKIN" },
+  { href: "/biorhythm", label: "波", sub: "BIORHYTHM" },
   { href: "/compat", label: "相性", sub: "COMPATIBILITY", dark: true },
 ];
 

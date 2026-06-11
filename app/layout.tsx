@@ -66,6 +66,7 @@ export default function RootLayout({
                   <Link href="/mbti" className="editorial-chip text-[10px]"><span>MBTI</span></Link>
                   <Link href="/sukuyo" className="editorial-chip text-[10px]"><span>宿曜</span></Link>
                   <Link href="/maya" className="editorial-chip text-[10px]"><span>マヤ</span></Link>
+                  <Link href="/biorhythm" className="editorial-chip text-[10px]"><span>波</span></Link>
                   <Link href="/compat" className="editorial-chip editorial-chip-dark text-[10px]"><span>相性</span></Link>
                 </nav>
                 <ThemeSwitcher />

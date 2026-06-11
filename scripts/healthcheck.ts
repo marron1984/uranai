@@ -20,6 +20,7 @@ import { ASTRO_TRANSIT_2026 } from "@/lib/synthesis";
 import { birthMansion, todayMansion, dailyRelation, MANSIONS } from "@/lib/sukuyo";
 import { kinFromDate, SOLAR_SEALS, GALACTIC_TONES } from "@/lib/maya";
 import { hiddenStems, hiddenStemTongbian } from "@/lib/shichu";
+import { biorhythm, bioCompat } from "@/lib/biorhythm";
 
 type TestResult = { name: string; ok: boolean; detail: string };
 const results: TestResult[] = [];
@@ -186,6 +187,18 @@ test("マヤ 基準検証 2012-12-21", () => kinFromDate("2012-12-21").kin, (v) 
 test("蔵干 申", () => hiddenStems("申").main, (v) => v === "庚");
 test("蔵干 辰", () => hiddenStems("辰").all.join(""), (v) => v === "乙癸戊");
 test("蔵干通変星 戊×申", () => hiddenStemTongbian("戊", "申").map(h => h.star).join(","), (v) => (v as string).includes("食神"));
+
+// ---- バイオリズム (2026-05-27 基準) ----
+const bio = biorhythm(OWNER.birth, today);
+test("バイオ 経過日数 (1984-05-02→2026-05-27)", () => bio.days, (v) => v === 15365);
+test("バイオ 身体 (周期23)", () => bio.cycles.find(c => c.def.key === "physical")?.value, (v) => v === 27);
+test("バイオ 感情 (周期28)", () => bio.cycles.find(c => c.def.key === "emotional")?.value, (v) => v === -100);
+test("バイオ 知性 (周期33)", () => bio.cycles.find(c => c.def.key === "intellectual")?.value, (v) => v === -62);
+test("バイオ 総合 (3リズム平均)", () => bio.composite, (v) => v === Math.round((27 + -100 + -62) / 3));
+test("バイオ 拡張含め 7 リズム", () => bio.cycles.length, (v) => v === 7);
+const bioWife = bioCompat(OWNER.birth, OWNER.family.spouse.birth);
+test("バイオ 妻との総合同調度", () => bioWife.overall, (v) => v === Math.round((85 + -62 + 98) / 3));
+test("バイオ 妻 身体同調度", () => bioWife.cycles.find(c => c.def.key === "physical")?.sync, (v) => v === 85);
 
 // ---- 出力 ----
 const passed = results.filter((r) => r.ok).length;
