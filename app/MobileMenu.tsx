@@ -18,7 +18,9 @@ const LINKS = [
   { href: "/maya", label: "マヤ", sub: "TZOLKIN" },
   { href: "/biorhythm", label: "波", sub: "BIORHYTHM" },
   { href: "/koyomi", label: "暦", sub: "LUCKY DAYS" },
+  { href: "/calendar", label: "暦表", sub: "CALENDAR" },
   { href: "/animal", label: "動物", sub: "60 ANIMALS" },
+  { href: "/family", label: "家族", sub: "FAMILY TODAY" },
   { href: "/compat", label: "相性", sub: "COMPATIBILITY", dark: true },
 ];
 
