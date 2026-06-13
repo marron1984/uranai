@@ -17,11 +17,11 @@
 //   3. 出力されたハッシュを下記 UNLOCK_HASH に貼り付け
 //   4. localStorage.removeItem("uranai-unlock") で既存ユーザーは再認証
 //
-// 初期パスフレーズ: "yoshida-shunsuke-1984-05-02"
-// (本人だけが知る情報の組合せ。納品後はオーナーが上記手順で変更すべき)
+// 現在のパスフレーズ: "yoshida7847" (2026-06 にオーナーが変更)
+// (ハッシュ変更により、既存の解錠フラグは自動失効し全端末で再認証が必要)
 
 export const UNLOCK_HASH =
-  "6fe96c7bcf46590d9d19b4be04854c1c4d9ace1c5db8b95b2262973113da9942";
+  "5fba87e626891a495d1a4bfdbf3d0df74ef236ae40987a6121a00dbe8a39aa74";
 
 const STORAGE_KEY = "uranai-unlock";
 
