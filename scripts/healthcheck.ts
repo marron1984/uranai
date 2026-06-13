@@ -144,6 +144,30 @@ test("ビジネス相性 overall", () => bizCompat.scores.overall, (v) => typeof
 // ---- 15. perfume ----
 const perfs = recommendPerfumes(4, ["sunny", "hot"], "afternoon", "summer");
 test("香水推薦", () => perfs.length, (v) => typeof v === "number" && (v as number) >= 1);
+// 決定論: 同シードは同結果
+test("香水 決定論 (同シード同結果)", () => {
+  const a = recommendPerfumes(4, [], "afternoon", "summer", 2, 111).map((x) => x.perfume.id).join();
+  const b = recommendPerfumes(4, [], "afternoon", "summer", 2, 111).map((x) => x.perfume.id).join();
+  return a === b;
+}, (v) => v === true);
+// 分散: 30 日相当のシードでユニーク香水が 20 種以上 (固定化していない)
+test("香水 分散 (30シードで20種以上)", () => {
+  const set = new Set<string>();
+  for (let d = 1; d <= 30; d++) {
+    const seed = (2026 * 10000 + 600 + d) ^ 0x9e3779b9;
+    const pd = (d % 9) + 1;
+    recommendPerfumes(pd, [], "afternoon", "summer", 2, seed).forEach((x) => set.add(x.perfume.id));
+  }
+  return set.size;
+}, (v) => typeof v === "number" && (v as number) >= 20);
+// 2本は異なる香調 (family) を優先
+test("香水 2本目は別系統優先", () => {
+  const r = recommendPerfumes(3, [], "afternoon", "summer", 2, 4242);
+  if (r.length < 2) return true;
+  const f0 = (r[0].perfume as { family?: string }).family;
+  const f1 = (r[1].perfume as { family?: string }).family;
+  return f0 !== f1;
+}, (v) => v === true);
 
 // ---- 16. 命理主張の突合 (kanshiInteractions) ----
 // サブエージェント産テキスト (SHICHU_DEEP_SHENSHA / ANNUAL_2026_DEEP 等) の

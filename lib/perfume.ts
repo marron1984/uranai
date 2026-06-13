@@ -44,14 +44,29 @@ export type PerfumeMatch = {
   reasons: string[];
 };
 
+// 決定論的な擬似乱数 (0〜1)。seed と文字列キーから安定したハッシュを生成。
+// 同じ日 (seed) × 同じ香水 (id) なら常に同じ値 ─ サイトの「同じ日は同じ結果」方針を維持しつつ、
+// 日替わりで分散させるための撹拌項に使う。
+function seededUnit(seed: number, key: string): number {
+  let h = (seed >>> 0) ^ 0x9e3779b9;
+  for (let i = 0; i < key.length; i++) {
+    h = Math.imul(h ^ key.charCodeAt(i), 0x01000193) >>> 0;
+  }
+  // 追加で1ラウンド混ぜて分布を均す
+  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;
+  h = Math.imul(h ^ (h >>> 12), 0x297a2d39) >>> 0;
+  return (h >>> 8) / 0x01000000; // 0〜1
+}
+
 export function recommendPerfumes(
   personalDay: number,
   weatherTags: WeatherTag[],
   timeTag: TimeTag,
   seasonTag: SeasonTag,
-  topN = 2
+  topN = 2,
+  seed = 0
 ): PerfumeMatch[] {
-  const scored: PerfumeMatch[] = OWNER.perfumes.map((p) => {
+  const scored: (PerfumeMatch & { jitter: number; sortKey: number })[] = OWNER.perfumes.map((p) => {
     let score = 0;
     const reasons: string[] = [];
 
@@ -81,12 +96,36 @@ export function recommendPerfumes(
       reasons.push(`${seasonLabel(seasonTag)}の季節感に合う`);
     }
 
-    return { perfume: p, score, reasons };
+    // 日替わりの撹拌項 (0〜3.5)。スコア差が同点〜僅差の香水を毎日ローテーションさせる。
+    // 最大3.5 のため「真の高スコア (パーソナルデイ+5 等)」の優位は保ちつつ、
+    // 横並びの候補群からは日ごとに違う1本が選ばれる。
+    const jitter = seededUnit(seed, p.id) * 3.5;
+
+    return { perfume: p, score, reasons, jitter, sortKey: score + jitter };
   });
 
-  return scored
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topN);
+  scored.sort((a, b) => b.sortKey - a.sortKey);
+
+  // 1本目は最上位。2本目以降はできるだけ異なる香調 (family) を選び、
+  // 似た系統ばかりが並ぶのを防いで分散を強める。
+  const picked: typeof scored = [];
+  const usedFamilies = new Set<string>();
+  for (const cand of scored) {
+    if (picked.length >= topN) break;
+    const fam = (cand.perfume as { family?: string }).family ?? "";
+    if (picked.length > 0 && usedFamilies.has(fam)) continue; // 同系統はいったんスキップ
+    picked.push(cand);
+    usedFamilies.add(fam);
+  }
+  // 異系統だけでは topN に満たない場合は、残りを sortKey 順で補充
+  if (picked.length < topN) {
+    for (const cand of scored) {
+      if (picked.length >= topN) break;
+      if (!picked.includes(cand)) picked.push(cand);
+    }
+  }
+
+  return picked.map(({ perfume, score, reasons }) => ({ perfume, score, reasons }));
 }
 
 function weatherLabel(w: WeatherTag): string {

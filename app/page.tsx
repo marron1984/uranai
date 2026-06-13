@@ -945,12 +945,16 @@ function TodayTab({
   const weatherTags = isToday && weather
     ? classifyWeather(weather.weatherCode, weather.tempC)
     : [];
+  // 表示中の日付からシードを作り、横並びの候補から日替わりで別の香水を選ぶ
+  const perfumeSeed =
+    (selectedDate.getFullYear() * 10000 + (selectedDate.getMonth() + 1) * 100 + selectedDate.getDate()) ^ 0x9e3779b9;
   const perfumeRecs: PerfumeMatch[] = recommendPerfumes(
     pDay,
     weatherTags,
     getTimeTag(now.getHours()),
     getSeason(now.getMonth() + 1),
-    2
+    2,
+    perfumeSeed
   );
 
   return (
