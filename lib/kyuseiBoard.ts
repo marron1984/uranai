@@ -108,11 +108,13 @@ export function dayStar(date: Date): DayStarResult {
 // ====================================================================
 
 export function yearStar(year: number, month: number, day: number): number {
-  // 立春前は前年扱い (日単位)
+  // 立春前は前年扱い (JST の暦日単位)。
+  // ⚠ 立春の瞬間は UTC では前日夜になることがある (例: 2026 立春 = 2/3 19:50 UTC = 2/4 04:50 JST)。
+  //   UTC 日付で比較すると年に 1 日だけ誤判定するため、JST 日番号に揃えて比較する。
   const risshun = solarTermsOfYear(year).find((t) => t.term === "立春")!.date;
-  const target = Date.UTC(year, month - 1, day);
-  const rDay = Date.UTC(risshun.getUTCFullYear(), risshun.getUTCMonth(), risshun.getUTCDate());
-  const y = target < rDay ? year - 1 : year;
+  const targetJstDay = Math.floor((Date.UTC(year, month - 1, day) + 9 * 3600 * 1000) / DAY_MS);
+  const risshunJstDay = jstDayNum(risshun);
+  const y = targetJstDay < risshunJstDay ? year - 1 : year;
   let star = (11 - (y % 9)) % 9;
   if (star === 0) star = 9;
   return star;
@@ -214,10 +216,10 @@ export function todayDirections(date: Date, honmei: number): {
   // 月支: 節月 1(寅)..12(丑)
   const MONTH_BRANCHES = "寅卯辰巳午未申酉戌亥子丑";
   const monthBranch = MONTH_BRANCHES[setsuMonth(date).monthNum - 1];
-  // 年支
+  // 年支 (暦注の慣例に合わせ立春「日」全体を新年扱い — yearStar と同じ JST 日単位)
   const yearForBranch = (() => {
     const risshun = solarTermsOfYear(date.getFullYear()).find((t) => t.term === "立春")!.date;
-    return date.getTime() < risshun.getTime() ? date.getFullYear() - 1 : date.getFullYear();
+    return jstDayNum(date) < jstDayNum(risshun) ? date.getFullYear() - 1 : date.getFullYear();
   })();
   const yearBranch = "子丑寅卯辰巳午未申酉戌亥"[((yearForBranch - 4) % 12 + 12) % 12];
 
