@@ -21,6 +21,8 @@ import { birthMansion, todayMansion, dailyRelation, MANSIONS } from "@/lib/sukuy
 import { kinFromDate, SOLAR_SEALS, GALACTIC_TONES } from "@/lib/maya";
 import { hiddenStems, hiddenStemTongbian } from "@/lib/shichu";
 import { biorhythm, bioCompat } from "@/lib/biorhythm";
+import { QUOTES as QUOTES_ALL } from "@/lib/quotes";
+import { ONE_LINER_VARIANTS as ONE_LINER_ALL } from "@/lib/today";
 import { dayGanzhi, dayTags, rokuyo, lunarDate } from "@/lib/koyomi";
 import { dayStar, monthStar, yearStar, luckyStarsFor } from "@/lib/kyuseiBoard";
 import { moonLongitude, accurateMoonSign, ascendant, midheaven } from "@/lib/astronomy";
@@ -168,6 +170,21 @@ test("香水 2本目は別系統優先", () => {
   const f1 = (r[1].perfume as { family?: string }).family;
   return f0 !== f1;
 }, (v) => v === true);
+
+// ---- 15-B. 格言・今日の一言の分量 (2026-06 に 3 倍化) ----
+test("格言 総数 3倍化 (>=700)", () => QUOTES_ALL.length, (v) => typeof v === "number" && (v as number) >= 700);
+test("格言 全カテゴリ網羅 (8種)", () => new Set(QUOTES_ALL.map((q) => q.category)).size, (v) => v === 8);
+test("格言 本文の重複なし", () => {
+  const norm = (s: string) => s.replace(/[\s、。「」・！？!?,.\-—―…'"]/g, "");
+  const seen = new Set<string>(); let dup = 0;
+  for (const q of QUOTES_ALL) { const k = norm(q.text); if (seen.has(k)) dup++; else seen.add(k); }
+  return dup;
+}, (v) => v === 0);
+test("今日の一言 各PD 3倍化 (>=40本)", () => {
+  let min = 999;
+  for (let pd = 1; pd <= 9; pd++) min = Math.min(min, (ONE_LINER_ALL[pd] ?? []).length);
+  return min;
+}, (v) => typeof v === "number" && (v as number) >= 40);
 
 // ---- 16. 命理主張の突合 (kanshiInteractions) ----
 // サブエージェント産テキスト (SHICHU_DEEP_SHENSHA / ANNUAL_2026_DEEP 等) の
