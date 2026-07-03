@@ -30,20 +30,20 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#fef9e7",
+  themeColor: "#f6f2ea",
 };
 
 const themeBootstrap = `
 (function(){
   try {
     var t = localStorage.getItem('uranai-theme');
-    if (t && ['neobrutal','editorial','midnight','twilight','forest','paper','cream'].indexOf(t) >= 0) {
+    if (t && ['atelier','neobrutal','editorial','midnight','twilight','forest','paper','cream'].indexOf(t) >= 0) {
       document.documentElement.setAttribute('data-theme', t);
     } else {
-      document.documentElement.setAttribute('data-theme', 'neobrutal');
+      document.documentElement.setAttribute('data-theme', 'atelier');
     }
   } catch(e) {
-    document.documentElement.setAttribute('data-theme', 'neobrutal');
+    document.documentElement.setAttribute('data-theme', 'atelier');
   }
 })();
 `;
@@ -54,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" data-theme="neobrutal">
+    <html lang="ja" data-theme="atelier">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>

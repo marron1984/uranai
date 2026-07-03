@@ -588,26 +588,25 @@ main, header, footer {
   border-color: #0a0a0a !important;
 }
 
-/* ===== 巨大ディスプレイタイポ用クラス ===== */
+/* ===== ディスプレイタイポ (ミニマル高級・余白主義) =====
+   極太ゴシック → 上品なセリフへ。細く・広く・静かに。 */
 .editorial-display {
-  font-family: "Archivo Black", "Anton", "Inter", system-ui, sans-serif;
-  font-weight: 900;
-  font-stretch: 90%;
-  letter-spacing: -0.04em;
-  line-height: 0.85;
-  font-feature-settings: "ss01", "cv11";
+  font-family: "Cormorant Garamond", "Noto Serif JP", ui-serif, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+  font-feature-settings: "liga", "dlig";
 }
 .editorial-display-jp {
-  font-family: "Noto Serif JP", serif;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  /* 0.95 だと複数行に折り返した時に行が重なる (利用側の leading-* はこの定義に負ける) */
-  line-height: 1.18;
+  font-family: "Noto Serif JP", ui-serif, serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
 }
 .editorial-mono {
   font-family: "Inter", system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   font-feature-settings: "tnum";
 }
@@ -629,40 +628,43 @@ main, header, footer {
   background: linear-gradient(to top left, transparent 49.5%, #0a0a0a 49.5%, #0a0a0a 50.5%, transparent 50.5%);
 }
 
-/* チップ型ナビ (テーマ追従) */
+/* チップ型ナビ (ミニマル高級: ヘアライン・letterspaced・静かなホバー) */
 .editorial-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  padding: 0.45em 1em;
-  border: 1.5px solid currentColor;
-  background: var(--background);
+  gap: 0.5em;
+  padding: 0.4em 0.95em;
+  border: 1px solid var(--hairline, rgba(42,38,34,0.16));
+  background: transparent;
   font-family: "Inter", system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.05em;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--foreground);
   border-radius: 999px;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
 }
 .editorial-chip:hover {
-  background: var(--foreground);
-  color: var(--background);
+  border-color: var(--accent, var(--foreground));
+  color: var(--accent, var(--foreground));
+  background: transparent;
 }
 .editorial-chip-num {
   font-variant-numeric: tabular-nums;
   font-size: 10px;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .editorial-chip-dark {
   background: var(--foreground);
   color: var(--background);
+  border-color: var(--foreground);
 }
 .editorial-chip-dark:hover {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--accent, var(--foreground));
+  border-color: var(--accent, var(--foreground));
+  color: var(--background);
 }
 
 /* 回転 EXPLORE バッジ */
@@ -955,23 +957,204 @@ main, header, footer {
   box-shadow: 6px 6px 0 0 #000 !important;
 }
 
-/* ステッカー風の装飾 (新規) — class="nb-sticker" 用 */
+/* ラベル装飾 — class="nb-sticker" (ミニマル化: 傾き・ハードシャドウを廃し静かな箔ラベルへ) */
 .nb-sticker {
   display: inline-block;
-  background: var(--nb-yellow, #ffe600);
-  color: #000;
-  border: 3px solid #000;
-  padding: 6px 14px;
-  font-weight: 900;
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  background: transparent;
+  color: var(--muted, var(--foreground));
+  border: 1px solid var(--hairline, rgba(42,38,34,0.16));
+  padding: 5px 12px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  box-shadow: 4px 4px 0 0 #000;
-  transform: rotate(-2deg);
+  border-radius: 999px;
 }
-.nb-sticker.nb-sticker-pink { background: var(--nb-pink, #ff5cb1); }
-.nb-sticker.nb-sticker-cyan { background: var(--nb-cyan, #00d4d4); }
-.nb-sticker.nb-sticker-lime { background: var(--nb-lime, #b6ff5c); }
+.nb-sticker.nb-sticker-pink,
+.nb-sticker.nb-sticker-cyan,
+.nb-sticker.nb-sticker-lime { background: transparent; }
 .nb-sticker.nb-sticker-coral { background: var(--nb-coral, #ff6b35); }
 .nb-sticker.nb-sticker-purple { background: var(--nb-purple, #b888ff); }
 
+
+/* =====================================================================
+ * ATELIER テーマ — ミニマル高級・余白主義 (2026-06 全面刷新・既定)
+ * 極太ゴシック/ハードシャドウ/ビビッド を完全に廃し、
+ * 暖かなオフホワイト × 墨インク × 抑えたテラコッタ差し色 +
+ * 上品なセリフ + ヘアライン + 大きな余白 で構成する。
+ * ===================================================================== */
+
+:root[data-theme="atelier"] {
+  --background: #f6f2ea;          /* 暖かなオフホワイト */
+  --foreground: #2a2521;          /* 墨インク (純黒を避ける) */
+  --muted: #8a8075;              /* 副次テキスト・淡いトープ */
+  --accent: #a86b47;            /* 抑えたテラコッタ (丙火=陽の差し色) */
+  --accent-soft: rgba(168,107,71,0.10);
+  --hairline: rgba(42,37,33,0.14);
+  --hairline-strong: rgba(42,37,33,0.24);
+  --card-bg: #fbf8f2;
+  --card-bg-elevated: #fefdfa;
+  --menu-bg: #fbf8f2;
+  --copper: #a86b47;
+  --copper-bright: #8f5738;
+  --star-opacity: 0;
+  --glow-overlay-opacity: 0;
+  /* 装飾ハイライト (カレンダー等が参照する nb 変数を上品な色へ) */
+  --nb-yellow: rgba(168,107,71,0.10);
+  --nb-pink: rgba(168,107,71,0.10);
+  --nb-cyan: rgba(42,37,33,0.05);
+  --nb-lime: rgba(168,107,71,0.10);
+}
+
+[data-theme="atelier"] body {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  background-image: none !important;
+}
+[data-theme="atelier"] body::before,
+[data-theme="atelier"] body::after { display: none !important; }
+
+/* 背景クラス → カード地 or 透明 */
+[data-theme="atelier"] .bg-midnight-900,
+[data-theme="atelier"] .bg-midnight-800,
+[data-theme="atelier"] .bg-midnight-fade { background: var(--background) !important; }
+[data-theme="atelier"] .bg-midnight-800\/50,
+[data-theme="atelier"] .bg-midnight-700\/60,
+[data-theme="atelier"] .bg-midnight-900\/60,
+[data-theme="atelier"] .bg-midnight-900\/50,
+[data-theme="atelier"] .bg-midnight-900\/40,
+[data-theme="atelier"] .bg-midnight-900\/30 { background: var(--card-bg) !important; }
+
+/* テキスト色 → インク / ミュート */
+[data-theme="atelier"] .text-sand-50,
+[data-theme="atelier"] .text-sand-100,
+[data-theme="atelier"] .text-sand-200,
+[data-theme="atelier"] .text-sand-300,
+[data-theme="atelier"] .text-copper-200,
+[data-theme="atelier"] .text-copper-300,
+[data-theme="atelier"] .text-gold-200 { color: var(--foreground) !important; }
+[data-theme="atelier"] .text-sand-400,
+[data-theme="atelier"] .text-sand-400\/80,
+[data-theme="atelier"] .text-sand-500,
+[data-theme="atelier"] .text-copper-400,
+[data-theme="atelier"] .text-copper-400\/80 { color: var(--muted) !important; }
+
+/* 差し色を要所へ (銅系テキストはアクセントに) */
+[data-theme="atelier"] .text-copper-300,
+[data-theme="atelier"] .text-copper-500 { color: var(--accent) !important; }
+
+/* 枠線: currentColor の太枠 → 一律ヘアライン。border-2 も 1px に。 */
+[data-theme="atelier"] .border-current,
+[data-theme="atelier"] [class*="border-copper-500"],
+[data-theme="atelier"] [class*="border-copper-400"] { border-color: var(--hairline) !important; }
+[data-theme="atelier"] .border-2 { border-width: 1px !important; }
+[data-theme="atelier"] .border-\[3px\],
+[data-theme="atelier"] .border-b-\[3px\],
+[data-theme="atelier"] .border-t-\[3px\] { border-width: 1px !important; }
+/* 左罫のアクセントバーは細く・差し色に */
+[data-theme="atelier"] .border-l-4 { border-left-width: 2px !important; border-color: var(--accent) !important; }
+
+/* 影・グローは全廃 (ハードシャドウ / box-shadow inline も打ち消す) */
+[data-theme="atelier"] .glow-copper,
+[data-theme="atelier"] .glow-soft,
+[data-theme="atelier"] .shadow-copper-glow,
+[data-theme="atelier"] [style*="box-shadow"] { box-shadow: none !important; text-shadow: none !important; }
+
+/* 角丸は控えめに (大きい角丸だけ穏やかに) */
+[data-theme="atelier"] .rounded-2xl { border-radius: 4px !important; }
+[data-theme="atelier"] .rounded-xl { border-radius: 3px !important; }
+
+/* ディスプレイ見出しに差し色をわずかに / 特大サイズは細く優雅に */
+[data-theme="atelier"] h1.editorial-display { font-weight: 500; letter-spacing: 0.02em; }
+
+/* タブ/選択中ハイライト: 反転塗り → 差し色の下線 + わずかな地 */
+[data-theme="atelier"] .tab-btn-active {
+  background: var(--accent-soft) !important;
+  color: var(--foreground) !important;
+  border-color: var(--accent) !important;
+  box-shadow: inset 0 -2px 0 0 var(--accent) !important;
+}
+[data-theme="atelier"] .tab-btn-active .editorial-mono,
+[data-theme="atelier"] .tab-btn-active .editorial-display-jp { color: var(--foreground) !important; }
+[data-theme="atelier"] .tab-btn { transition: color .2s, border-color .2s; }
+[data-theme="atelier"] .tab-btn:hover:not(.tab-btn-active) { color: var(--accent); border-color: var(--accent) !important; }
+
+/* ヘッダー: 透明地 + 下ヘアライン + すりガラス */
+[data-theme="atelier"] header {
+  background: color-mix(in srgb, var(--background) 82%, transparent) !important;
+  border-bottom: 1px solid var(--hairline) !important;
+  backdrop-filter: saturate(120%) blur(8px);
+}
+[data-theme="atelier"] header .border-copper-500\/20 { border-color: var(--hairline) !important; }
+
+/* フッター */
+[data-theme="atelier"] footer {
+  background: transparent !important;
+  border-top: 1px solid var(--hairline) !important;
+}
+
+/* 入力欄: 下線基調のミニマル */
+[data-theme="atelier"] input,
+[data-theme="atelier"] select,
+[data-theme="atelier"] textarea {
+  background: var(--card-bg-elevated) !important;
+  border: 1px solid var(--hairline) !important;
+  border-radius: 2px !important;
+  font-weight: 400;
+}
+[data-theme="atelier"] input:focus,
+[data-theme="atelier"] select:focus,
+[data-theme="atelier"] textarea:focus {
+  border-color: var(--accent) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* リンク: 差し色 + 細い下線 */
+[data-theme="atelier"] a:not(.editorial-chip):not([class*="rounded-full"]):not(.tab-btn) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* スクロールバー */
+[data-theme="atelier"] ::-webkit-scrollbar { width: 9px; height: 9px; }
+[data-theme="atelier"] ::-webkit-scrollbar-track { background: var(--background); }
+[data-theme="atelier"] ::-webkit-scrollbar-thumb { background: var(--hairline-strong); border-radius: 9px; }
+
+/* 選択・区切り */
+[data-theme="atelier"] ::selection { background: var(--accent-soft); color: var(--foreground); }
+[data-theme="atelier"] .divider-decorative::before,
+[data-theme="atelier"] .divider-decorative::after { background: var(--hairline) !important; height: 1px !important; }
+[data-theme="atelier"] .divider-decorative > span {
+  background: var(--background) !important; color: var(--muted) !important;
+  border: none !important; box-shadow: none !important; font-weight: 500 !important;
+  letter-spacing: 0.2em;
+}
+
+/* セクション番号バッジ */
+[data-theme="atelier"] .section-num {
+  border-color: var(--hairline) !important; color: var(--accent) !important;
+  background: transparent; box-shadow: none !important; font-weight: 500;
+}
+
+/* キーワードハイライト: 蛍光 → 差し色の細い下線 */
+[data-theme="atelier"] .kw {
+  background: linear-gradient(180deg, transparent 62%, var(--accent-soft) 62%) !important;
+  font-family: inherit; font-weight: 500;
+}
+
+/* テーマ切替ボタン */
+[data-theme="atelier"] .theme-btn {
+  background: transparent !important; color: var(--foreground) !important;
+  border: 1px solid var(--hairline) !important; box-shadow: none !important; font-weight: 500;
+}
+
+/* 回転 EXPLORE バッジ・ヒーローの黄丸を沈静化 */
+[data-theme="atelier"] .editorial-spinner { opacity: 0.5; }
+[data-theme="atelier"] .bg-yellow-400 { background: var(--accent) !important; }
+
+/* 五行/バーの原色を沈める補助 (nb-yellow 等は上でトークン化済み) */
